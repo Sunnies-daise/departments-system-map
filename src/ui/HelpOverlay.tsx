@@ -24,7 +24,7 @@ export function HelpOverlay() {
           <li>
             <b>Target / As-built</b> — switch between the organisation model being designed and what the code does today.
           </li>
-          <li>Drag to orbit, scroll to zoom. Esc closes.</li>
+          <li>Drag to pan, scroll or pinch to zoom. Esc closes.</li>
         </ul>
         <button type="button" className="btn" onClick={() => setOpen(false)}>
           Got it

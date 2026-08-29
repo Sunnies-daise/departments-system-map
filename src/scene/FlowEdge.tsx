@@ -4,10 +4,20 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import type { Department, Edge } from "@/data/types";
-import { edgeCurve } from "@/lib/layout";
+import { edgePath } from "@/lib/layout";
 import { focusId, useMapStore } from "@/state/useMapStore";
 
-const PARTICLES = 4;
+const PARTICLES = 3;
+const IDLE = "#8f9bc0";
+
+function Dot({ position, color, opacity, r = 0.085 }: { position: THREE.Vector3; color: string; opacity: number; r?: number }) {
+  return (
+    <mesh position={[position.x, position.y + 0.01, position.z]} rotation={[-Math.PI / 2, 0, 0]}>
+      <circleGeometry args={[r, 20]} />
+      <meshBasicMaterial color={color} transparent opacity={opacity} />
+    </mesh>
+  );
+}
 
 export function FlowEdge({ edge, from, to }: { edge: Edge; from: Department; to: Department }) {
   const hovered = useMapStore((s) => s.hovered);
@@ -15,22 +25,17 @@ export function FlowEdge({ edge, from, to }: { edge: Edge; from: Department; to:
   const highlightedEdge = useMapStore((s) => s.highlightedEdge);
   const reduced = useMapStore((s) => s.reducedMotion);
 
-  const curve = useMemo(() => edgeCurve(edge, from, to), [edge, from, to]);
-  const points = useMemo(() => curve.getPoints(48), [curve]);
-  const end = points[points.length - 1];
-  const tangent = useMemo(() => curve.getTangent(1).normalize(), [curve]);
-  const arrowQuat = useMemo(
-    () => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent),
-    [tangent],
-  );
+  const path = useMemo(() => edgePath(edge, from, to), [edge, from, to]);
+  const start = path.points[0];
+  const end = path.points[path.points.length - 1];
 
   const focus = focusId({ hovered, selected });
   let state: "active" | "dimmed" | "idle" = "idle";
   if (highlightedEdge) state = highlightedEdge === edge.id ? "active" : "dimmed";
   else if (focus) state = edge.from === focus || edge.to === focus ? "active" : "dimmed";
 
-  const color = state === "active" ? from.color : "#7c8bb0";
-  const opacity = state === "active" ? 1 : state === "dimmed" ? 0.07 : 0.32;
+  const color = state === "active" ? from.color : IDLE;
+  const opacity = state === "active" ? 1 : state === "dimmed" ? 0.18 : 0.85;
   const dashed = edge.maturity === "target" || edge.maturity === "schema-only";
 
   const particles = useRef<THREE.InstancedMesh>(null);
@@ -38,13 +43,11 @@ export function FlowEdge({ edge, from, to }: { edge: Edge; from: Department; to:
   useFrame(({ clock }) => {
     const mesh = particles.current;
     if (!mesh) return;
-    const t0 = reduced ? 0 : (clock.elapsedTime * 0.28) % 1;
+    const t0 = reduced ? 0 : (clock.elapsedTime * 0.22) % 1;
     for (let i = 0; i < PARTICLES; i++) {
       const t = (t0 + i / PARTICLES) % 1;
-      const p = curve.getPoint(t);
-      dummy.position.copy(p);
-      const s = 0.7 + 0.3 * Math.sin(t * Math.PI);
-      dummy.scale.setScalar(s);
+      const p = path.curve.getPoint(t);
+      dummy.position.set(p.x, p.y + 0.03, p.z);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
     }
@@ -53,24 +56,16 @@ export function FlowEdge({ edge, from, to }: { edge: Edge; from: Department; to:
 
   return (
     <group>
-      <Line
-        points={points}
-        color={color}
-        lineWidth={state === "active" ? 2.4 : 1.1}
-        transparent
-        opacity={opacity}
-        dashed={dashed}
-        dashSize={0.3}
-        gapSize={0.18}
-      />
-      <mesh position={end} quaternion={arrowQuat}>
-        <coneGeometry args={[0.13, 0.36, 12]} />
-        <meshBasicMaterial color={color} transparent opacity={opacity} />
-      </mesh>
+      <Line points={path.points} color={color} lineWidth={state === "active" ? 2.4 : 1.4} transparent opacity={opacity} dashed={dashed} dashSize={0.22} gapSize={0.14} />
+      <Dot position={start} color={color} opacity={opacity} r={0.07} />
+      {path.bends.map((b, i) => (
+        <Dot key={i} position={b} color={color} opacity={opacity} r={0.06} />
+      ))}
+      <Dot position={end} color={state === "active" ? to.color : IDLE} opacity={opacity} r={0.11} />
       {state === "active" && (
         <instancedMesh ref={particles} args={[undefined, undefined, PARTICLES]}>
-          <sphereGeometry args={[0.09, 10, 10]} />
-          <meshBasicMaterial color="#ffffff" toneMapped={false} />
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshBasicMaterial color={from.color} />
         </instancedMesh>
       )}
     </group>

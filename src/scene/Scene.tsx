@@ -1,6 +1,6 @@
-import { Grid, OrbitControls } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { Grid, OrbitControls, OrthographicCamera } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { departmentsById, systemMap } from "@/data/systemMap";
@@ -11,23 +11,39 @@ import { useMapStore } from "@/state/useMapStore";
 import { DeptBlock } from "./DeptBlock";
 import { FlowEdge } from "./FlowEdge";
 
-/** Eases the orbit target toward the selected block (skipped under reduced motion). */
 type OrbitControlsImpl = React.ElementRef<typeof OrbitControls>;
 
+/** Pans the isometric camera toward the selected tile (instant under reduced motion). */
 function CameraRig({ controls }: { controls: React.RefObject<OrbitControlsImpl | null> }) {
   const selected = useMapStore((s) => s.selected);
   const reduced = useMapStore((s) => s.reducedMotion);
+  const camera = useThree((s) => s.camera);
   const goal = useMemo(() => {
     const d = selected ? departmentsById[selected] : null;
-    return d ? new THREE.Vector3(d.position[0] * 0.55, 0.6, d.position[2] * 0.55) : new THREE.Vector3(...CAMERA_TARGET);
+    return d ? new THREE.Vector3(d.position[0] * 0.6, 0, d.position[2] * 0.6) : new THREE.Vector3(...CAMERA_TARGET);
   }, [selected]);
+  const delta = useMemo(() => new THREE.Vector3(), []);
   useFrame((_, dt) => {
     const c = controls.current;
     if (!c) return;
-    if (reduced) c.target.copy(goal);
-    else c.target.lerp(goal, Math.min(1, dt * 3));
+    delta.copy(goal).sub(c.target);
+    if (delta.lengthSq() < 1e-5) return;
+    if (!reduced) delta.multiplyScalar(Math.min(1, dt * 3.5));
+    c.target.add(delta);
+    camera.position.add(delta);
     c.update();
   });
+  return null;
+}
+
+/** Fit the orthographic zoom to the viewport so the whole grid is visible. */
+function FitZoom() {
+  const { size, camera } = useThree();
+  useEffect(() => {
+    const cam = camera as THREE.OrthographicCamera;
+    cam.zoom = THREE.MathUtils.clamp(size.width / 30, 26, 60);
+    cam.updateProjectionMatrix();
+  }, [size.width, camera]);
   return null;
 }
 
@@ -49,34 +65,32 @@ export function Scene() {
   const select = useMapStore((s) => s.select);
   return (
     <Canvas
-      camera={{ position: CAMERA_POSITION, fov: 38, near: 0.1, far: 120 }}
-      dpr={[1, 1.75]}
-      gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+      dpr={[1, 2]}
+      flat
+      gl={{ antialias: true, alpha: false }}
       onPointerMissed={(e) => {
-        // DOM overlays (block labels, cards) bubble into r3f's event layer and
-        // would read as a "missed" click — only the canvas itself clears state.
+        // DOM overlays (labels, cards) bubble into r3f's event layer and would
+        // read as a "missed" click — only the canvas itself clears state.
         if (!(e.target instanceof HTMLCanvasElement)) return;
         setHovered(null);
         select(null);
       }}
       style={{ touchAction: "none" }}
     >
-      <color attach="background" args={["#0b1020"]} />
-      <fog attach="fog" args={["#0b1020", 22, 40]} />
-      <ambientLight intensity={0.85} />
-      <directionalLight position={[6, 12, 6]} intensity={1.6} />
-      <directionalLight position={[-8, 6, -6]} intensity={0.5} color="#9db4ff" />
+      <OrthographicCamera makeDefault position={CAMERA_POSITION} zoom={44} near={-60} far={120} />
+      <FitZoom />
+      <color attach="background" args={["#f7f8fc"]} />
       <Grid
         position={[0, -0.01, -1.5]}
-        args={[40, 40]}
+        args={[60, 60]}
         cellSize={1}
-        cellThickness={0.6}
-        cellColor="#1a2340"
+        cellThickness={0.7}
+        cellColor="#e6e9f3"
         sectionSize={5}
         sectionThickness={1}
-        sectionColor="#26325a"
-        fadeDistance={34}
-        fadeStrength={1.4}
+        sectionColor="#d5dbeb"
+        fadeDistance={60}
+        fadeStrength={0.6}
         infiniteGrid
       />
       {systemMap.departments.map((d) => (
@@ -86,13 +100,15 @@ export function Scene() {
       <OrbitControls
         ref={controls}
         target={CAMERA_TARGET}
-        enablePan={false}
+        enableRotate={false}
+        enablePan
         enableDamping
-        dampingFactor={0.08}
-        minDistance={8}
-        maxDistance={26}
-        minPolarAngle={0.35}
-        maxPolarAngle={Math.PI / 2.35}
+        dampingFactor={0.1}
+        minZoom={18}
+        maxZoom={110}
+        screenSpacePanning
+        mouseButtons={{ LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN }}
+        touches={{ ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN }}
         makeDefault
       />
       <CameraRig controls={controls} />

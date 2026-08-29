@@ -6,28 +6,122 @@
       "name": "Sales",
       "short": "SALES",
       "color": "#F59E0B",
-      "position": [-6, 0, 0],
+      "position": [
+        -7.5,
+        0,
+        0
+      ],
       "size": 1,
       "maturity": "live",
       "blurb": "Owns the customer relationship and the start of every deal: leads, the customer master, and the CRFQ that captures what the customer wants to hire or buy. Also raises service tickets to Operations on machines already on hire.",
       "responsibilities": [
-        { "label": "Leads management — parking-state pipeline, AI snapshot, background scan to Customer Master", "maturity": "prototype", "page": "/leads" },
-        { "label": "Capture a CRFQ (contract order inquiry) — items, hire window, site, terms", "maturity": "live", "page": "/rfqs" },
-        { "label": "Maintain the Customer Master (partner, contacts, addresses, credit terms)", "maturity": "live", "page": "/customer-canvas" },
-        { "label": "Confirm order / customer order status after the quotation is accepted", "maturity": "prototype", "page": "/order-status" },
-        { "label": "Raise service tickets to Ops — breakdown, replacement, upgrade, full/partial return", "maturity": "prototype", "page": "/my-service-tickets" },
-        { "label": "My Customers book + Sales Log (activities, follow-ups)", "maturity": "prototype", "page": "/salesperson" },
-        { "label": "Manager: team report, pipeline funnel, account allocation", "maturity": "prototype", "page": "/manager/dashboard" }
+        {
+          "label": "Leads management — parking-state pipeline, AI snapshot, background scan to Customer Master",
+          "maturity": "prototype",
+          "page": "/leads"
+        },
+        {
+          "label": "Capture a CRFQ (contract order inquiry) — items, hire window, site, terms",
+          "maturity": "live",
+          "page": "/rfqs"
+        },
+        {
+          "label": "Maintain the Customer Master (partner, contacts, addresses, credit terms)",
+          "maturity": "live",
+          "page": "/customer-canvas"
+        },
+        {
+          "label": "Confirm order / customer order status after the quotation is accepted",
+          "maturity": "prototype",
+          "page": "/order-status"
+        },
+        {
+          "label": "Raise service tickets to Ops — breakdown, replacement, upgrade, full/partial return",
+          "maturity": "prototype",
+          "page": "/my-service-tickets"
+        },
+        {
+          "label": "My Customers book + Sales Log (activities, follow-ups)",
+          "maturity": "prototype",
+          "page": "/salesperson"
+        },
+        {
+          "label": "Manager: team report, pipeline funnel, account allocation",
+          "maturity": "prototype",
+          "page": "/manager/dashboard"
+        }
       ],
       "inputs": [
-        { "record": "CRFQ (rfq)", "fields": ["customer / partner", "site PIC + delivery address", "items + quantities", "hire window / usage term", "source of inquiry", "financial terms"], "maturity": "live" },
-        { "record": "Customer Master (partner)", "fields": ["company + branch", "contacts", "credit term", "industry", "sales person"], "maturity": "live" },
-        { "record": "Service ticket (hc_ops_ticket)", "fields": ["hiring contract", "type: breakdown / replacement / upgrade / return", "affected items", "requested date", "remark"], "maturity": "prototype" },
-        { "record": "Lead (proto)", "fields": ["company", "stage", "relationships", "follow-ups"], "maturity": "prototype" }
+        {
+          "record": "CRFQ (rfq)",
+          "fields": [
+            "customer / partner",
+            "site PIC + delivery address",
+            "items + quantities",
+            "hire window / usage term",
+            "source of inquiry",
+            "financial terms"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Customer Master (partner)",
+          "fields": [
+            "company + branch",
+            "contacts",
+            "credit term",
+            "industry",
+            "sales person"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Service ticket (hc_ops_ticket)",
+          "fields": [
+            "hiring contract",
+            "type: breakdown / replacement / upgrade / return",
+            "affected items",
+            "requested date",
+            "remark"
+          ],
+          "maturity": "prototype"
+        },
+        {
+          "record": "Lead (proto)",
+          "fields": [
+            "company",
+            "stage",
+            "relationships",
+            "follow-ups"
+          ],
+          "maturity": "prototype"
+        }
       ],
-      "roles": ["sales", "sales_manager", "sale_manager"],
-      "navSections": ["Core Flow", "Sales", "Sales Manager", "Customer Master"],
-      "tables": ["rfq", "rfq_item", "rfq_rating", "draft_crfq", "follow_up_task", "sales_activity", "sales_account", "partner", "partner_contact", "partner_address", "sales_person", "source_of_inquiry"],
+      "roles": [
+        "sales",
+        "sales_manager",
+        "sale_manager"
+      ],
+      "navSections": [
+        "Core Flow",
+        "Sales",
+        "Sales Manager",
+        "Customer Master"
+      ],
+      "tables": [
+        "rfq",
+        "rfq_item",
+        "rfq_rating",
+        "draft_crfq",
+        "follow_up_task",
+        "sales_activity",
+        "sales_account",
+        "partner",
+        "partner_contact",
+        "partner_address",
+        "sales_person",
+        "source_of_inquiry"
+      ],
       "asBuiltNote": "A plain `sales` rep is scoped to their own book (no `sales.view_all`) and cannot touch Ops data directly — service tickets go through a backend route that stamps the rep as submitter.",
       "targetNote": "Sales works with Procurement on machine cost so quoted rates stay above cost."
     },
@@ -36,26 +130,97 @@
       "name": "Quotation",
       "short": "QUOTE",
       "color": "#8B5CF6",
-      "position": [-2, 0, 0],
+      "position": [
+        -2.5,
+        0,
+        0
+      ],
       "size": 1,
       "maturity": "live",
       "blurb": "Turns the CRFQ into a priced, approvable offer. Rental lines price off the 3-tier rate card; the quotation climbs an approval ladder, is emailed to the customer, and converts into the Hiring Contract.",
       "responsibilities": [
-        { "label": "Price every rental line from the rate card (Lowest / Standard / Highest) — a person picks the tier", "maturity": "live", "page": "/quotations" },
-        { "label": "Approval ladder: Draft → In Queue → In Progress → Pending Approval → Final Approved", "maturity": "live", "page": "/quotations" },
-        { "label": "Mark the quotation sent (stage flips to Quotation Sent)", "maturity": "live" },
-        { "label": "Convert to Hiring Contract — needs Site PIC + delivery address, every rental line rated", "maturity": "live", "page": "/hiring-contracts" },
-        { "label": "Assign lead + assistants; @mention colleagues on the document", "maturity": "live", "page": "/quotation-notifications" },
-        { "label": "Reorder re-approval cascades edited lines into the linked HC", "maturity": "live" }
+        {
+          "label": "Price every rental line from the rate card (Lowest / Standard / Highest) — a person picks the tier",
+          "maturity": "live",
+          "page": "/quotations"
+        },
+        {
+          "label": "Approval ladder: Draft → In Queue → In Progress → Pending Approval → Final Approved",
+          "maturity": "live",
+          "page": "/quotations"
+        },
+        {
+          "label": "Mark the quotation sent (stage flips to Quotation Sent)",
+          "maturity": "live"
+        },
+        {
+          "label": "Convert to Hiring Contract — needs Site PIC + delivery address, every rental line rated",
+          "maturity": "live",
+          "page": "/hiring-contracts"
+        },
+        {
+          "label": "Assign lead + assistants; @mention colleagues on the document",
+          "maturity": "live",
+          "page": "/quotation-notifications"
+        },
+        {
+          "label": "Reorder re-approval cascades edited lines into the linked HC",
+          "maturity": "live"
+        }
       ],
       "inputs": [
-        { "record": "Quotation (quotation, quotation_item)", "fields": ["rate tier per period (daily … monthly)", "transport charge", "tax option", "validity", "sales category (is_rental)"], "maturity": "live" },
-        { "record": "Approval decision (status)", "fields": ["Pending Approval → Final Approved", "send back to In Progress", "cancel"], "maturity": "live" },
-        { "record": "Hiring Contract at conversion (snapshot)", "fields": ["agreed rate", "item description + UOM", "delivery address", "site PIC"], "maturity": "live" }
+        {
+          "record": "Quotation (quotation, quotation_item)",
+          "fields": [
+            "rate tier per period (daily … monthly)",
+            "transport charge",
+            "tax option",
+            "validity",
+            "sales category (is_rental)"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Approval decision (status)",
+          "fields": [
+            "Pending Approval → Final Approved",
+            "send back to In Progress",
+            "cancel"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Hiring Contract at conversion (snapshot)",
+          "fields": [
+            "agreed rate",
+            "item description + UOM",
+            "delivery address",
+            "site PIC"
+          ],
+          "maturity": "live"
+        }
       ],
-      "roles": ["quotation_assistant", "quotation_manager", "ops_manager"],
-      "navSections": ["Core Flow", "Quotation"],
-      "tables": ["quotation", "quotation_item", "quotation_item_rate_history", "quotation_attachment", "workflow_assignment", "workflow_comment", "workflow_status_log", "hiring_contract", "hiring_contract_item", "hiring_contract_item_rate"],
+      "roles": [
+        "quotation_assistant",
+        "quotation_manager",
+        "ops_manager"
+      ],
+      "navSections": [
+        "Core Flow",
+        "Quotation"
+      ],
+      "tables": [
+        "quotation",
+        "quotation_item",
+        "quotation_item_rate_history",
+        "quotation_attachment",
+        "workflow_assignment",
+        "workflow_comment",
+        "workflow_status_log",
+        "hiring_contract",
+        "hiring_contract_item",
+        "hiring_contract_item_rate"
+      ],
       "asBuiltNote": "Today there is ONE gated transition: Pending Approval → Final Approved requires `quotations.approve` (quotation_manager / sales_manager / admin). Operations does not approve quotations.",
       "targetNote": "Target: three layers — assistant prepares, quotation lead reviews, the Operations manager gives final approval (machine availability + transport feasibility)."
     },
@@ -64,29 +229,122 @@
       "name": "Operations",
       "short": "OPS",
       "color": "#3B82F6",
-      "position": [2, 0, 0],
+      "position": [
+        2.5,
+        0,
+        0
+      ],
       "size": 1,
       "maturity": "live",
       "blurb": "Fulfils the contract: binds real machine units to the Hiring Contract, plans delivery and collection jobs, dispatches drivers, processes return / replacement / breakdown tickets, assesses machine condition on return, and publishes the customer PO to Finance.",
       "responsibilities": [
-        { "label": "Schedule the HC — bind item units, create the Delivery Order + Job", "maturity": "live", "page": "/hiring-contracts" },
-        { "label": "Delivery Order Job board — assign drivers, split DOs, validate Delivered → Completed", "maturity": "live", "page": "/delivery-order-job" },
-        { "label": "Transport coordination — delivery planning + return collection", "maturity": "live", "page": "/delivery-order-job" },
-        { "label": "Ops tickets: return → Collection DO, replacement → Replacement DO, breakdown → Service_Breakdown DO", "maturity": "live", "page": "/ops-tickets" },
-        { "label": "Compensation assessment on return (good / compensation required / under inspection)", "maturity": "prototype", "page": "/ar/returns" },
-        { "label": "PO follow-up — flag, chase and publish the customer PO to Finance", "maturity": "prototype", "page": "/po-follow-up" },
-        { "label": "Ops notification feed (returns, replacements, upgrades, transit events)", "maturity": "live", "page": "/ops-notifications" }
+        {
+          "label": "Schedule the HC — bind item units, create the Delivery Order + Job",
+          "maturity": "live",
+          "page": "/hiring-contracts"
+        },
+        {
+          "label": "Delivery Order Job board — assign drivers, split DOs, validate Delivered → Completed",
+          "maturity": "live",
+          "page": "/delivery-order-job"
+        },
+        {
+          "label": "Transport coordination — delivery planning + return collection",
+          "maturity": "live",
+          "page": "/delivery-order-job"
+        },
+        {
+          "label": "Ops tickets: return → Collection DO, replacement → Replacement DO, breakdown → Service_Breakdown DO",
+          "maturity": "live",
+          "page": "/ops-tickets"
+        },
+        {
+          "label": "Compensation assessment on return (good / compensation required / under inspection)",
+          "maturity": "prototype",
+          "page": "/ar/returns"
+        },
+        {
+          "label": "PO follow-up — flag, chase and publish the customer PO to Finance",
+          "maturity": "prototype",
+          "page": "/po-follow-up"
+        },
+        {
+          "label": "Ops notification feed (returns, replacements, upgrades, transit events)",
+          "maturity": "live",
+          "page": "/ops-notifications"
+        }
       ],
       "inputs": [
-        { "record": "Delivery Order + Job (delivery_order, job)", "fields": ["job type: Delivery / Collection / Replacement / Service_Breakdown", "scheduled date", "driver assignment", "split child DOs"], "maturity": "live" },
-        { "record": "Unit binding (hiring_contract_item_unit)", "fields": ["item unit ↔ HC line", "free-or-repoint"], "maturity": "live" },
-        { "record": "Ops ticket (hc_ops_ticket)", "fields": ["action_type", "pending → processed", "ops cut-off date"], "maturity": "live" },
-        { "record": "Machine return (machine_return)", "fields": ["condition_status", "compensation notes", "photos"], "maturity": "prototype" },
-        { "record": "PO follow-up (po_follow_up)", "fields": ["PO number", "flagged date", "published to Finance", "split / superseded PO"], "maturity": "prototype" }
+        {
+          "record": "Delivery Order + Job (delivery_order, job)",
+          "fields": [
+            "job type: Delivery / Collection / Replacement / Service_Breakdown",
+            "scheduled date",
+            "driver assignment",
+            "split child DOs"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Unit binding (hiring_contract_item_unit)",
+          "fields": [
+            "item unit ↔ HC line",
+            "free-or-repoint"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Ops ticket (hc_ops_ticket)",
+          "fields": [
+            "action_type",
+            "pending → processed",
+            "ops cut-off date"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Machine return (machine_return)",
+          "fields": [
+            "condition_status",
+            "compensation notes",
+            "photos"
+          ],
+          "maturity": "prototype"
+        },
+        {
+          "record": "PO follow-up (po_follow_up)",
+          "fields": [
+            "PO number",
+            "flagged date",
+            "published to Finance",
+            "split / superseded PO"
+          ],
+          "maturity": "prototype"
+        }
       ],
-      "roles": ["operations", "transport_coordinator", "ops_manager"],
-      "navSections": ["Operations", "PO Workspace"],
-      "tables": ["delivery_order", "do_item", "do_item_unit", "do_item_unit_photo", "delivery_split", "job", "job_assignment", "job_attempt", "job_item_unit", "hc_ops_ticket", "hc_breakdown_log", "machine_return"],
+      "roles": [
+        "operations",
+        "transport_coordinator",
+        "ops_manager"
+      ],
+      "navSections": [
+        "Operations",
+        "PO Workspace"
+      ],
+      "tables": [
+        "delivery_order",
+        "do_item",
+        "do_item_unit",
+        "do_item_unit_photo",
+        "delivery_split",
+        "job",
+        "job_assignment",
+        "job_attempt",
+        "job_item_unit",
+        "hc_ops_ticket",
+        "hc_breakdown_log",
+        "machine_return"
+      ],
       "asBuiltNote": "One `operations` role holds ops_tickets.manage, delivery_jobs.manage, inventory.manage and hiring_contracts.schedule — coordinator, transport planner and storekeeper are the same login today.",
       "targetNote": "Target splits the role: transport coordinator (delivery planning + return collection), ops manager (final quotation approval, compensation sign-off)."
     },
@@ -95,23 +353,60 @@
       "name": "Driver",
       "short": "DRIVER",
       "color": "#60A5FA",
-      "position": [2, 0, 3.6],
+      "position": [
+        2.5,
+        0,
+        4.6
+      ],
       "size": 0.55,
       "maturity": "live",
       "blurb": "The mobile app a driver runs for each Delivery Order: accept the units loaded, photograph them, upload the signed Hiring Contract, mark Delivered, and collect on return.",
       "responsibilities": [
-        { "label": "See assigned orders; start transit", "maturity": "live", "page": "/driver/orders" },
-        { "label": "Accept / refuse each unit, take unit photos", "maturity": "live" },
-        { "label": "Upload the signed HC — required before Delivered", "maturity": "live" },
-        { "label": "Collection flow on return jobs", "maturity": "live" },
-        { "label": "Driver notifications", "maturity": "live", "page": "/driver/notifications" }
+        {
+          "label": "See assigned orders; start transit",
+          "maturity": "live",
+          "page": "/driver/orders"
+        },
+        {
+          "label": "Accept / refuse each unit, take unit photos",
+          "maturity": "live"
+        },
+        {
+          "label": "Upload the signed HC — required before Delivered",
+          "maturity": "live"
+        },
+        {
+          "label": "Collection flow on return jobs",
+          "maturity": "live"
+        },
+        {
+          "label": "Driver notifications",
+          "maturity": "live",
+          "page": "/driver/notifications"
+        }
       ],
       "inputs": [
-        { "record": "DO evidence (do_item_unit_photo, do_document)", "fields": ["unit photos", "signed HC upload", "refusal reason", "transit / delivered timestamps"], "maturity": "live" }
+        {
+          "record": "DO evidence (do_item_unit_photo, do_document)",
+          "fields": [
+            "unit photos",
+            "signed HC upload",
+            "refusal reason",
+            "transit / delivered timestamps"
+          ],
+          "maturity": "live"
+        }
       ],
-      "roles": ["driver"],
+      "roles": [
+        "driver"
+      ],
       "navSections": [],
-      "tables": ["do_document", "do_item_unit_photo", "job_attempt_image", "job_item_location"],
+      "tables": [
+        "do_document",
+        "do_item_unit_photo",
+        "job_attempt_image",
+        "job_item_location"
+      ],
       "asBuiltNote": "Gated by `driver.app`; a driver login is force-routed to /driver and sees no back-office page.",
       "targetNote": null
     },
@@ -120,27 +415,102 @@
       "name": "Finance",
       "short": "FINANCE",
       "color": "#10B981",
-      "position": [6, 0, 0],
+      "position": [
+        7.5,
+        0,
+        0
+      ],
       "size": 1,
       "maturity": "prototype",
       "blurb": "Accounts Receivable: receives the Ops-published customer PO, verifies it against the Hiring Contract in the Document Hub, bills through the Billing Queue and the IVN ladder, handles returns / compensation credit notes, and watches ageing on the AR dashboard.",
       "responsibilities": [
-        { "label": "Document Hub — upload → match → cross-check → stamp → publish; Preview & Verify the PO", "maturity": "prototype", "page": "/ar/documents" },
-        { "label": "Billing Queue — every verified contract carries a draft IVN; priority, billing type, progress", "maturity": "prototype", "page": "/ar/billing" },
-        { "label": "Create Invoice — IVN ladder Draft → Approved (junior) → Published (senior) → Sent", "maturity": "prototype", "page": "/ar/billing/create" },
-        { "label": "PO revision auto-sync into draft IVNs; guarded compare on approved / published", "maturity": "prototype", "page": "/ar/documents" },
-        { "label": "Returns + credit notes for compensation and early returns", "maturity": "prototype", "page": "/ar/returns" },
-        { "label": "AR dashboard — ageing, escalated follow-ups, today's queue", "maturity": "prototype", "page": "/ar/dashboard" },
-        { "label": "Customer profiles (credit, payment health) + rental calculator", "maturity": "prototype", "page": "/ar/customers" }
+        {
+          "label": "Document Hub — upload → match → cross-check → stamp → publish; Preview & Verify the PO",
+          "maturity": "prototype",
+          "page": "/ar/documents"
+        },
+        {
+          "label": "Billing Queue — every verified contract carries a draft IVN; priority, billing type, progress",
+          "maturity": "prototype",
+          "page": "/ar/billing"
+        },
+        {
+          "label": "Create Invoice — IVN ladder Draft → Approved (junior) → Published (senior) → Sent",
+          "maturity": "prototype",
+          "page": "/ar/billing/create"
+        },
+        {
+          "label": "PO revision auto-sync into draft IVNs; guarded compare on approved / published",
+          "maturity": "prototype",
+          "page": "/ar/documents"
+        },
+        {
+          "label": "Returns + credit notes for compensation and early returns",
+          "maturity": "prototype",
+          "page": "/ar/returns"
+        },
+        {
+          "label": "AR dashboard — ageing, escalated follow-ups, today's queue",
+          "maturity": "prototype",
+          "page": "/ar/dashboard"
+        },
+        {
+          "label": "Customer profiles (credit, payment health) + rental calculator",
+          "maturity": "prototype",
+          "page": "/ar/customers"
+        }
       ],
       "inputs": [
-        { "record": "Verified PO (po_follow_up.ar_state)", "fields": ["PO number + amount", "cut-off date", "billing tag: standard / split", "AR verified stamp"], "maturity": "prototype" },
-        { "record": "Invoice (proto_invoice)", "fields": ["line items from HC", "rental tier math", "IVN type", "priority", "ladder status"], "maturity": "prototype" },
-        { "record": "Credit note", "fields": ["reason: compensation / early return", "amount", "linked IVN"], "maturity": "prototype" }
+        {
+          "record": "Verified PO (po_follow_up.ar_state)",
+          "fields": [
+            "PO number + amount",
+            "cut-off date",
+            "billing tag: standard / split",
+            "AR verified stamp"
+          ],
+          "maturity": "prototype"
+        },
+        {
+          "record": "Invoice (proto_invoice)",
+          "fields": [
+            "line items from HC",
+            "rental tier math",
+            "IVN type",
+            "priority",
+            "ladder status"
+          ],
+          "maturity": "prototype"
+        },
+        {
+          "record": "Credit note",
+          "fields": [
+            "reason: compensation / early return",
+            "amount",
+            "linked IVN"
+          ],
+          "maturity": "prototype"
+        }
       ],
-      "roles": ["finance", "ar_junior", "ar_senior"],
-      "navSections": ["Finance", "PO Workspace"],
-      "tables": ["po_follow_up", "proto_invoice", "partner_finance_email", "partner_bank", "credit_term", "payment_term", "chart_of_accounts", "tax_option"],
+      "roles": [
+        "finance",
+        "ar_junior",
+        "ar_senior"
+      ],
+      "navSections": [
+        "Finance",
+        "PO Workspace"
+      ],
+      "tables": [
+        "po_follow_up",
+        "proto_invoice",
+        "partner_finance_email",
+        "partner_bank",
+        "credit_term",
+        "payment_term",
+        "chart_of_accounts",
+        "tax_option"
+      ],
       "asBuiltNote": "Finance-AR is a prototype module on the demo branch: real partner / HC data with overlay tables created by direct DDL. One `finance` role holds ar.view + ar.manage.",
       "targetNote": "Target: junior AR approves invoices, senior AR publishes and can undo; Finance and Operations share the PO workspace."
     },
@@ -149,26 +519,85 @@
       "name": "Plant",
       "short": "PLANT",
       "color": "#F97316",
-      "position": [4, 0, -4.5],
+      "position": [
+        5,
+        0,
+        -6
+      ],
       "size": 1,
       "maturity": "schema-only",
       "blurb": "Keeps the fleet fit: pre-delivery and post-return inspection, servicing, maintenance and repair of machine units. Breakdown jobs from Operations land here; a serviced unit goes back to the Store as available.",
       "responsibilities": [
-        { "label": "Pre-delivery inspection before a unit leaves the yard", "maturity": "target" },
-        { "label": "Post-delivery / return inspection — feeds the compensation assessment", "maturity": "target" },
-        { "label": "Machine servicing + preventive maintenance (technical_service)", "maturity": "schema-only" },
-        { "label": "Repair work orders (work_order, work_order_item, fault types)", "maturity": "schema-only" },
-        { "label": "Service_Breakdown jobs raised by Ops on site", "maturity": "live" },
-        { "label": "Plant notification feed", "maturity": "schema-only" }
+        {
+          "label": "Pre-delivery inspection before a unit leaves the yard",
+          "maturity": "target"
+        },
+        {
+          "label": "Post-delivery / return inspection — feeds the compensation assessment",
+          "maturity": "target"
+        },
+        {
+          "label": "Machine servicing + preventive maintenance (technical_service)",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Repair work orders (work_order, work_order_item, fault types)",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Service_Breakdown jobs raised by Ops on site",
+          "maturity": "live"
+        },
+        {
+          "label": "Plant notification feed",
+          "maturity": "schema-only"
+        }
       ],
       "inputs": [
-        { "record": "Work order (work_order)", "fields": ["unit", "work_order_status", "parts required (item_status)", "labour"], "maturity": "schema-only" },
-        { "record": "Technical service (item_unit_technical_service)", "fields": ["service type", "meter reading", "next due"], "maturity": "schema-only" },
-        { "record": "Inspection result", "fields": ["pass / fail", "damage found", "compensation recommended"], "maturity": "target" }
+        {
+          "record": "Work order (work_order)",
+          "fields": [
+            "unit",
+            "work_order_status",
+            "parts required (item_status)",
+            "labour"
+          ],
+          "maturity": "schema-only"
+        },
+        {
+          "record": "Technical service (item_unit_technical_service)",
+          "fields": [
+            "service type",
+            "meter reading",
+            "next due"
+          ],
+          "maturity": "schema-only"
+        },
+        {
+          "record": "Inspection result",
+          "fields": [
+            "pass / fail",
+            "damage found",
+            "compensation recommended"
+          ],
+          "maturity": "target"
+        }
       ],
-      "roles": ["plant_supervisor", "technician"],
+      "roles": [
+        "plant_supervisor",
+        "technician"
+      ],
       "navSections": [],
-      "tables": ["work_order", "work_order_item", "technical_service", "item_unit_technical_service", "job_service_details", "hc_breakdown_log", "item_unit_meter_reading_history", "item_condition"],
+      "tables": [
+        "work_order",
+        "work_order_item",
+        "technical_service",
+        "item_unit_technical_service",
+        "job_service_details",
+        "hc_breakdown_log",
+        "item_unit_meter_reading_history",
+        "item_condition"
+      ],
       "asBuiltNote": "No Plant screens exist yet. The tables were carried over from the legacy ERP and `plant` is already a notification department, so the seam is ready.",
       "targetNote": "Target: Plant owns machine readiness; Ops cannot schedule a unit that failed pre-delivery inspection."
     },
@@ -177,25 +606,80 @@
       "name": "Procurement",
       "short": "PROCURE",
       "color": "#EC4899",
-      "position": [-4, 0, -4.5],
+      "position": [
+        -5,
+        0,
+        -6
+      ],
       "size": 1,
       "maturity": "schema-only",
       "blurb": "Buys and costs the fleet: supplier management, supplier RFQ → purchase order → supplier invoice, and the landed cost of each machine that Sales prices against.",
       "responsibilities": [
-        { "label": "Supplier master + item-code ↔ supplier links", "maturity": "schema-only" },
-        { "label": "Supplier RFQ → Purchase Order (po / delivery / billing status)", "maturity": "schema-only" },
-        { "label": "Receive supplier invoices; match to PO", "maturity": "schema-only" },
-        { "label": "Machine cost + purchase value per unit (feeds rate roster with Sales)", "maturity": "target" },
-        { "label": "Hand received machines to the Store as new item units", "maturity": "target" }
+        {
+          "label": "Supplier master + item-code ↔ supplier links",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Supplier RFQ → Purchase Order (po / delivery / billing status)",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Receive supplier invoices; match to PO",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Machine cost + purchase value per unit (feeds rate roster with Sales)",
+          "maturity": "target"
+        },
+        {
+          "label": "Hand received machines to the Store as new item units",
+          "maturity": "target"
+        }
       ],
       "inputs": [
-        { "record": "Purchase order (purchase_order, purchase_order_item)", "fields": ["supplier", "po_status: Draft → …", "delivery_status", "billing_status"], "maturity": "schema-only" },
-        { "record": "Supplier RFQ (supplier_rfq)", "fields": ["rfq_status: Sent → …", "items", "quoted cost"], "maturity": "schema-only" },
-        { "record": "Machine cost (item_unit_price, item_unit_supplier)", "fields": ["purchase value", "supplier", "currency"], "maturity": "schema-only" }
+        {
+          "record": "Purchase order (purchase_order, purchase_order_item)",
+          "fields": [
+            "supplier",
+            "po_status: Draft → …",
+            "delivery_status",
+            "billing_status"
+          ],
+          "maturity": "schema-only"
+        },
+        {
+          "record": "Supplier RFQ (supplier_rfq)",
+          "fields": [
+            "rfq_status: Sent → …",
+            "items",
+            "quoted cost"
+          ],
+          "maturity": "schema-only"
+        },
+        {
+          "record": "Machine cost (item_unit_price, item_unit_supplier)",
+          "fields": [
+            "purchase value",
+            "supplier",
+            "currency"
+          ],
+          "maturity": "schema-only"
+        }
       ],
-      "roles": ["procurement_officer"],
+      "roles": [
+        "procurement_officer"
+      ],
       "navSections": [],
-      "tables": ["supplier_rfq", "purchase_order", "purchase_order_item", "supplier_invoice", "item_code_supplier", "item_unit_supplier", "item_unit_price", "brand"],
+      "tables": [
+        "supplier_rfq",
+        "purchase_order",
+        "purchase_order_item",
+        "supplier_invoice",
+        "item_code_supplier",
+        "item_unit_supplier",
+        "item_unit_price",
+        "brand"
+      ],
       "asBuiltNote": "No Procurement screens exist yet; the legacy tables are mirrored in the inventory schema.",
       "targetNote": "Target: Procurement and Sales share the cost-to-rate view so quoted tiers never fall below landed cost."
     },
@@ -204,28 +688,111 @@
       "name": "Store / Inventory",
       "short": "STORE",
       "color": "#14B8A6",
-      "position": [0, 0, -4.5],
+      "position": [
+        0,
+        0,
+        -6
+      ],
       "size": 1,
       "maturity": "live",
       "blurb": "Machine inventory management: the item master (models), item units (serialised machines and where they are), item groups, the rate roster, receiving machines from suppliers, and stock takes.",
       "responsibilities": [
-        { "label": "Item Master — item codes with classification labels (stock_type, item_type, is_serialized, whiteboard)", "maturity": "live", "page": "/inventory/item-codes" },
-        { "label": "Item Units — every physical machine and its status: IN · RESERVED · OUT · SOLD / SCRAP / LOANED", "maturity": "live", "page": "/inventory/item-units" },
-        { "label": "Item Groups — bundles of item codes (e.g. Cranes) for hire and sale", "maturity": "live", "page": "/inventory/item-groups" },
-        { "label": "Rate Roster — 3-tier rental rates per item / group", "maturity": "live", "page": "/inventory/rate-roster" },
-        { "label": "Receive from supplier / issue / transfer between locations", "maturity": "schema-only" },
-        { "label": "Stock take cycles + stock adjustments", "maturity": "schema-only" },
-        { "label": "Whiteboard view of machines (show_in_white_board)", "maturity": "target" }
+        {
+          "label": "Item Master — item codes with classification labels (stock_type, item_type, is_serialized, whiteboard)",
+          "maturity": "live",
+          "page": "/inventory/item-codes"
+        },
+        {
+          "label": "Item Units — every physical machine and its status: IN · RESERVED · OUT · SOLD / SCRAP / LOANED",
+          "maturity": "live",
+          "page": "/inventory/item-units"
+        },
+        {
+          "label": "Item Groups — bundles of item codes (e.g. Cranes) for hire and sale",
+          "maturity": "live",
+          "page": "/inventory/item-groups"
+        },
+        {
+          "label": "Rate Roster — 3-tier rental rates per item / group",
+          "maturity": "live",
+          "page": "/inventory/rate-roster"
+        },
+        {
+          "label": "Receive from supplier / issue / transfer between locations",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Stock take cycles + stock adjustments",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Whiteboard view of machines (show_in_white_board)",
+          "maturity": "target"
+        }
       ],
       "inputs": [
-        { "record": "Item code (item_code)", "fields": ["stock_type: Stock / Non-Stock", "item_type", "is_serialized", "show_in_white_board", "UOM", "capacity / dimensions"], "maturity": "live" },
-        { "record": "Item unit (item_unit)", "fields": ["serial / display unit", "item_unit_status", "location", "meter reading", "condition"], "maturity": "live" },
-        { "record": "Rate card (item_code_rate)", "fields": ["Lowest / Standard / Highest per period", "current rate"], "maturity": "live" },
-        { "record": "Inventory receive / issue / transfer", "fields": ["reference", "units", "from / to location"], "maturity": "schema-only" }
+        {
+          "record": "Item code (item_code)",
+          "fields": [
+            "stock_type: Stock / Non-Stock",
+            "item_type",
+            "is_serialized",
+            "show_in_white_board",
+            "UOM",
+            "capacity / dimensions"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Item unit (item_unit)",
+          "fields": [
+            "serial / display unit",
+            "item_unit_status",
+            "location",
+            "meter reading",
+            "condition"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Rate card (item_code_rate)",
+          "fields": [
+            "Lowest / Standard / Highest per period",
+            "current rate"
+          ],
+          "maturity": "live"
+        },
+        {
+          "record": "Inventory receive / issue / transfer",
+          "fields": [
+            "reference",
+            "units",
+            "from / to location"
+          ],
+          "maturity": "schema-only"
+        }
       ],
-      "roles": ["operations", "storekeeper"],
-      "navSections": ["Inventory"],
-      "tables": ["item_code", "item_unit", "item_unit_status_history", "item_unit_location_history", "group", "group_item", "item_code_rate", "inventory_receive", "inventory_issue", "inventory_transfer", "stock_take_cycle", "stock_adjustment"],
+      "roles": [
+        "operations",
+        "storekeeper"
+      ],
+      "navSections": [
+        "Inventory"
+      ],
+      "tables": [
+        "item_code",
+        "item_unit",
+        "item_unit_status_history",
+        "item_unit_location_history",
+        "group",
+        "group_item",
+        "item_code_rate",
+        "inventory_receive",
+        "inventory_issue",
+        "inventory_transfer",
+        "stock_take_cycle",
+        "stock_adjustment"
+      ],
       "asBuiltNote": "Inventory screens are live but held by the `operations` role (`inventory.manage`); there is no separate storekeeper login.",
       "targetNote": "Target: a Storekeeper role owns receiving, whiteboard and stock takes; Ops keeps unit binding."
     }

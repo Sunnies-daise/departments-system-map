@@ -21,7 +21,7 @@ export function Legend() {
         <span className="dot maturity-target" /> Target (PM brief)
       </div>
       <div className="legend-row muted">
-        Solid line = built flow · dashed = schema-only / target · wireframe block = nothing built yet
+        Solid line = built flow · dashed = schema-only / target · dashed grey tile = nothing built yet
         {mode === "asBuilt" ? " · target items hidden or ghosted" : ""}
       </div>
       <div className="legend-row muted">

@@ -1,16 +1,58 @@
-import { Html, RoundedBox } from "@react-three/drei";
+import { Edges, Html, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { systemMap } from "@/data/systemMap";
 import type { Department } from "@/data/types";
-import { blockHeight, blockWidth } from "@/lib/layout";
+import { blockWidth, chipSize, tileHeight } from "@/lib/layout";
 import { isDeptGhost, relatedDepartments } from "@/lib/selectors";
 import { focusId, useMapStore } from "@/state/useMapStore";
 import { HoverCard } from "@/ui/HoverCard";
 
 type Emphasis = "active" | "related" | "dimmed" | "idle";
+
+const WHITE = new THREE.Color("#ffffff");
+const INK = "#2a2f52";
+const GHOST_SIDE = new THREE.Color("#dfe3ef");
+
+function shade(base: THREE.Color, towards: THREE.Color, amount: number) {
+  return base.clone().lerp(towards, amount);
+}
+
+/** Flat-shaded box: white/pastel top, darker +x side, lighter +z side (isometric look). */
+function IsoBox({
+  size,
+  top,
+  sideX,
+  sideZ,
+  topRef,
+  outline,
+  position,
+}: {
+  size: [number, number, number];
+  top: THREE.Color;
+  sideX: THREE.Color;
+  sideZ: THREE.Color;
+  topRef?: React.Ref<THREE.MeshBasicMaterial>;
+  outline: string;
+  position: [number, number, number];
+}) {
+  return (
+    <mesh position={position}>
+      <boxGeometry args={size} />
+      <meshBasicMaterial attach="material-0" color={sideX} transparent />
+      <meshBasicMaterial attach="material-1" color={sideX} transparent />
+      <meshBasicMaterial attach="material-2" color={top} transparent ref={topRef} />
+      <meshBasicMaterial attach="material-3" color={sideX} transparent />
+      <meshBasicMaterial attach="material-4" color={sideZ} transparent />
+      <meshBasicMaterial attach="material-5" color={sideZ} transparent />
+      <Edges color={outline} threshold={15}>
+        <lineBasicMaterial color={outline} transparent opacity={0.55} />
+      </Edges>
+    </mesh>
+  );
+}
 
 export function DeptBlock({ dept }: { dept: Department }) {
   const mode = useMapStore((s) => s.mode);
@@ -36,38 +78,64 @@ export function DeptBlock({ dept }: { dept: Department }) {
     emphasis = a === dept.id || b === dept.id ? "active" : "dimmed";
   }
 
-  const group = useRef<THREE.Group>(null);
-  const mat = useRef<THREE.MeshStandardMaterial>(null);
   const w = blockWidth(dept);
-  const h = blockHeight(dept);
+  const h = tileHeight(dept);
+  const c = chipSize(dept);
   const color = useMemo(() => new THREE.Color(dept.color), [dept.color]);
+  const palette = useMemo(
+    () =>
+      ghost
+        ? { tileTop: WHITE, tileX: GHOST_SIDE, tileZ: shade(GHOST_SIDE, WHITE, 0.4), chipTop: shade(GHOST_SIDE, WHITE, 0.3), chipX: GHOST_SIDE, chipZ: shade(GHOST_SIDE, WHITE, 0.4), outline: "#b8bfd6" }
+        : { tileTop: WHITE, tileX: shade(color, new THREE.Color("#000"), 0.22), tileZ: shade(color, WHITE, 0.12), chipTop: shade(color, WHITE, 0.42), chipX: shade(color, new THREE.Color("#000"), 0.16), chipZ: color, outline: INK },
+    [ghost, color],
+  );
+  const hoverTop = useMemo(() => shade(WHITE, color, 0.16), [color]);
 
+  const lift = useRef<THREE.Group>(null);
+  const topMat = useRef<THREE.MeshBasicMaterial>(null);
   useFrame((_, dt) => {
-    const g = group.current;
-    const m = mat.current;
-    if (!g || !m) return;
-    const lift = emphasis === "active" ? 0.35 : emphasis === "related" ? 0.12 : 0;
-    const opacity = ghost ? (emphasis === "dimmed" ? 0.12 : 0.35) : emphasis === "dimmed" ? 0.28 : 1;
-    const emissive = emphasis === "active" ? 0.55 : emphasis === "related" ? 0.3 : 0.08;
-    const k = reduced ? 1 : Math.min(1, dt * 8);
-    g.position.y += (lift - g.position.y) * k;
-    m.opacity += (opacity - m.opacity) * k;
-    m.emissiveIntensity += (emissive - m.emissiveIntensity) * k;
+    const g = lift.current;
+    if (!g) return;
+    const k = reduced ? 1 : Math.min(1, dt * 9);
+    const targetY = emphasis === "active" ? 0.32 : emphasis === "related" ? 0.12 : 0;
+    g.position.y += (targetY - g.position.y) * k;
+    const targetOpacity = emphasis === "dimmed" ? (ghost ? 0.25 : 0.35) : ghost ? 0.7 : 1;
+    g.traverse((o) => {
+      const m = (o as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
+      if (!m) return;
+      for (const mat of Array.isArray(m) ? m : [m]) {
+        const base = (mat as { userData?: { baseOpacity?: number } }).userData?.baseOpacity ?? 1;
+        mat.opacity += (targetOpacity * base - mat.opacity) * k;
+      }
+    });
+    if (topMat.current && !ghost) topMat.current.color.lerp(emphasis === "active" || emphasis === "related" ? hoverTop : WHITE, k);
   });
 
   const hoverOn = () => setHovered(dept.id);
   const hoverOff = () => {
     if (useMapStore.getState().hovered === dept.id) setHovered(null);
   };
+  const outlinePts = useMemo(() => {
+    const hw = w / 2 + 0.02;
+    const y = h + 0.01;
+    return [
+      new THREE.Vector3(-hw, y, -hw),
+      new THREE.Vector3(hw, y, -hw),
+      new THREE.Vector3(hw, y, hw),
+      new THREE.Vector3(-hw, y, hw),
+      new THREE.Vector3(-hw, y, -hw),
+    ];
+  }, [w, h]);
 
   return (
     <group position={[dept.position[0], 0, dept.position[2]]}>
-      <group ref={group}>
-        <RoundedBox
-          args={[w, h, w]}
-          radius={0.1}
-          smoothness={4}
-          position={[0, h / 2, 0]}
+      {/* Drop shadow — offset so it reads as sitting on the grid. */}
+      <mesh position={[0.32, 0.004, 0.32]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[w, w]} />
+        <meshBasicMaterial color="#1b2140" transparent opacity={ghost ? 0.05 : 0.11} userData={{ baseOpacity: ghost ? 0.05 : 0.11 }} />
+      </mesh>
+      <group ref={lift}>
+        <group
           onPointerOver={(e) => {
             e.stopPropagation();
             hoverOn();
@@ -84,24 +152,11 @@ export function DeptBlock({ dept }: { dept: Department }) {
             select(selected === dept.id ? null : dept.id);
           }}
         >
-          <meshStandardMaterial
-            ref={mat}
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.08}
-            roughness={0.45}
-            metalness={0.15}
-            transparent
-            opacity={ghost ? 0.35 : 1}
-            wireframe={ghost}
-          />
-        </RoundedBox>
-        {/* Top-face outline so the cube reads as a block even when ghosted. */}
-        <lineSegments position={[0, h + 0.002, 0]}>
-          <edgesGeometry args={[new THREE.PlaneGeometry(w * 0.92, w * 0.92).rotateX(-Math.PI / 2)]} />
-          <lineBasicMaterial color={dept.color} transparent opacity={emphasis === "dimmed" ? 0.15 : 0.7} />
-        </lineSegments>
-        <Html position={[0, h + 0.08, 0]} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+          <IsoBox size={[w, h, w]} position={[0, h / 2, 0]} top={palette.tileTop} sideX={palette.tileX} sideZ={palette.tileZ} topRef={topMat} outline={palette.outline} />
+          <IsoBox size={[c, c, c]} position={[0, h + c / 2, 0]} top={palette.chipTop} sideX={palette.chipX} sideZ={palette.chipZ} outline={palette.outline} />
+        </group>
+        {ghost && <Line points={outlinePts} color="#9aa3c2" lineWidth={1} dashed dashSize={0.18} gapSize={0.12} transparent opacity={0.9} />}
+        <Html position={[0, h + c + 0.12, 0]} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
           <button
             type="button"
             className={`block-label emphasis-${emphasis}${ghost ? " ghost" : ""}`}
@@ -117,11 +172,11 @@ export function DeptBlock({ dept }: { dept: Department }) {
             onBlur={hoverOff}
             onClick={() => select(selected === dept.id ? null : dept.id)}
           >
-            {dept.short}
+            {dept.name}
           </button>
         </Html>
         {hovered === dept.id && (
-          <Html position={[0, h + 0.7, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: "none" }}>
+          <Html position={[0, h + c + 0.7, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: "none" }}>
             <HoverCard dept={dept} />
           </Html>
         )}
