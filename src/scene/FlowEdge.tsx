@@ -36,7 +36,7 @@ export function FlowEdge({ edge, from, to }: { edge: Edge; from: Department; to:
 
   const color = state === "active" ? from.color : IDLE;
   const opacity = state === "active" ? 1 : state === "dimmed" ? 0.18 : 0.85;
-  const dashed = edge.maturity === "target" || edge.maturity === "schema-only";
+  const dashed = edge.maturity === "target";
 
   const particles = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);

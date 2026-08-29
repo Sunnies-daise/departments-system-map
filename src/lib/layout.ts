@@ -1,10 +1,12 @@
 import * as THREE from "three";
 
+import { systemMap } from "@/data/systemMap";
 import type { Department, Edge } from "@/data/types";
 
-/** Tile footprint (world units) and thickness for the isometric tiles. */
-export const BLOCK_WIDTH = 3.0;
-export const TILE_HEIGHT = 0.42;
+/** Every block sits centred in its own CELL×CELL square of the background grid. */
+export const CELL = 9;
+export const BLOCK_WIDTH = 4;
+export const TILE_HEIGHT = 0.5;
 export const LINE_Y = 0.02;
 
 export function blockWidth(d: Department): number {
@@ -15,7 +17,7 @@ export function tileHeight(d: Department): number {
 }
 /** The block chip that sits on the tile. */
 export function chipSize(d: Department): number {
-  return 0.95 * d.size;
+  return 1.2 * d.size;
 }
 
 export interface EdgePath {
@@ -32,7 +34,7 @@ export interface EdgePath {
 export function edgePath(edge: Edge, from: Department, to: Department): EdgePath {
   const y = LINE_Y;
   const sign = edge.from < edge.to ? 1 : -1;
-  const lane = 0.5 * sign;
+  const lane = 0.6 * sign;
   const a = new THREE.Vector3(from.position[0], y, from.position[2]);
   const b = new THREE.Vector3(to.position[0], y, to.position[2]);
   const dx = b.x - a.x;
@@ -67,6 +69,29 @@ function trim(pts: THREE.Vector3[], i: number, j: number, by: number) {
   pts[i].add(dir.normalize().multiplyScalar(by));
 }
 
-/** Isometric: camera on the (1,1,1) diagonal looking at the target. */
-export const CAMERA_POSITION: [number, number, number] = [16, 16, 16];
-export const CAMERA_TARGET: [number, number, number] = [0.4, 0, -2.4];
+/** World-space points that must stay on screen: the cell plates and the tops of the chips + labels. */
+export const MAP_BOUNDS: THREE.Vector3[] = systemMap.departments.flatMap((d) => {
+  const [x, , z] = d.position;
+  const half = CELL / 2 - 0.4;
+  const top = tileHeight(d) + chipSize(d) + 1.6;
+  return [
+    new THREE.Vector3(x - half, 0, z - half),
+    new THREE.Vector3(x + half, 0, z - half),
+    new THREE.Vector3(x - half, 0, z + half),
+    new THREE.Vector3(x + half, 0, z + half),
+    new THREE.Vector3(x, top, z),
+  ];
+});
+
+export const MAP_CENTER: THREE.Vector3 = (() => {
+  const c = new THREE.Vector3();
+  for (const d of systemMap.departments) c.add(new THREE.Vector3(d.position[0], 0, d.position[2]));
+  return c.divideScalar(systemMap.departments.length);
+})();
+
+/** Isometric: camera on the (1,1,1) diagonal looking at the map centre. */
+export const CAMERA_POSITION: [number, number, number] = [MAP_CENTER.x + 30, 30, MAP_CENTER.z + 30];
+
+/** Width of the department panel (px) — the camera fits the map into what is left. */
+export const PANEL_WIDTH = 440;
+export const PANEL_BREAKPOINT = 720;

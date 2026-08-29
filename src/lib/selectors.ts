@@ -1,48 +1,24 @@
 import { departmentsById, rolesById, systemMap } from "@/data/systemMap";
-import type { Department, Edge, Maturity, Mode, Role } from "@/data/types";
+import type { Department, Edge, Maturity, Role } from "@/data/types";
 
-/** Is something with this maturity part of the picture in this mode? */
-export function isVisible(maturity: Maturity, mode: Mode): boolean {
-  return mode === "target" || maturity !== "target";
+export function edgesTouching(deptId: string): Edge[] {
+  return systemMap.edges.filter((e) => e.from === deptId || e.to === deptId);
 }
 
-/** A block is "built" when it has real behaviour today (live or prototype). */
-export function isDeptBuilt(dept: Department): boolean {
-  return dept.maturity === "live" || dept.maturity === "prototype";
-}
-
-/** Ghosted = drawn as a wireframe placeholder (As-built mode, nothing shipped). */
-export function isDeptGhost(dept: Department, mode: Mode): boolean {
-  return mode === "asBuilt" && !isDeptBuilt(dept);
-}
-
-export function visibleEdges(mode: Mode): Edge[] {
-  return systemMap.edges.filter((e) => isVisible(e.maturity, mode));
-}
-
-export function edgesTouching(deptId: string, mode: Mode): Edge[] {
-  return visibleEdges(mode).filter((e) => e.from === deptId || e.to === deptId);
-}
-
-export function relatedDepartments(deptId: string, mode: Mode): Set<string> {
+export function relatedDepartments(deptId: string): Set<string> {
   const out = new Set<string>();
-  for (const e of edgesTouching(deptId, mode)) out.add(e.from === deptId ? e.to : e.from);
+  for (const e of edgesTouching(deptId)) out.add(e.from === deptId ? e.to : e.from);
   return out;
 }
 
 /** Roles shown on a block: the department's own plus roles that list it in `alsoIn`. */
-export function rolesFor(dept: Department, mode: Mode): Role[] {
+export function rolesFor(dept: Department): Role[] {
   const ids = new Set(dept.roles);
   for (const r of systemMap.roles) if (r.alsoIn?.includes(dept.id)) ids.add(r.id);
   return [...ids]
     .map((id) => rolesById[id])
     .filter((r): r is Role => Boolean(r))
-    .filter((r) => isVisible(r.maturity, mode))
     .sort((a, b) => maturityRank(a.maturity) - maturityRank(b.maturity));
-}
-
-export function responsibilitiesFor(dept: Department, mode: Mode) {
-  return dept.responsibilities.filter((r) => isVisible(r.maturity, mode));
 }
 
 export function maturityRank(m: Maturity): number {
@@ -65,9 +41,10 @@ export function groupPermissions(keys: string[]): { resource: string; actions: s
     .sort((a, b) => a.resource.localeCompare(b.resource));
 }
 
-export const MATURITY_LABEL: Record<Maturity, string> = {
+/** "Schema only" is deliberately never shown as text — it reads like a warning to non-engineers. */
+export const MATURITY_LABEL: Record<Maturity, string | null> = {
   live: "Live",
   prototype: "Prototype",
-  "schema-only": "Schema only",
+  "schema-only": null,
   target: "Target",
 };

@@ -7,9 +7,9 @@
       "short": "SALES",
       "color": "#F59E0B",
       "position": [
-        -10.5,
+        -13.5,
         0,
-        0
+        4.5
       ],
       "size": 1,
       "maturity": "live",
@@ -131,9 +131,9 @@
       "short": "QUOTE",
       "color": "#8B5CF6",
       "position": [
-        -3.5,
+        -4.5,
         0,
-        0
+        4.5
       ],
       "size": 1,
       "maturity": "live",
@@ -230,9 +230,9 @@
       "short": "OPS",
       "color": "#3B82F6",
       "position": [
-        3.5,
+        4.5,
         0,
-        0
+        4.5
       ],
       "size": 1,
       "maturity": "live",
@@ -354,9 +354,9 @@
       "short": "DRIVER",
       "color": "#60A5FA",
       "position": [
-        3.5,
+        4.5,
         0,
-        6.5
+        13.5
       ],
       "size": 0.55,
       "maturity": "live",
@@ -416,9 +416,9 @@
       "short": "FINANCE",
       "color": "#10B981",
       "position": [
-        10.5,
+        13.5,
         0,
-        0
+        4.5
       ],
       "size": 1,
       "maturity": "prototype",
@@ -520,9 +520,9 @@
       "short": "PLANT",
       "color": "#F97316",
       "position": [
-        7,
+        4.5,
         0,
-        -8.5
+        -4.5
       ],
       "size": 1,
       "maturity": "schema-only",
@@ -607,9 +607,9 @@
       "short": "PROCURE",
       "color": "#EC4899",
       "position": [
-        -7,
+        -13.5,
         0,
-        -8.5
+        -4.5
       ],
       "size": 1,
       "maturity": "schema-only",
@@ -689,9 +689,9 @@
       "short": "STORE",
       "color": "#14B8A6",
       "position": [
+        -4.5,
         0,
-        0,
-        -8.5
+        -4.5
       ],
       "size": 1,
       "maturity": "live",

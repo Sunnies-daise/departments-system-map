@@ -13,7 +13,12 @@ test("hover a block shows role/task counts and lights up correlated departments"
   await expect(card.getByTestId("hover-stats")).toContainText("3 roles");
   await expect(card.getByTestId("hover-stats")).toContainText("7 tasks");
   await expect(card).toContainText("Flows with");
-  // Correlation: Quotation / Operations / Finance exchange data with Sales; Plant does not.
+  // The card lives in the bottom-left corner, not over the map.
+  const box = await card.boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(box!.x).toBeLessThan(40);
+  expect(box!.y + box!.height).toBeGreaterThan(viewport.height - 40);
+  // Correlation: Quotation / Operations / Finance / Procurement exchange data with Sales; Plant does not.
   await expect(page.getByTestId("block-sales")).toHaveAttribute("data-emphasis", "active");
   await expect(page.getByTestId("block-quotation")).toHaveAttribute("data-emphasis", "related");
   await expect(page.getByTestId("block-operations")).toHaveAttribute("data-emphasis", "related");
@@ -31,6 +36,7 @@ test("click a block opens the department panel with role pills; a pill opens the
   await expect(panel.getByTestId("role-pill-quotation_manager")).toBeVisible();
   await expect(panel.getByTestId("role-pill-ops_manager")).toHaveAttribute("data-maturity", "target");
   await expect(panel.getByTestId("approval-ladder")).toContainText("Three approval layers");
+  await expect(panel).not.toContainText("Schema only");
 
   await panel.getByTestId("role-pill-quotation_manager").click();
   const pop = panel.getByTestId("role-popover-quotation_manager");
@@ -47,19 +53,18 @@ test("click a block opens the department panel with role pills; a pill opens the
   await expect(page.getByTestId("block-finance")).toHaveAttribute("data-emphasis", "dimmed");
 });
 
-test("As-built mode ghosts target-only roles, flows and unbuilt departments", async ({ page }) => {
+test("every block stays on screen while the panel is open", async ({ page }) => {
   await open(page);
-  await page.getByTestId("block-quotation").click();
-  await expect(page.getByTestId("role-pill-ops_manager")).toBeVisible();
-  await page.getByTestId("mode-asBuilt").click();
-  await expect(page.getByTestId("role-pill-ops_manager")).toHaveCount(0);
-  await expect(page.getByTestId("approval-ladder")).toContainText("One gated transition");
-  await expect(page.getByTestId("outputs").getByTestId("flow-quotation-operations-final-approval")).toHaveCount(0);
-  await expect(page.getByTestId("block-plant")).toHaveAttribute("data-ghost", "true");
-  await expect(page.getByTestId("block-procurement")).toHaveAttribute("data-ghost", "true");
-  await expect(page.getByTestId("block-store")).toHaveAttribute("data-ghost", "false");
-  await page.getByTestId("mode-target").click();
-  await expect(page.getByTestId("block-plant")).toHaveAttribute("data-ghost", "false");
+  await page.getByTestId("block-operations").click();
+  await expect(page.getByTestId("dept-panel")).toBeVisible();
+  await expect(page.getByTestId("hover-card-operations")).toHaveCount(0); // panel replaces the card
+  await page.waitForTimeout(1200); // camera re-fit eases in
+  const panelBox = (await page.getByTestId("dept-panel").boundingBox())!;
+  for (const id of ["sales", "quotation", "operations", "driver", "finance", "plant", "procurement", "store"]) {
+    const box = (await page.getByTestId(`block-${id}`).boundingBox())!;
+    expect(box.x + box.width, `${id} hidden behind the panel`).toBeLessThan(panelBox.x);
+    expect(box.x).toBeGreaterThan(0);
+  }
 });
 
 test("glossary is searchable and Esc closes overlays", async ({ page }) => {
@@ -77,11 +82,13 @@ test("glossary is searchable and Esc closes overlays", async ({ page }) => {
   await expect(page.getByTestId("dept-panel")).toHaveCount(0);
 });
 
-test("data fidelity: every department block renders and the map exposes the store", async ({ page }) => {
+test("no mode toggle and no 'Schema only' text anywhere", async ({ page }) => {
   await open(page);
-  for (const id of ["sales", "quotation", "operations", "driver", "finance", "plant", "procurement", "store"]) {
-    await expect(page.getByTestId(`block-${id}`)).toBeVisible();
+  await expect(page.getByTestId("mode-toggle")).toHaveCount(0);
+  for (const id of ["plant", "procurement", "store"]) {
+    await page.getByTestId(`block-${id}`).click();
+    await expect(page.getByTestId("dept-panel")).toBeVisible();
+    await expect(page.getByTestId("dept-panel")).not.toContainText("Schema only");
+    await page.keyboard.press("Escape");
   }
-  const mode = await page.evaluate(() => window.__mapDebug?.getState().mode);
-  expect(mode).toBe("target");
 });

@@ -6,6 +6,7 @@ import { useMapStore } from "@/state/useMapStore";
 import { DeptPanel } from "@/ui/DeptPanel";
 import { GlossaryDrawer } from "@/ui/GlossaryDrawer";
 import { HelpOverlay } from "@/ui/HelpOverlay";
+import { HoverCard } from "@/ui/HoverCard";
 import { TopBar } from "@/ui/TopBar";
 
 declare global {
@@ -33,6 +34,7 @@ export default function App() {
       <TopBar />
       <main className="stage">
         <Scene />
+        <HoverCard />
         <GlossaryDrawer />
         {dept && <DeptPanel key={dept.id} dept={dept} />}
       </main>

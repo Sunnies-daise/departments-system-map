@@ -134,9 +134,9 @@
         }
       ],
       "position": [
-        -10.5,
+        -13.5,
         0,
-        0
+        4.5
       ],
       "responsibilities": [
         {
@@ -312,9 +312,9 @@
         }
       ],
       "position": [
-        -3.5,
+        -4.5,
         0,
-        0
+        4.5
       ],
       "responsibilities": [
         {
@@ -495,9 +495,9 @@
         }
       ],
       "position": [
-        3.5,
+        4.5,
         0,
-        0
+        4.5
       ],
       "responsibilities": [
         {
@@ -649,9 +649,9 @@
         }
       ],
       "position": [
-        3.5,
+        4.5,
         0,
-        6.5
+        13.5
       ],
       "responsibilities": [
         {
@@ -796,9 +796,9 @@
         }
       ],
       "position": [
-        10.5,
+        13.5,
         0,
-        0
+        4.5
       ],
       "responsibilities": [
         {
@@ -927,9 +927,9 @@
       "name": "Plant",
       "pages": [],
       "position": [
-        7,
+        4.5,
         0,
-        -8.5
+        -4.5
       ],
       "responsibilities": [
         {
@@ -1046,9 +1046,9 @@
       "name": "Procurement",
       "pages": [],
       "position": [
-        -7,
+        -13.5,
         0,
-        -8.5
+        -4.5
       ],
       "responsibilities": [
         {
@@ -1197,9 +1197,9 @@
         }
       ],
       "position": [
+        -4.5,
         0,
-        0,
-        -8.5
+        -4.5
       ],
       "responsibilities": [
         {

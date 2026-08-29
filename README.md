@@ -17,20 +17,21 @@ Render gives a custom URL with zero configuration.
 | **Click a block** | the department panel: blurb, role pills, responsibilities, crucial data entered, data flowing out / in, screens in the ERP, tables |
 | **Click a role pill** | what the role does, how they handle their work, permission chips, demo login |
 | **Click a flow** | highlights that path on the map with trigger, status path and source-file evidence |
-| **Target / As-built** | switch between the organisation model being designed and what the code does today |
 | **Terminology** | searchable glossary — core-flow docs + department vocabulary |
 
 Every block, role, task and flow carries a **maturity**:
 
 - **Live** — shipped in the ERP
 - **Prototype** — on the `demo` branch (`prototypes/INDEX.md` in the ERP repo)
-- **Schema only** — tables exist (mirrored from the legacy ERP), no screens yet
 - **Target** — from the PM's organisation brief; nothing in the code yet
+- `schema-only` (tables exist, no screens) is kept in the data but never shown as a label
 
 ## Departments
 
 Sales → Quotation → Operations (+ Driver) → Finance on the main row;
-Procurement · Store / Inventory · Plant on the back row.
+Procurement · Store / Inventory · Plant on the back row. Each block sits in its
+own square cell of the background grid; the camera always fits the whole map
+into the space left of the open panel, so highlighted flows stay visible.
 
 ## Run it
 

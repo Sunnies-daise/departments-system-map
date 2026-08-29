@@ -10,7 +10,7 @@ export function HelpOverlay() {
         <h2>How to read the map</h2>
         <ul>
           <li>
-            <b>Hover a block</b> — see how many roles and tasks the department has; the departments it exchanges data with light up and the flow animates.
+            <b>Hover a block</b> — the card in the top-left shows how many roles and tasks the department has; the departments it exchanges data with light up and the flow animates along the connectors.
           </li>
           <li>
             <b>Click a block</b> — open the department: roles, responsibilities, the crucial data it enters, and where that data goes.
@@ -20,9 +20,6 @@ export function HelpOverlay() {
           </li>
           <li>
             <b>Click a flow</b> in the panel — highlight that path on the map, with the trigger, status path and the source files.
-          </li>
-          <li>
-            <b>Target / As-built</b> — switch between the organisation model being designed and what the code does today.
           </li>
           <li>Drag to pan, scroll or pinch to zoom. Esc closes.</li>
         </ul>

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { departmentsById, rolesById, systemMap } from "@/data/systemMap";
 import type { Department, Edge } from "@/data/types";
-import { deptName, isDeptGhost, responsibilitiesFor, rolesFor, visibleEdges } from "@/lib/selectors";
+import { deptName, rolesFor } from "@/lib/selectors";
 import { useMapStore } from "@/state/useMapStore";
 
 import { MaturityChip, MaturityDot } from "./Chips";
@@ -12,19 +12,16 @@ import { RolePopover } from "./RolePopover";
 const ERP_REPO = "https://github.com/Sunnies-daise/Lincoln-ERP-product-demo/blob/main/";
 
 export function DeptPanel({ dept }: { dept: Department }) {
-  const mode = useMapStore((s) => s.mode);
   const select = useMapStore((s) => s.select);
   const selectedRole = useMapStore((s) => s.selectedRole);
   const highlightedEdge = useMapStore((s) => s.highlightedEdge);
   const highlightEdge = useMapStore((s) => s.highlightEdge);
 
-  const roles = rolesFor(dept, mode);
-  const tasks = responsibilitiesFor(dept, mode);
-  const edges = useMemo(() => visibleEdges(mode), [mode]);
-  const outputs = edges.filter((e) => e.from === dept.id);
-  const inputsFrom = edges.filter((e) => e.to === dept.id);
+  const roles = rolesFor(dept);
+  const tasks = dept.responsibilities;
+  const outputs = useMemo(() => systemMap.edges.filter((e) => e.from === dept.id), [dept.id]);
+  const inputsFrom = useMemo(() => systemMap.edges.filter((e) => e.to === dept.id), [dept.id]);
   const role = selectedRole ? rolesById[selectedRole] : null;
-  const ghost = isDeptGhost(dept, mode);
   const ladder = dept.id === "quotation" ? systemMap.targetModel.approvalLadder : null;
 
   const toggleEdge = (e: Edge) => highlightEdge(highlightedEdge === e.id ? null : e.id);
@@ -37,7 +34,6 @@ export function DeptPanel({ dept }: { dept: Department }) {
           <h2 data-testid="dept-panel-title">{dept.name}</h2>
           <div className="chips">
             <MaturityChip maturity={dept.maturity} />
-            {ghost && <span className="chip chip-ghost">Not built yet</span>}
           </div>
         </div>
         <button type="button" className="icon-btn" aria-label="Close panel" onClick={() => select(null)}>
@@ -64,18 +60,16 @@ export function DeptPanel({ dept }: { dept: Department }) {
       {ladder && (
         <section data-testid="approval-ladder">
           <h3>Approval ladder</h3>
-          <p className="muted">{mode === "target" ? ladder.target.summary : ladder.asBuilt.summary}</p>
+          <p className="muted">{ladder.target.summary}</p>
           <ol className="ladder">
-            {(mode === "target" ? ladder.target.steps : ladder.asBuilt.steps).map((s) => (
+            {ladder.target.steps.map((s) => (
               <li key={s.step}>
                 <b>{s.who}</b> — {s.does}
                 {s.gate && <code className="perm-chip">{s.gate}</code>}
               </li>
             ))}
           </ol>
-          <p className="note">
-            {mode === "target" ? `Today: ${ladder.asBuilt.summary}` : `Target: ${ladder.target.summary}`}
-          </p>
+          <p className="note">Today: {ladder.asBuilt.summary}</p>
         </section>
       )}
 
