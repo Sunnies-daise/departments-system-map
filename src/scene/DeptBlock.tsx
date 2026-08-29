@@ -79,6 +79,8 @@ export function DeptBlock({ dept }: { dept: Department }) {
           }}
           onClick={(e) => {
             e.stopPropagation();
+            // A click on the DOM label is handled by the label itself.
+            if (!(e.nativeEvent.target instanceof HTMLCanvasElement)) return;
             select(selected === dept.id ? null : dept.id);
           }}
         >

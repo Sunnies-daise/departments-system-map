@@ -52,7 +52,10 @@ export function Scene() {
       camera={{ position: CAMERA_POSITION, fov: 38, near: 0.1, far: 120 }}
       dpr={[1, 1.75]}
       gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-      onPointerMissed={() => {
+      onPointerMissed={(e) => {
+        // DOM overlays (block labels, cards) bubble into r3f's event layer and
+        // would read as a "missed" click — only the canvas itself clears state.
+        if (!(e.target instanceof HTMLCanvasElement)) return;
         setHovered(null);
         select(null);
       }}
