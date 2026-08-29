@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: lincoln-system-map
+    name: departments-system-map
     runtime: static
     buildCommand: bun install && bun run build
     staticPublishPath: dist

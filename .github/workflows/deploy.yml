@@ -33,7 +33,7 @@ jobs:
       - name: Build for GitHub Pages
         run: bun run build
         env:
-          VITE_BASE: /lincoln-system-map/
+          VITE_BASE: /departments-system-map/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

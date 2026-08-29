@@ -5,7 +5,7 @@ block, the roles inside it as pill tags, the crucial data each department enters
 and how that data flows block-to-block. Built for onboarding and product
 discussions — hover a block to see its correlations light up, click to open it.
 
-**Live:** https://sunnies-daise.github.io/lincoln-system-map/ (GitHub Pages) — the
+**Live:** https://sunnies-daise.github.io/departments-system-map/ (GitHub Pages) — the
 repo also ships `vercel.json` and `render.yaml`, so importing it into Vercel or
 Render gives a custom URL with zero configuration.
 
@@ -71,7 +71,7 @@ defined. Unit tests: `bun run test:extractor`.
 ## Deploy
 
 - **GitHub Pages** — `.github/workflows/deploy.yml` builds on every push to
-  `main` (`VITE_BASE=/lincoln-system-map/`). Enable *Settings → Pages → Source:
+  `main` (`VITE_BASE=/departments-system-map/`). Enable *Settings → Pages → Source:
   GitHub Actions* once.
 - **Vercel** — import the repo; `vercel.json` sets the Bun build + `dist/`.
 - **Render** — *New → Blueprint* on this repo; `render.yaml` defines a static site.
