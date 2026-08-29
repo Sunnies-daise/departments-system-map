@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 async function open(page: Page) {
-  await page.goto("/");
+  await page.goto("./");
   await expect(page.getByTestId("block-sales")).toBeVisible({ timeout: 20_000 });
 }
 
