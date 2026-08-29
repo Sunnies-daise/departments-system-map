@@ -130,12 +130,6 @@ code { font-family: var(--mono); font-size: 0.85em; }
 .table-chip { background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: 11px; }
 .table-proto { border-style: dashed; color: var(--prototype); }
 
-/* Legend */
-.legend { position: absolute; z-index: 40; left: 12px; bottom: 12px; max-width: 520px; background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; font-size: 12px; display: grid; gap: 6px; backdrop-filter: blur(6px); }
-.legend-title { font-weight: 650; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.legend-row { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
-.legend-dept { display: inline-flex; align-items: center; gap: 5px; }
-.legend .dot { margin-top: 0; }
 
 /* Glossary */
 .glossary { position: absolute; top: 12px; left: 12px; bottom: 12px; width: min(420px, calc(100% - 24px)); background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); z-index: 45; }
@@ -157,7 +151,6 @@ code { font-family: var(--mono); font-size: 0.85em; }
   .topbar { flex-wrap: wrap; }
   .dept-panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 62dvh; }
   .glossary { left: 8px; right: 8px; width: auto; max-height: 70dvh; bottom: auto; }
-  .legend { display: none; }
   .hover-card { width: 200px; }
 }
 @media (prefers-reduced-motion: reduce) {
