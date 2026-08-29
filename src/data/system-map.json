@@ -1,0 +1,3386 @@
+{
+  "departments": [
+    {
+      "asBuiltNote": "A plain `sales` rep is scoped to their own book (no `sales.view_all`) and cannot touch Ops data directly — service tickets go through a backend route that stamps the rep as submitter.",
+      "blurb": "Owns the customer relationship and the start of every deal: leads, the customer master, and the CRFQ that captures what the customer wants to hire or buy. Also raises service tickets to Operations on machines already on hire.",
+      "color": "#F59E0B",
+      "id": "sales",
+      "inputs": [
+        {
+          "fields": [
+            "customer / partner",
+            "site PIC + delivery address",
+            "items + quantities",
+            "hire window / usage term",
+            "source of inquiry",
+            "financial terms"
+          ],
+          "maturity": "live",
+          "record": "CRFQ (rfq)"
+        },
+        {
+          "fields": [
+            "company + branch",
+            "contacts",
+            "credit term",
+            "industry",
+            "sales person"
+          ],
+          "maturity": "live",
+          "record": "Customer Master (partner)"
+        },
+        {
+          "fields": [
+            "hiring contract",
+            "type: breakdown / replacement / upgrade / return",
+            "affected items",
+            "requested date",
+            "remark"
+          ],
+          "maturity": "prototype",
+          "record": "Service ticket (hc_ops_ticket)"
+        },
+        {
+          "fields": [
+            "company",
+            "stage",
+            "relationships",
+            "follow-ups"
+          ],
+          "maturity": "prototype",
+          "record": "Lead (proto)"
+        }
+      ],
+      "maturity": "live",
+      "name": "Sales",
+      "pages": [
+        {
+          "permission": "rfqs.view",
+          "section": "Core Flow",
+          "title": "CRFQs",
+          "url": "/rfqs"
+        },
+        {
+          "permission": "quotations.view",
+          "section": "Core Flow",
+          "title": "Quotations",
+          "url": "/quotations"
+        },
+        {
+          "permission": "hiring_contracts.view",
+          "section": "Core Flow",
+          "title": "Hiring Contracts",
+          "url": "/hiring-contracts"
+        },
+        {
+          "permission": "sales_dashboard.view",
+          "section": "Sales",
+          "title": "Report",
+          "url": "/sales-dashboard"
+        },
+        {
+          "permission": "sales_dashboard.view",
+          "section": "Sales",
+          "title": "Leads management",
+          "url": "/leads"
+        },
+        {
+          "permission": "sales_dashboard.view",
+          "section": "Sales",
+          "title": "My Customers",
+          "url": "/salesperson"
+        },
+        {
+          "permission": "sales_dashboard.view",
+          "section": "Sales",
+          "title": "My Service Tickets",
+          "url": "/my-service-tickets"
+        },
+        {
+          "permission": "sales_log.view",
+          "section": "Sales",
+          "title": "Sales Log",
+          "url": "/sales-log"
+        },
+        {
+          "permission": "sales_manager.view",
+          "section": "Sales Manager",
+          "title": "Report",
+          "url": "/manager/dashboard"
+        },
+        {
+          "permission": "sales_manager.view",
+          "section": "Sales Manager",
+          "title": "Pipeline Funnel",
+          "url": "/manager/pipeline"
+        },
+        {
+          "permission": "sales_manager.view",
+          "section": "Sales Manager",
+          "title": "Account Allocation",
+          "url": "/manager/allocation"
+        },
+        {
+          "permission": "customers.view",
+          "section": "Customer Master",
+          "title": "Customer Master",
+          "url": "/customer-canvas"
+        },
+        {
+          "permission": "industries.view",
+          "section": "Customer Master",
+          "title": "Industries",
+          "url": "/industries"
+        }
+      ],
+      "position": [
+        -6,
+        0,
+        0
+      ],
+      "responsibilities": [
+        {
+          "label": "Leads management — parking-state pipeline, AI snapshot, background scan to Customer Master",
+          "maturity": "prototype",
+          "page": "/leads"
+        },
+        {
+          "label": "Capture a CRFQ (contract order inquiry) — items, hire window, site, terms",
+          "maturity": "live",
+          "page": "/rfqs"
+        },
+        {
+          "label": "Maintain the Customer Master (partner, contacts, addresses, credit terms)",
+          "maturity": "live",
+          "page": "/customer-canvas"
+        },
+        {
+          "label": "Confirm order / customer order status after the quotation is accepted",
+          "maturity": "prototype",
+          "page": "/order-status"
+        },
+        {
+          "label": "Raise service tickets to Ops — breakdown, replacement, upgrade, full/partial return",
+          "maturity": "prototype",
+          "page": "/my-service-tickets"
+        },
+        {
+          "label": "My Customers book + Sales Log (activities, follow-ups)",
+          "maturity": "prototype",
+          "page": "/salesperson"
+        },
+        {
+          "label": "Manager: team report, pipeline funnel, account allocation",
+          "maturity": "prototype",
+          "page": "/manager/dashboard"
+        }
+      ],
+      "roles": [
+        "sales",
+        "sales_manager",
+        "sale_manager"
+      ],
+      "short": "SALES",
+      "size": 1,
+      "tables": [
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "rfq"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "rfq_item"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "rfq_rating"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "draft_crfq"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "follow_up_task"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "sales_activity"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "sales_account"
+        },
+        {
+          "domain": "customer",
+          "inSchema": true,
+          "name": "partner"
+        },
+        {
+          "domain": "customer",
+          "inSchema": true,
+          "name": "partner_contact"
+        },
+        {
+          "domain": "customer",
+          "inSchema": true,
+          "name": "partner_address"
+        },
+        {
+          "domain": "customer",
+          "inSchema": true,
+          "name": "sales_person"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "source_of_inquiry"
+        }
+      ],
+      "targetNote": "Sales works with Procurement on machine cost so quoted rates stay above cost."
+    },
+    {
+      "asBuiltNote": "Today there is ONE gated transition: Pending Approval → Final Approved requires `quotations.approve` (quotation_manager / sales_manager / admin). Operations does not approve quotations.",
+      "blurb": "Turns the CRFQ into a priced, approvable offer. Rental lines price off the 3-tier rate card; the quotation climbs an approval ladder, is emailed to the customer, and converts into the Hiring Contract.",
+      "color": "#8B5CF6",
+      "id": "quotation",
+      "inputs": [
+        {
+          "fields": [
+            "rate tier per period (daily … monthly)",
+            "transport charge",
+            "tax option",
+            "validity",
+            "sales category (is_rental)"
+          ],
+          "maturity": "live",
+          "record": "Quotation (quotation, quotation_item)"
+        },
+        {
+          "fields": [
+            "Pending Approval → Final Approved",
+            "send back to In Progress",
+            "cancel"
+          ],
+          "maturity": "live",
+          "record": "Approval decision (status)"
+        },
+        {
+          "fields": [
+            "agreed rate",
+            "item description + UOM",
+            "delivery address",
+            "site PIC"
+          ],
+          "maturity": "live",
+          "record": "Hiring Contract at conversion (snapshot)"
+        }
+      ],
+      "maturity": "live",
+      "name": "Quotation",
+      "pages": [
+        {
+          "permission": "rfqs.view",
+          "section": "Core Flow",
+          "title": "CRFQs",
+          "url": "/rfqs"
+        },
+        {
+          "permission": "quotations.view",
+          "section": "Core Flow",
+          "title": "Quotations",
+          "url": "/quotations"
+        },
+        {
+          "permission": "hiring_contracts.view",
+          "section": "Core Flow",
+          "title": "Hiring Contracts",
+          "url": "/hiring-contracts"
+        },
+        {
+          "permission": "users.view",
+          "section": "Quotation",
+          "title": "Notifications",
+          "url": "/quotation-notifications"
+        }
+      ],
+      "position": [
+        -2,
+        0,
+        0
+      ],
+      "responsibilities": [
+        {
+          "label": "Price every rental line from the rate card (Lowest / Standard / Highest) — a person picks the tier",
+          "maturity": "live",
+          "page": "/quotations"
+        },
+        {
+          "label": "Approval ladder: Draft → In Queue → In Progress → Pending Approval → Final Approved",
+          "maturity": "live",
+          "page": "/quotations"
+        },
+        {
+          "label": "Mark the quotation sent (stage flips to Quotation Sent)",
+          "maturity": "live"
+        },
+        {
+          "label": "Convert to Hiring Contract — needs Site PIC + delivery address, every rental line rated",
+          "maturity": "live",
+          "page": "/hiring-contracts"
+        },
+        {
+          "label": "Assign lead + assistants; @mention colleagues on the document",
+          "maturity": "live",
+          "page": "/quotation-notifications"
+        },
+        {
+          "label": "Reorder re-approval cascades edited lines into the linked HC",
+          "maturity": "live"
+        }
+      ],
+      "roles": [
+        "quotation_assistant",
+        "quotation_manager",
+        "ops_manager"
+      ],
+      "short": "QUOTE",
+      "size": 1,
+      "tables": [
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "quotation"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "quotation_item"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "quotation_item_rate_history"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "quotation_attachment"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "workflow_assignment"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "workflow_comment"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "workflow_status_log"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "hiring_contract"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "hiring_contract_item"
+        },
+        {
+          "domain": "sales",
+          "inSchema": true,
+          "name": "hiring_contract_item_rate"
+        }
+      ],
+      "targetNote": "Target: three layers — assistant prepares, quotation lead reviews, the Operations manager gives final approval (machine availability + transport feasibility)."
+    },
+    {
+      "asBuiltNote": "One `operations` role holds ops_tickets.manage, delivery_jobs.manage, inventory.manage and hiring_contracts.schedule — coordinator, transport planner and storekeeper are the same login today.",
+      "blurb": "Fulfils the contract: binds real machine units to the Hiring Contract, plans delivery and collection jobs, dispatches drivers, processes return / replacement / breakdown tickets, assesses machine condition on return, and publishes the customer PO to Finance.",
+      "color": "#3B82F6",
+      "id": "operations",
+      "inputs": [
+        {
+          "fields": [
+            "job type: Delivery / Collection / Replacement / Service_Breakdown",
+            "scheduled date",
+            "driver assignment",
+            "split child DOs"
+          ],
+          "maturity": "live",
+          "record": "Delivery Order + Job (delivery_order, job)"
+        },
+        {
+          "fields": [
+            "item unit ↔ HC line",
+            "free-or-repoint"
+          ],
+          "maturity": "live",
+          "record": "Unit binding (hiring_contract_item_unit)"
+        },
+        {
+          "fields": [
+            "action_type",
+            "pending → processed",
+            "ops cut-off date"
+          ],
+          "maturity": "live",
+          "record": "Ops ticket (hc_ops_ticket)"
+        },
+        {
+          "fields": [
+            "condition_status",
+            "compensation notes",
+            "photos"
+          ],
+          "maturity": "prototype",
+          "record": "Machine return (machine_return)"
+        },
+        {
+          "fields": [
+            "PO number",
+            "flagged date",
+            "published to Finance",
+            "split / superseded PO"
+          ],
+          "maturity": "prototype",
+          "record": "PO follow-up (po_follow_up)"
+        }
+      ],
+      "maturity": "live",
+      "name": "Operations",
+      "pages": [
+        {
+          "permission": "ops_tickets.view",
+          "section": "Operations",
+          "title": "Ops Notification",
+          "url": "/ops-notifications"
+        },
+        {
+          "permission": "ops_tickets.view",
+          "section": "Operations",
+          "title": "Ops Tickets",
+          "url": "/ops-tickets"
+        },
+        {
+          "permission": "delivery_jobs.view",
+          "section": "Operations",
+          "title": "Delivery Order Job",
+          "url": "/delivery-order-job"
+        },
+        {
+          "permission": "sales.view_all",
+          "section": "PO Workspace",
+          "title": "PO Follow-up",
+          "url": "/po-follow-up"
+        },
+        {
+          "permission": "sales.view_all",
+          "section": "PO Workspace",
+          "title": "Document Hub",
+          "url": "/ar/documents"
+        }
+      ],
+      "position": [
+        2,
+        0,
+        0
+      ],
+      "responsibilities": [
+        {
+          "label": "Schedule the HC — bind item units, create the Delivery Order + Job",
+          "maturity": "live",
+          "page": "/hiring-contracts"
+        },
+        {
+          "label": "Delivery Order Job board — assign drivers, split DOs, validate Delivered → Completed",
+          "maturity": "live",
+          "page": "/delivery-order-job"
+        },
+        {
+          "label": "Transport coordination — delivery planning + return collection",
+          "maturity": "live",
+          "page": "/delivery-order-job"
+        },
+        {
+          "label": "Ops tickets: return → Collection DO, replacement → Replacement DO, breakdown → Service_Breakdown DO",
+          "maturity": "live",
+          "page": "/ops-tickets"
+        },
+        {
+          "label": "Compensation assessment on return (good / compensation required / under inspection)",
+          "maturity": "prototype",
+          "page": "/ar/returns"
+        },
+        {
+          "label": "PO follow-up — flag, chase and publish the customer PO to Finance",
+          "maturity": "prototype",
+          "page": "/po-follow-up"
+        },
+        {
+          "label": "Ops notification feed (returns, replacements, upgrades, transit events)",
+          "maturity": "live",
+          "page": "/ops-notifications"
+        }
+      ],
+      "roles": [
+        "operations",
+        "transport_coordinator",
+        "ops_manager"
+      ],
+      "short": "OPS",
+      "size": 1,
+      "tables": [
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "delivery_order"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "do_item"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "do_item_unit"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "do_item_unit_photo"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "delivery_split"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "job"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "job_assignment"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "job_attempt"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "job_item_unit"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "hc_ops_ticket"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "hc_breakdown_log"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "machine_return"
+        }
+      ],
+      "targetNote": "Target splits the role: transport coordinator (delivery planning + return collection), ops manager (final quotation approval, compensation sign-off)."
+    },
+    {
+      "asBuiltNote": "Gated by `driver.app`; a driver login is force-routed to /driver and sees no back-office page.",
+      "blurb": "The mobile app a driver runs for each Delivery Order: accept the units loaded, photograph them, upload the signed Hiring Contract, mark Delivered, and collect on return.",
+      "color": "#60A5FA",
+      "id": "driver",
+      "inputs": [
+        {
+          "fields": [
+            "unit photos",
+            "signed HC upload",
+            "refusal reason",
+            "transit / delivered timestamps"
+          ],
+          "maturity": "live",
+          "record": "DO evidence (do_item_unit_photo, do_document)"
+        }
+      ],
+      "maturity": "live",
+      "name": "Driver",
+      "pages": [
+        {
+          "permission": "driver.app",
+          "title": "Orders",
+          "url": "/driver/orders"
+        },
+        {
+          "permission": "driver.app",
+          "title": "Order detail",
+          "url": "/driver/orders/:id"
+        },
+        {
+          "permission": "driver.app",
+          "title": "Notifications",
+          "url": "/driver/notifications"
+        },
+        {
+          "permission": "driver.app",
+          "title": "Profile",
+          "url": "/driver/profile"
+        }
+      ],
+      "position": [
+        2,
+        0,
+        3.6
+      ],
+      "responsibilities": [
+        {
+          "label": "See assigned orders; start transit",
+          "maturity": "live",
+          "page": "/driver/orders"
+        },
+        {
+          "label": "Accept / refuse each unit, take unit photos",
+          "maturity": "live"
+        },
+        {
+          "label": "Upload the signed HC — required before Delivered",
+          "maturity": "live"
+        },
+        {
+          "label": "Collection flow on return jobs",
+          "maturity": "live"
+        },
+        {
+          "label": "Driver notifications",
+          "maturity": "live",
+          "page": "/driver/notifications"
+        }
+      ],
+      "roles": [
+        "driver"
+      ],
+      "short": "DRIVER",
+      "size": 0.55,
+      "tables": [
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "do_document"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "do_item_unit_photo"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "job_attempt_image"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "job_item_location"
+        }
+      ],
+      "targetNote": null
+    },
+    {
+      "asBuiltNote": "Finance-AR is a prototype module on the demo branch: real partner / HC data with overlay tables created by direct DDL. One `finance` role holds ar.view + ar.manage.",
+      "blurb": "Accounts Receivable: receives the Ops-published customer PO, verifies it against the Hiring Contract in the Document Hub, bills through the Billing Queue and the IVN ladder, handles returns / compensation credit notes, and watches ageing on the AR dashboard.",
+      "color": "#10B981",
+      "id": "finance",
+      "inputs": [
+        {
+          "fields": [
+            "PO number + amount",
+            "cut-off date",
+            "billing tag: standard / split",
+            "AR verified stamp"
+          ],
+          "maturity": "prototype",
+          "record": "Verified PO (po_follow_up.ar_state)"
+        },
+        {
+          "fields": [
+            "line items from HC",
+            "rental tier math",
+            "IVN type",
+            "priority",
+            "ladder status"
+          ],
+          "maturity": "prototype",
+          "record": "Invoice (proto_invoice)"
+        },
+        {
+          "fields": [
+            "reason: compensation / early return",
+            "amount",
+            "linked IVN"
+          ],
+          "maturity": "prototype",
+          "record": "Credit note"
+        }
+      ],
+      "maturity": "prototype",
+      "name": "Finance",
+      "pages": [
+        {
+          "permission": "ar.view",
+          "section": "Finance",
+          "title": "AR Dashboard",
+          "url": "/ar/dashboard"
+        },
+        {
+          "permission": "ar.view",
+          "section": "Finance",
+          "title": "Billing Queue",
+          "url": "/ar/billing"
+        },
+        {
+          "permission": "ar.view",
+          "section": "Finance",
+          "title": "Rental Calculator",
+          "url": "/ar/billing/calculator"
+        },
+        {
+          "permission": "ar.view",
+          "section": "Finance",
+          "title": "Returns",
+          "url": "/ar/returns"
+        },
+        {
+          "permission": "ar.view",
+          "section": "Finance",
+          "title": "Credit Notes",
+          "url": "/ar/credit-notes"
+        },
+        {
+          "permission": "ar.view",
+          "section": "Finance",
+          "title": "Customer Profiles",
+          "url": "/ar/customers"
+        },
+        {
+          "permission": "sales.view_all",
+          "section": "PO Workspace",
+          "title": "PO Follow-up",
+          "url": "/po-follow-up"
+        },
+        {
+          "permission": "sales.view_all",
+          "section": "PO Workspace",
+          "title": "Document Hub",
+          "url": "/ar/documents"
+        }
+      ],
+      "position": [
+        6,
+        0,
+        0
+      ],
+      "responsibilities": [
+        {
+          "label": "Document Hub — upload → match → cross-check → stamp → publish; Preview & Verify the PO",
+          "maturity": "prototype",
+          "page": "/ar/documents"
+        },
+        {
+          "label": "Billing Queue — every verified contract carries a draft IVN; priority, billing type, progress",
+          "maturity": "prototype",
+          "page": "/ar/billing"
+        },
+        {
+          "label": "Create Invoice — IVN ladder Draft → Approved (junior) → Published (senior) → Sent",
+          "maturity": "prototype",
+          "page": "/ar/billing/create"
+        },
+        {
+          "label": "PO revision auto-sync into draft IVNs; guarded compare on approved / published",
+          "maturity": "prototype",
+          "page": "/ar/documents"
+        },
+        {
+          "label": "Returns + credit notes for compensation and early returns",
+          "maturity": "prototype",
+          "page": "/ar/returns"
+        },
+        {
+          "label": "AR dashboard — ageing, escalated follow-ups, today's queue",
+          "maturity": "prototype",
+          "page": "/ar/dashboard"
+        },
+        {
+          "label": "Customer profiles (credit, payment health) + rental calculator",
+          "maturity": "prototype",
+          "page": "/ar/customers"
+        }
+      ],
+      "roles": [
+        "finance",
+        "ar_junior",
+        "ar_senior"
+      ],
+      "short": "FINANCE",
+      "size": 1,
+      "tables": [
+        {
+          "domain": null,
+          "inSchema": false,
+          "name": "po_follow_up"
+        },
+        {
+          "domain": null,
+          "inSchema": false,
+          "name": "proto_invoice"
+        },
+        {
+          "domain": "customer",
+          "inSchema": true,
+          "name": "partner_finance_email"
+        },
+        {
+          "domain": "customer",
+          "inSchema": true,
+          "name": "partner_bank"
+        },
+        {
+          "domain": "shared",
+          "inSchema": true,
+          "name": "credit_term"
+        },
+        {
+          "domain": "shared",
+          "inSchema": true,
+          "name": "payment_term"
+        },
+        {
+          "domain": "shared",
+          "inSchema": true,
+          "name": "chart_of_accounts"
+        },
+        {
+          "domain": "shared",
+          "inSchema": true,
+          "name": "tax_option"
+        }
+      ],
+      "targetNote": "Target: junior AR approves invoices, senior AR publishes and can undo; Finance and Operations share the PO workspace."
+    },
+    {
+      "asBuiltNote": "No Plant screens exist yet. The tables were carried over from the legacy ERP and `plant` is already a notification department, so the seam is ready.",
+      "blurb": "Keeps the fleet fit: pre-delivery and post-return inspection, servicing, maintenance and repair of machine units. Breakdown jobs from Operations land here; a serviced unit goes back to the Store as available.",
+      "color": "#F97316",
+      "id": "plant",
+      "inputs": [
+        {
+          "fields": [
+            "unit",
+            "work_order_status",
+            "parts required (item_status)",
+            "labour"
+          ],
+          "maturity": "schema-only",
+          "record": "Work order (work_order)"
+        },
+        {
+          "fields": [
+            "service type",
+            "meter reading",
+            "next due"
+          ],
+          "maturity": "schema-only",
+          "record": "Technical service (item_unit_technical_service)"
+        },
+        {
+          "fields": [
+            "pass / fail",
+            "damage found",
+            "compensation recommended"
+          ],
+          "maturity": "target",
+          "record": "Inspection result"
+        }
+      ],
+      "maturity": "schema-only",
+      "name": "Plant",
+      "pages": [],
+      "position": [
+        4,
+        0,
+        -4.5
+      ],
+      "responsibilities": [
+        {
+          "label": "Pre-delivery inspection before a unit leaves the yard",
+          "maturity": "target"
+        },
+        {
+          "label": "Post-delivery / return inspection — feeds the compensation assessment",
+          "maturity": "target"
+        },
+        {
+          "label": "Machine servicing + preventive maintenance (technical_service)",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Repair work orders (work_order, work_order_item, fault types)",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Service_Breakdown jobs raised by Ops on site",
+          "maturity": "live"
+        },
+        {
+          "label": "Plant notification feed",
+          "maturity": "schema-only"
+        }
+      ],
+      "roles": [
+        "plant_supervisor",
+        "technician"
+      ],
+      "short": "PLANT",
+      "size": 1,
+      "tables": [
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "work_order"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "work_order_item"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "technical_service"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_unit_technical_service"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "job_service_details"
+        },
+        {
+          "domain": "operations",
+          "inSchema": true,
+          "name": "hc_breakdown_log"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_unit_meter_reading_history"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_condition"
+        }
+      ],
+      "targetNote": "Target: Plant owns machine readiness; Ops cannot schedule a unit that failed pre-delivery inspection."
+    },
+    {
+      "asBuiltNote": "No Procurement screens exist yet; the legacy tables are mirrored in the inventory schema.",
+      "blurb": "Buys and costs the fleet: supplier management, supplier RFQ → purchase order → supplier invoice, and the landed cost of each machine that Sales prices against.",
+      "color": "#EC4899",
+      "id": "procurement",
+      "inputs": [
+        {
+          "fields": [
+            "supplier",
+            "po_status: Draft → …",
+            "delivery_status",
+            "billing_status"
+          ],
+          "maturity": "schema-only",
+          "record": "Purchase order (purchase_order, purchase_order_item)"
+        },
+        {
+          "fields": [
+            "rfq_status: Sent → …",
+            "items",
+            "quoted cost"
+          ],
+          "maturity": "schema-only",
+          "record": "Supplier RFQ (supplier_rfq)"
+        },
+        {
+          "fields": [
+            "purchase value",
+            "supplier",
+            "currency"
+          ],
+          "maturity": "schema-only",
+          "record": "Machine cost (item_unit_price, item_unit_supplier)"
+        }
+      ],
+      "maturity": "schema-only",
+      "name": "Procurement",
+      "pages": [],
+      "position": [
+        -4,
+        0,
+        -4.5
+      ],
+      "responsibilities": [
+        {
+          "label": "Supplier master + item-code ↔ supplier links",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Supplier RFQ → Purchase Order (po / delivery / billing status)",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Receive supplier invoices; match to PO",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Machine cost + purchase value per unit (feeds rate roster with Sales)",
+          "maturity": "target"
+        },
+        {
+          "label": "Hand received machines to the Store as new item units",
+          "maturity": "target"
+        }
+      ],
+      "roles": [
+        "procurement_officer"
+      ],
+      "short": "PROCURE",
+      "size": 1,
+      "tables": [
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "supplier_rfq"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "purchase_order"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "purchase_order_item"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "supplier_invoice"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_code_supplier"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_unit_supplier"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_unit_price"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "brand"
+        }
+      ],
+      "targetNote": "Target: Procurement and Sales share the cost-to-rate view so quoted tiers never fall below landed cost."
+    },
+    {
+      "asBuiltNote": "Inventory screens are live but held by the `operations` role (`inventory.manage`); there is no separate storekeeper login.",
+      "blurb": "Machine inventory management: the item master (models), item units (serialised machines and where they are), item groups, the rate roster, receiving machines from suppliers, and stock takes.",
+      "color": "#14B8A6",
+      "id": "store",
+      "inputs": [
+        {
+          "fields": [
+            "stock_type: Stock / Non-Stock",
+            "item_type",
+            "is_serialized",
+            "show_in_white_board",
+            "UOM",
+            "capacity / dimensions"
+          ],
+          "maturity": "live",
+          "record": "Item code (item_code)"
+        },
+        {
+          "fields": [
+            "serial / display unit",
+            "item_unit_status",
+            "location",
+            "meter reading",
+            "condition"
+          ],
+          "maturity": "live",
+          "record": "Item unit (item_unit)"
+        },
+        {
+          "fields": [
+            "Lowest / Standard / Highest per period",
+            "current rate"
+          ],
+          "maturity": "live",
+          "record": "Rate card (item_code_rate)"
+        },
+        {
+          "fields": [
+            "reference",
+            "units",
+            "from / to location"
+          ],
+          "maturity": "schema-only",
+          "record": "Inventory receive / issue / transfer"
+        }
+      ],
+      "maturity": "live",
+      "name": "Store / Inventory",
+      "pages": [
+        {
+          "permission": "inventory.manage",
+          "section": "Inventory",
+          "title": "Item Master",
+          "url": "/inventory/item-codes"
+        },
+        {
+          "permission": "inventory.manage",
+          "section": "Inventory",
+          "title": "Item Units",
+          "url": "/inventory/item-units"
+        },
+        {
+          "permission": "inventory.view",
+          "section": "Inventory",
+          "title": "Item Groups",
+          "url": "/inventory/item-groups"
+        },
+        {
+          "permission": "inventory.view",
+          "section": "Inventory",
+          "title": "Rate Roster",
+          "url": "/inventory/rate-roster"
+        }
+      ],
+      "position": [
+        0,
+        0,
+        -4.5
+      ],
+      "responsibilities": [
+        {
+          "label": "Item Master — item codes with classification labels (stock_type, item_type, is_serialized, whiteboard)",
+          "maturity": "live",
+          "page": "/inventory/item-codes"
+        },
+        {
+          "label": "Item Units — every physical machine and its status: IN · RESERVED · OUT · SOLD / SCRAP / LOANED",
+          "maturity": "live",
+          "page": "/inventory/item-units"
+        },
+        {
+          "label": "Item Groups — bundles of item codes (e.g. Cranes) for hire and sale",
+          "maturity": "live",
+          "page": "/inventory/item-groups"
+        },
+        {
+          "label": "Rate Roster — 3-tier rental rates per item / group",
+          "maturity": "live",
+          "page": "/inventory/rate-roster"
+        },
+        {
+          "label": "Receive from supplier / issue / transfer between locations",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Stock take cycles + stock adjustments",
+          "maturity": "schema-only"
+        },
+        {
+          "label": "Whiteboard view of machines (show_in_white_board)",
+          "maturity": "target"
+        }
+      ],
+      "roles": [
+        "operations",
+        "storekeeper"
+      ],
+      "short": "STORE",
+      "size": 1,
+      "tables": [
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_code"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_unit"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_unit_status_history"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_unit_location_history"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "group"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "group_item"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "item_code_rate"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "inventory_receive"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "inventory_issue"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "inventory_transfer"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "stock_take_cycle"
+        },
+        {
+          "domain": "inventory",
+          "inSchema": true,
+          "name": "stock_adjustment"
+        }
+      ],
+      "targetNote": "Target: a Storekeeper role owns receiving, whiteboard and stock takes; Ops keeps unit binding."
+    }
+  ],
+  "edges": [
+    {
+      "evidence": [
+        "docs/core-flow/crfq.md",
+        "server/domains/sales/routes/create-quotation.ts"
+      ],
+      "from": "sales",
+      "id": "sales-quotation-crfq",
+      "maturity": "live",
+      "record": "CRFQ → Quotation",
+      "statusPath": [
+        "Draft",
+        "In Review",
+        "Converted"
+      ],
+      "to": "quotation",
+      "trigger": "Sales converts a reviewed CRFQ; the deal number carries over (CRFQ-2026-0042 → QTN-2026-0042)."
+    },
+    {
+      "evidence": [
+        "docs/core-flow/quotation.md",
+        "server/domains/sales/routes/mark-quotation-sent.ts",
+        "server/domains/sales/routes/send-quotation-email.ts"
+      ],
+      "from": "quotation",
+      "id": "quotation-sales-sent",
+      "maturity": "live",
+      "record": "Final Approved quotation, emailed",
+      "statusPath": [
+        "Pending Approval",
+        "Final Approved",
+        "Quotation Sent",
+        "Customer Confirm"
+      ],
+      "to": "sales",
+      "trigger": "Quotation desk approves + marks sent; the rep confirms the order with the customer (stage: Quotation Sent → Customer Confirm)."
+    },
+    {
+      "evidence": [
+        "docs/core-flow/hiring-contract.md",
+        "server/domains/sales/routes/create-hiring-contract.ts",
+        "server/domains/sales/routes/schedule-hiring-contract.ts"
+      ],
+      "from": "quotation",
+      "id": "quotation-operations-hc",
+      "maturity": "live",
+      "record": "Hiring Contract (HC) → Schedule",
+      "statusPath": [
+        "HC Draft",
+        "Scheduled",
+        "Delivered"
+      ],
+      "to": "operations",
+      "trigger": "Quotation converts to an HC (Site PIC + address gate); Ops schedules it — binds units and creates the first Delivery Order + Job."
+    },
+    {
+      "evidence": [
+        "docs/core-flow/machine-units.md",
+        "server/domains/inventory/routes/update-item-unit-status.ts",
+        "server/domains/inventory/schema/item-unit-status-history.ts"
+      ],
+      "from": "operations",
+      "id": "operations-store-units",
+      "maturity": "live",
+      "record": "Item unit binding",
+      "statusPath": [
+        "IN",
+        "RESERVED",
+        "OUT",
+        "IN"
+      ],
+      "to": "store",
+      "trigger": "Scheduling reserves units (IN → RESERVED); Completed delivery sets them OUT; a processed return brings them back IN."
+    },
+    {
+      "evidence": [
+        "docs/core-flow/delivery-order.md",
+        "src/lib/notifications.ts",
+        "server/domains/driver/routes/list-driver-orders.ts"
+      ],
+      "from": "operations",
+      "id": "operations-driver-do",
+      "maturity": "live",
+      "record": "Delivery Order assigned",
+      "statusPath": [
+        "Scheduled",
+        "In Transit"
+      ],
+      "to": "driver",
+      "trigger": "Ops assigns a driver to a DO; the driver gets a delivery.driver_assigned notification and the job appears in the app."
+    },
+    {
+      "evidence": [
+        "docs/core-flow/driver-app.md",
+        "server/domains/driver/routes/upload-signed-hc.ts",
+        "server/domains/driver/routes/deliver-do.ts",
+        "server/domains/operations/routes/validate-delivery-order.ts"
+      ],
+      "from": "driver",
+      "id": "driver-operations-evidence",
+      "maturity": "live",
+      "record": "Transit / Delivered + signed HC + photos",
+      "statusPath": [
+        "In Transit",
+        "Delivered",
+        "Completed"
+      ],
+      "to": "operations",
+      "trigger": "Driver uploads the signed HC and marks Delivered; Ops validates → Completed and the HC stage becomes Delivered."
+    },
+    {
+      "evidence": [
+        "server/domains/sales/routes/create-service-ticket.ts",
+        "server/domains/operations/schema/hc-ops-ticket.ts",
+        "docs/core-flow/ops-tickets.md",
+        "server/domains/operations/routes/process-ops-ticket.ts"
+      ],
+      "from": "sales",
+      "id": "sales-operations-ticket",
+      "maturity": "prototype",
+      "record": "Service ticket (hc_ops_ticket)",
+      "statusPath": [
+        "pending",
+        "processed"
+      ],
+      "to": "operations",
+      "trigger": "Rep raises breakdown / replacement / upgrade / return on a Delivered HC; Ops processes it into a Collection / Replacement / Service_Breakdown DO."
+    },
+    {
+      "evidence": [
+        "prototypes/INDEX.md",
+        "src/domains/finance/pages/document-hub",
+        "src/domains/finance/pages/po-follow-up",
+        "src/domains/finance/pages/billing-queue"
+      ],
+      "from": "operations",
+      "id": "operations-finance-po",
+      "maturity": "prototype",
+      "record": "Customer PO + verified HC",
+      "statusPath": [
+        "PO flagged",
+        "Published",
+        "Preview & Verify",
+        "AR verified",
+        "Draft IVN"
+      ],
+      "to": "finance",
+      "trigger": "Ops flags and publishes the PO in the PO workspace; Finance previews & verifies it in the Document Hub, which creates the draft IVN in the Billing Queue."
+    },
+    {
+      "evidence": [
+        "server/domains/operations/schema/machine-return.ts",
+        "src/domains/finance/pages/returns",
+        "src/domains/finance/pages/credit-notes"
+      ],
+      "from": "operations",
+      "id": "operations-finance-compensation",
+      "maturity": "prototype",
+      "record": "Machine return — compensation assessment",
+      "statusPath": [
+        "pending_return",
+        "under_inspection",
+        "compensation_required | good_condition"
+      ],
+      "to": "finance",
+      "trigger": "On collection Ops records condition_status; compensation_required flows to Finance Returns for a credit note / charge."
+    },
+    {
+      "evidence": [
+        "prototypes/INDEX.md",
+        "src/domains/sales/pages/salesperson-dashboard",
+        "src/domains/customer/pages/customer-canvas"
+      ],
+      "from": "finance",
+      "id": "finance-sales-alerts",
+      "maturity": "prototype",
+      "record": "Payment health + overdue alerts",
+      "statusPath": null,
+      "to": "sales",
+      "trigger": "AR overlay surfaces overdue / flagged customers on My Customers, Leads and the Customer Master risk strip."
+    },
+    {
+      "evidence": [
+        "server/domains/operations/schema/hc-breakdown-log.ts",
+        "server/domains/operations/schema/job-service-details.ts",
+        "server/domains/inventory/schema/work-order.ts"
+      ],
+      "from": "operations",
+      "id": "operations-plant-breakdown",
+      "maturity": "schema-only",
+      "record": "Service_Breakdown job / inspection request",
+      "statusPath": [
+        "breakdown ticket",
+        "Service_Breakdown DO",
+        "work_order Created",
+        "serviced"
+      ],
+      "to": "plant",
+      "trigger": "A breakdown ticket spawns a Service_Breakdown DO; returned units under_inspection go to Plant for post-delivery inspection and repair."
+    },
+    {
+      "evidence": [
+        "server/domains/inventory/schema/technical-service.ts",
+        "server/domains/inventory/schema/item-unit-technical-service.ts",
+        "server/domains/inventory/schema/item-unit-meter-reading-history.ts"
+      ],
+      "from": "plant",
+      "id": "plant-store-serviced",
+      "maturity": "schema-only",
+      "record": "Serviced unit → available",
+      "statusPath": [
+        "under service",
+        "IN"
+      ],
+      "to": "store",
+      "trigger": "Plant closes the work order / technical service; the unit's status returns to IN and its meter reading + service history update."
+    },
+    {
+      "evidence": [
+        "docs/core-flow/machine-units.md"
+      ],
+      "from": "plant",
+      "id": "plant-operations-readiness",
+      "maturity": "target",
+      "record": "Pre-delivery inspection pass",
+      "statusPath": [
+        "inspection pending",
+        "passed"
+      ],
+      "to": "operations",
+      "trigger": "Target: Ops may only schedule a unit that passed pre-delivery inspection."
+    },
+    {
+      "evidence": [
+        "server/domains/inventory/schema/purchase-order.ts",
+        "server/domains/inventory/schema/inventory-receive.ts",
+        "server/domains/inventory/schema/item-unit-supplier.ts"
+      ],
+      "from": "procurement",
+      "id": "procurement-store-receive",
+      "maturity": "schema-only",
+      "record": "Purchase order → inventory receive → item unit",
+      "statusPath": [
+        "PO Draft",
+        "delivery Pending",
+        "Received",
+        "item_unit IN"
+      ],
+      "to": "store",
+      "trigger": "A delivered PO is received into stock; each machine becomes an item unit with its supplier and purchase value."
+    },
+    {
+      "evidence": [
+        "server/domains/inventory/schema/item-unit-price.ts",
+        "server/domains/inventory/schema/item-code-rate.ts",
+        "src/domains/inventory/pages/rate-roster"
+      ],
+      "from": "procurement",
+      "id": "procurement-sales-cost",
+      "maturity": "target",
+      "record": "Machine cost → rate roster",
+      "statusPath": null,
+      "to": "sales",
+      "trigger": "Target: landed cost per unit informs the 3-tier rate card Sales and the quotation desk price from."
+    },
+    {
+      "evidence": [
+        "docs/core-flow/machine-units.md",
+        "server/domains/inventory/schema/item-code-rate.ts",
+        "server/domains/sales/routes/available-item-units.ts"
+      ],
+      "from": "store",
+      "id": "store-quotation-rates",
+      "maturity": "live",
+      "record": "Rate roster + availability",
+      "statusPath": null,
+      "to": "quotation",
+      "trigger": "The quotation desk prices rental lines off the item's current 3-tier rates; serialized items must have units to bind before scheduling."
+    },
+    {
+      "evidence": [
+        "server/domains/sales/routes/update-quotation-status.ts"
+      ],
+      "from": "operations",
+      "id": "quotation-operations-final-approval",
+      "maturity": "target",
+      "record": "Final approval (3rd layer)",
+      "statusPath": [
+        "assistant prepared",
+        "lead reviewed",
+        "Ops manager approved"
+      ],
+      "to": "quotation",
+      "trigger": "Target: after the quotation lead's review, the Operations manager gives final approval based on unit availability and transport feasibility."
+    }
+  ],
+  "erpCommit": "bc1f4836",
+  "notifications": {
+    "departments": [
+      "sales",
+      "quotation",
+      "ops",
+      "plant",
+      "ar",
+      "finance"
+    ],
+    "events": [
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "quotation.assigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "quotation.reassigned_away"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "quotation.unassigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "quotation.owner_reassigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "quotation.status_updated"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "quotation.mentioned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "rfq.assigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "rfq.reassigned_away"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "rfq.unassigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "rfq.owner_reassigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "rfq.status_updated"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "rfq.mentioned"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.returned"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.return_partial"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.return_note_updated"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "hc.return_note_edited_owner"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.return_note_deleted"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.replace"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.upgrade"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.replace_note_updated"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "hc.replace_note_edited_owner"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.replace_note_deleted"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.breakdown_submitted"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.created"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.updated"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "hc.over_assigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "hc.mentioned"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "delivery_order.created"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "delivery_order.updated"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "delivery.transit_started"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "delivery.delivered"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "delivery.units_refused"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ops",
+        "eventType": "delivery.hc_uploaded"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "delivery.driver_assigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "delivery.driver_unassigned"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "delivery.driver_cancelled"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "delivery.driver_completed"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "delivery.owner_cancelled"
+      },
+      {
+        "audienceScope": "personal",
+        "department": null,
+        "eventType": "delivery_order.split"
+      },
+      {
+        "audienceScope": "department",
+        "department": "quotation",
+        "eventType": "crfq.review_requested"
+      },
+      {
+        "audienceScope": "department",
+        "department": "quotation",
+        "eventType": "crfq.converted"
+      },
+      {
+        "audienceScope": "department",
+        "department": "quotation",
+        "eventType": "quotation.converted_to_hc"
+      },
+      {
+        "audienceScope": "department",
+        "department": "quotation",
+        "eventType": "hc.moved_to_do"
+      },
+      {
+        "audienceScope": "department",
+        "department": "sales",
+        "eventType": "hc.stage_changed"
+      },
+      {
+        "audienceScope": "both",
+        "department": "quotation",
+        "eventType": "crfq.team_mentioned"
+      },
+      {
+        "audienceScope": "both",
+        "department": "quotation",
+        "eventType": "quotation.team_mentioned"
+      },
+      {
+        "audienceScope": "both",
+        "department": "quotation",
+        "eventType": "hc.team_mentioned"
+      },
+      {
+        "audienceScope": "department",
+        "department": "ar",
+        "eventType": "po_document.pushed_to_finance"
+      }
+    ]
+  },
+  "permissions": [
+    {
+      "const": "RFQS_VIEW",
+      "group": "Core Flow",
+      "key": "rfqs.view"
+    },
+    {
+      "const": "RFQS_CREATE",
+      "group": "Core Flow",
+      "key": "rfqs.create"
+    },
+    {
+      "const": "RFQS_UPDATE",
+      "group": "Core Flow",
+      "key": "rfqs.update"
+    },
+    {
+      "const": "RFQS_DELETE",
+      "group": "Core Flow",
+      "key": "rfqs.delete"
+    },
+    {
+      "const": "RFQS_IMPORT",
+      "group": "Core Flow",
+      "key": "rfqs.import"
+    },
+    {
+      "const": "QUOTATIONS_VIEW",
+      "group": "Core Flow",
+      "key": "quotations.view"
+    },
+    {
+      "const": "QUOTATIONS_CREATE",
+      "group": "Core Flow",
+      "key": "quotations.create"
+    },
+    {
+      "const": "QUOTATIONS_UPDATE",
+      "group": "Core Flow",
+      "key": "quotations.update"
+    },
+    {
+      "const": "QUOTATIONS_DELETE",
+      "group": "Core Flow",
+      "key": "quotations.delete"
+    },
+    {
+      "const": "QUOTATIONS_APPROVE",
+      "group": "Core Flow",
+      "key": "quotations.approve"
+    },
+    {
+      "const": "QUOTATIONS_LEAD",
+      "group": "Core Flow",
+      "key": "quotations.lead"
+    },
+    {
+      "const": "QUOTATIONS_ASSIGNEE",
+      "group": "Core Flow",
+      "key": "quotations.assignee"
+    },
+    {
+      "const": "QUOTATIONS_ASSIGNER",
+      "group": "Core Flow",
+      "key": "quotations.assigner"
+    },
+    {
+      "const": "HIRING_CONTRACTS_VIEW",
+      "group": "Core Flow",
+      "key": "hiring_contracts.view"
+    },
+    {
+      "const": "HIRING_CONTRACTS_CREATE",
+      "group": "Core Flow",
+      "key": "hiring_contracts.create"
+    },
+    {
+      "const": "HIRING_CONTRACTS_UPDATE",
+      "group": "Core Flow",
+      "key": "hiring_contracts.update"
+    },
+    {
+      "const": "HIRING_CONTRACTS_DELETE",
+      "group": "Core Flow",
+      "key": "hiring_contracts.delete"
+    },
+    {
+      "const": "HIRING_CONTRACTS_SCHEDULE",
+      "group": "Core Flow",
+      "key": "hiring_contracts.schedule"
+    },
+    {
+      "const": "SALES_DASHBOARD_VIEW",
+      "group": "Sales Management",
+      "key": "sales_dashboard.view"
+    },
+    {
+      "const": "SALES_LOG_VIEW",
+      "group": "Sales Management",
+      "key": "sales_log.view"
+    },
+    {
+      "const": "SALES_ACTIVITIES_VIEW",
+      "group": "Sales Management",
+      "key": "sales_activities.view"
+    },
+    {
+      "const": "SALES_INTELLIGENCE_VIEW",
+      "group": "Sales Management",
+      "key": "sales_intelligence.view"
+    },
+    {
+      "const": "SALES_MANAGER_VIEW",
+      "group": "Sales Management",
+      "key": "sales_manager.view"
+    },
+    {
+      "const": "SALES_VIEW_ALL",
+      "group": "Sales Management",
+      "key": "sales.view_all"
+    },
+    {
+      "const": "OPS_TICKETS_VIEW",
+      "group": "Operations",
+      "key": "ops_tickets.view"
+    },
+    {
+      "const": "OPS_TICKETS_MANAGE",
+      "group": "Operations",
+      "key": "ops_tickets.manage"
+    },
+    {
+      "const": "DELIVERY_JOBS_VIEW",
+      "group": "Operations",
+      "key": "delivery_jobs.view"
+    },
+    {
+      "const": "DELIVERY_JOBS_MANAGE",
+      "group": "Operations",
+      "key": "delivery_jobs.manage"
+    },
+    {
+      "const": "DRIVER_CALENDAR_VIEW",
+      "group": "Operations",
+      "key": "driver_calendar.view"
+    },
+    {
+      "const": "DRIVER_APP",
+      "group": "Driver Mobile",
+      "key": "driver.app"
+    },
+    {
+      "const": "EQUIPMENT_VIEW",
+      "group": "Equipment",
+      "key": "equipment.view"
+    },
+    {
+      "const": "EQUIPMENT_MANAGE",
+      "group": "Equipment",
+      "key": "equipment.manage"
+    },
+    {
+      "const": "RENTAL_RATES_VIEW",
+      "group": "Equipment",
+      "key": "rental_rates.view"
+    },
+    {
+      "const": "RENTAL_RATES_MANAGE",
+      "group": "Equipment",
+      "key": "rental_rates.manage"
+    },
+    {
+      "const": "INVENTORY_VIEW",
+      "group": "Inventory",
+      "key": "inventory.view"
+    },
+    {
+      "const": "INVENTORY_MANAGE",
+      "group": "Inventory",
+      "key": "inventory.manage"
+    },
+    {
+      "const": "AR_VIEW",
+      "group": "AR (Finance)",
+      "key": "ar.view"
+    },
+    {
+      "const": "AR_MANAGE",
+      "group": "AR (Finance)",
+      "key": "ar.manage"
+    },
+    {
+      "const": "NOTIFICATIONS_EMIT",
+      "group": "Notifications (every authenticated user)",
+      "key": "notifications.emit"
+    },
+    {
+      "const": "GROUPS_VIEW",
+      "group": "Notifications (every authenticated user)",
+      "key": "groups.view"
+    },
+    {
+      "const": "GROUPS_MANAGE",
+      "group": "Notifications (every authenticated user)",
+      "key": "groups.manage"
+    },
+    {
+      "const": "USERS_VIEW",
+      "group": "Admin",
+      "key": "users.view"
+    },
+    {
+      "const": "USERS_MANAGE",
+      "group": "Admin",
+      "key": "users.manage"
+    },
+    {
+      "const": "SETTINGS_MANAGE",
+      "group": "Admin",
+      "key": "settings.manage"
+    },
+    {
+      "const": "SALES_PERSON_ASSIGNED",
+      "group": "Sales Person",
+      "key": "sales_person.assigned"
+    },
+    {
+      "const": "CUSTOMERS_VIEW",
+      "group": "CRM",
+      "key": "customers.view"
+    },
+    {
+      "const": "CUSTOMERS_CREATE",
+      "group": "CRM",
+      "key": "customers.create"
+    },
+    {
+      "const": "CUSTOMERS_UPDATE",
+      "group": "CRM",
+      "key": "customers.update"
+    },
+    {
+      "const": "CUSTOMERS_DELETE",
+      "group": "CRM",
+      "key": "customers.delete"
+    },
+    {
+      "const": "COMPANIES_VIEW",
+      "group": "CRM",
+      "key": "companies.view"
+    },
+    {
+      "const": "COMPANIES_MANAGE",
+      "group": "CRM",
+      "key": "companies.manage"
+    },
+    {
+      "const": "INDUSTRIES_VIEW",
+      "group": "CRM",
+      "key": "industries.view"
+    },
+    {
+      "const": "INDUSTRIES_MANAGE",
+      "group": "CRM",
+      "key": "industries.manage"
+    }
+  ],
+  "rolePermissions": {
+    "admin": [
+      "ar.manage",
+      "ar.view",
+      "companies.manage",
+      "companies.view",
+      "customers.create",
+      "customers.delete",
+      "customers.update",
+      "customers.view",
+      "delivery_jobs.manage",
+      "delivery_jobs.view",
+      "driver.app",
+      "driver_calendar.view",
+      "equipment.manage",
+      "equipment.view",
+      "groups.manage",
+      "groups.view",
+      "hiring_contracts.create",
+      "hiring_contracts.delete",
+      "hiring_contracts.schedule",
+      "hiring_contracts.update",
+      "hiring_contracts.view",
+      "industries.manage",
+      "industries.view",
+      "inventory.manage",
+      "inventory.view",
+      "notifications.emit",
+      "ops_tickets.manage",
+      "ops_tickets.view",
+      "quotations.approve",
+      "quotations.assignee",
+      "quotations.assigner",
+      "quotations.create",
+      "quotations.delete",
+      "quotations.lead",
+      "quotations.update",
+      "quotations.view",
+      "rental_rates.manage",
+      "rental_rates.view",
+      "rfqs.create",
+      "rfqs.delete",
+      "rfqs.import",
+      "rfqs.update",
+      "rfqs.view",
+      "sales.view_all",
+      "sales_activities.view",
+      "sales_dashboard.view",
+      "sales_intelligence.view",
+      "sales_log.view",
+      "sales_manager.view",
+      "sales_person.assigned",
+      "settings.manage",
+      "users.view"
+    ],
+    "driver": [
+      "driver.app",
+      "notifications.emit"
+    ],
+    "finance": [
+      "ar.manage",
+      "ar.view",
+      "customers.view",
+      "groups.view",
+      "notifications.emit",
+      "sales.view_all"
+    ],
+    "operations": [
+      "delivery_jobs.manage",
+      "delivery_jobs.view",
+      "driver_calendar.view",
+      "equipment.manage",
+      "equipment.view",
+      "groups.view",
+      "hiring_contracts.schedule",
+      "hiring_contracts.view",
+      "inventory.manage",
+      "inventory.view",
+      "notifications.emit",
+      "ops_tickets.manage",
+      "ops_tickets.view",
+      "rental_rates.view",
+      "sales.view_all"
+    ],
+    "quotation_assistant": [
+      "customers.create",
+      "customers.update",
+      "customers.view",
+      "equipment.view",
+      "groups.view",
+      "hiring_contracts.view",
+      "inventory.view",
+      "notifications.emit",
+      "quotations.assignee",
+      "quotations.create",
+      "quotations.update",
+      "quotations.view",
+      "rental_rates.view",
+      "rfqs.update",
+      "rfqs.view",
+      "sales.view_all",
+      "sales_dashboard.view",
+      "users.view"
+    ],
+    "quotation_manager": [
+      "customers.create",
+      "customers.update",
+      "customers.view",
+      "equipment.view",
+      "groups.view",
+      "hiring_contracts.create",
+      "hiring_contracts.delete",
+      "hiring_contracts.schedule",
+      "hiring_contracts.update",
+      "hiring_contracts.view",
+      "inventory.view",
+      "notifications.emit",
+      "quotations.approve",
+      "quotations.assignee",
+      "quotations.assigner",
+      "quotations.create",
+      "quotations.delete",
+      "quotations.lead",
+      "quotations.update",
+      "quotations.view",
+      "rental_rates.view",
+      "rfqs.update",
+      "rfqs.view",
+      "sales.view_all",
+      "sales_dashboard.view",
+      "users.view"
+    ],
+    "sale_manager": [
+      "companies.view",
+      "customers.create",
+      "customers.update",
+      "customers.view",
+      "groups.view",
+      "hiring_contracts.create",
+      "hiring_contracts.view",
+      "industries.view",
+      "notifications.emit",
+      "quotations.create",
+      "quotations.update",
+      "quotations.view",
+      "rfqs.create",
+      "rfqs.update",
+      "rfqs.view",
+      "sales.view_all",
+      "sales_activities.view",
+      "sales_intelligence.view",
+      "sales_manager.view"
+    ],
+    "sales": [
+      "companies.view",
+      "customers.create",
+      "customers.update",
+      "customers.view",
+      "groups.view",
+      "hiring_contracts.schedule",
+      "hiring_contracts.view",
+      "inventory.view",
+      "notifications.emit",
+      "quotations.assignee",
+      "quotations.create",
+      "quotations.update",
+      "quotations.view",
+      "rental_rates.view",
+      "rfqs.create",
+      "rfqs.update",
+      "rfqs.view",
+      "sales_activities.view",
+      "sales_dashboard.view",
+      "sales_intelligence.view",
+      "sales_log.view",
+      "sales_person.assigned"
+    ],
+    "sales_manager": [
+      "companies.view",
+      "customers.create",
+      "customers.update",
+      "customers.view",
+      "groups.view",
+      "hiring_contracts.schedule",
+      "hiring_contracts.view",
+      "inventory.view",
+      "notifications.emit",
+      "quotations.approve",
+      "quotations.assignee",
+      "quotations.assigner",
+      "quotations.create",
+      "quotations.lead",
+      "quotations.update",
+      "quotations.view",
+      "rental_rates.view",
+      "rfqs.create",
+      "rfqs.update",
+      "rfqs.view",
+      "sales_activities.view",
+      "sales_dashboard.view",
+      "sales_intelligence.view",
+      "sales_log.view",
+      "sales_person.assigned",
+      "users.view"
+    ]
+  },
+  "roles": [
+    {
+      "blurb": "Owns a book of customers. Captures inquiries as CRFQs, builds or hands off the quotation, keeps the customer master current and raises service tickets once machines are on hire.",
+      "department": "sales",
+      "howTheyWork": [
+        "Starts the day in Leads / My Customers — follow-ups, dormant accounts, payment alerts from Finance.",
+        "Logs a customer inquiry as a CRFQ: items, hire window, site PIC, delivery address.",
+        "Can price the quotation (catalog-only lines, must pick a rate tier) but cannot approve it.",
+        "Confirms the order with the customer once the quotation is Final Approved + sent.",
+        "Raises breakdown / replacement / upgrade / return tickets from My Service Tickets and tracks Ops progress.",
+        "Sees only their own book — no cross-rep visibility (`sales.view_all` withheld)."
+      ],
+      "id": "sales",
+      "label": "Salesperson",
+      "maturity": "live",
+      "permissions": [
+        "companies.view",
+        "customers.create",
+        "customers.update",
+        "customers.view",
+        "groups.view",
+        "hiring_contracts.schedule",
+        "hiring_contracts.view",
+        "inventory.view",
+        "notifications.emit",
+        "quotations.assignee",
+        "quotations.create",
+        "quotations.update",
+        "quotations.view",
+        "rental_rates.view",
+        "rfqs.create",
+        "rfqs.update",
+        "rfqs.view",
+        "sales_activities.view",
+        "sales_dashboard.view",
+        "sales_intelligence.view",
+        "sales_log.view",
+        "sales_person.assigned"
+      ],
+      "proposedPermissions": [],
+      "seedUser": {
+        "email": "sales@voltade.com",
+        "name": "Sarah Sales"
+      }
+    },
+    {
+      "blurb": "Everything a salesperson does plus team oversight: approve quotations, act as quotation lead, assign work, view users.",
+      "department": "sales",
+      "howTheyWork": [
+        "Reviews Pending Approval quotations and approves or sends them back.",
+        "Can be auto-assigned as the lead on a quotation (`quotations.lead`).",
+        "Assigns CRFQs and quotations across the team (`quotations.assigner`)."
+      ],
+      "id": "sales_manager",
+      "label": "Sales Manager (approver)",
+      "maturity": "live",
+      "permissions": [
+        "companies.view",
+        "customers.create",
+        "customers.update",
+        "customers.view",
+        "groups.view",
+        "hiring_contracts.schedule",
+        "hiring_contracts.view",
+        "inventory.view",
+        "notifications.emit",
+        "quotations.approve",
+        "quotations.assignee",
+        "quotations.assigner",
+        "quotations.create",
+        "quotations.lead",
+        "quotations.update",
+        "quotations.view",
+        "rental_rates.view",
+        "rfqs.create",
+        "rfqs.update",
+        "rfqs.view",
+        "sales_activities.view",
+        "sales_dashboard.view",
+        "sales_intelligence.view",
+        "sales_log.view",
+        "sales_person.assigned",
+        "users.view"
+      ],
+      "proposedPermissions": [],
+      "seedUser": null
+    },
+    {
+      "blurb": "The demo-branch sales manager: team dashboard, pipeline funnel, account allocation and cross-book visibility — deliberately WITHOUT approval or inventory rights.",
+      "department": "sales",
+      "howTheyWork": [
+        "Opens /manager/dashboard for team activity + conversion metrics.",
+        "Re-allocates customer accounts between reps (proposes into the rep-side assignment seam).",
+        "Sees every rep's CRFQs, quotations and contracts (`sales.view_all`).",
+        "Cannot approve quotations — scope narrowed by the PM on purpose."
+      ],
+      "id": "sale_manager",
+      "label": "Sales Manager (demo)",
+      "maturity": "prototype",
+      "permissions": [
+        "companies.view",
+        "customers.create",
+        "customers.update",
+        "customers.view",
+        "groups.view",
+        "hiring_contracts.create",
+        "hiring_contracts.view",
+        "industries.view",
+        "notifications.emit",
+        "quotations.create",
+        "quotations.update",
+        "quotations.view",
+        "rfqs.create",
+        "rfqs.update",
+        "rfqs.view",
+        "sales.view_all",
+        "sales_activities.view",
+        "sales_intelligence.view",
+        "sales_manager.view"
+      ],
+      "proposedPermissions": [],
+      "seedUser": null
+    },
+    {
+      "blurb": "Prices the quotation: builds the lines from the catalog, picks the rate tier per period, sets transport charge and tax, and submits for approval.",
+      "department": "quotation",
+      "howTheyWork": [
+        "Picks up quotations from In Queue → In Progress.",
+        "Prices each rental line off the rate card; a group counts as rated once one member has a rate.",
+        "Submits to Pending Approval; edits after that point invalidate the approval.",
+        "Can convert a Final Approved quotation to a Hiring Contract and schedule it.",
+        "Cannot approve or delete."
+      ],
+      "id": "quotation_assistant",
+      "label": "Quotation Assistant",
+      "maturity": "live",
+      "permissions": [
+        "customers.create",
+        "customers.update",
+        "customers.view",
+        "equipment.view",
+        "groups.view",
+        "hiring_contracts.view",
+        "inventory.view",
+        "notifications.emit",
+        "quotations.assignee",
+        "quotations.create",
+        "quotations.update",
+        "quotations.view",
+        "rental_rates.view",
+        "rfqs.update",
+        "rfqs.view",
+        "sales.view_all",
+        "sales_dashboard.view",
+        "users.view"
+      ],
+      "proposedPermissions": [],
+      "seedUser": {
+        "email": "quotation@voltade.com",
+        "name": "Qasim Assistant"
+      }
+    },
+    {
+      "blurb": "Runs the quotation desk across every rep: assigns work, is the auto-assigned lead, gives Final Approval, marks quotations sent, and owns the Hiring Contract lifecycle.",
+      "department": "quotation",
+      "howTheyWork": [
+        "Sees every quotation (`sales.view_all`); assigns lead + assistants.",
+        "Approves Pending Approval → Final Approved (`quotations.approve`) — the one gate as built.",
+        "Marks the quotation emailed so the stage flips to Quotation Sent.",
+        "Creates / updates / deletes Hiring Contracts and triggers Schedule.",
+        "Re-approves edited reorders; the cascade rewrites the linked HC lines."
+      ],
+      "id": "quotation_manager",
+      "label": "Quotation Manager",
+      "maturity": "live",
+      "permissions": [
+        "customers.create",
+        "customers.update",
+        "customers.view",
+        "equipment.view",
+        "groups.view",
+        "hiring_contracts.create",
+        "hiring_contracts.delete",
+        "hiring_contracts.schedule",
+        "hiring_contracts.update",
+        "hiring_contracts.view",
+        "inventory.view",
+        "notifications.emit",
+        "quotations.approve",
+        "quotations.assignee",
+        "quotations.assigner",
+        "quotations.create",
+        "quotations.delete",
+        "quotations.lead",
+        "quotations.update",
+        "quotations.view",
+        "rental_rates.view",
+        "rfqs.update",
+        "rfqs.view",
+        "sales.view_all",
+        "sales_dashboard.view",
+        "users.view"
+      ],
+      "proposedPermissions": [],
+      "seedUser": {
+        "email": "ql@voltade.com",
+        "name": "Quinn Manager"
+      }
+    },
+    {
+      "alsoIn": [
+        "quotation"
+      ],
+      "blurb": "Target role: final approver on quotations (checks machine availability + transport feasibility), signs off compensation assessments and owns the Ops team.",
+      "department": "operations",
+      "howTheyWork": [
+        "Third approval layer: sees a quotation after the quotation lead has reviewed it.",
+        "Approves only if Store can commit the units for the hire window.",
+        "Signs off compensation_required returns before Finance raises a credit note."
+      ],
+      "id": "ops_manager",
+      "label": "Operations Manager",
+      "maturity": "target",
+      "permissions": [],
+      "proposedPermissions": [
+        "quotations.approve",
+        "ops_tickets.manage",
+        "delivery_jobs.manage"
+      ],
+      "seedUser": null
+    },
+    {
+      "blurb": "Fulfils contracts: binds units, creates delivery orders and jobs, assigns drivers, processes ops tickets, validates deliveries and keeps the inventory screens.",
+      "department": "operations",
+      "howTheyWork": [
+        "Works the Ops Tickets board: pending → processed, spawning Collection / Replacement / Service_Breakdown DOs.",
+        "Schedules HCs — binds item units (IN → RESERVED) and creates the DO + Job.",
+        "Plans transport on the Delivery Order Job board; splits DOs; assigns drivers.",
+        "Validates Delivered → Completed after the driver uploads the signed HC (units go OUT).",
+        "Assesses machine condition on return and flags compensation.",
+        "Flags and publishes customer POs to Finance in the PO workspace.",
+        "Also maintains item codes, units, groups and rates (`inventory.manage`)."
+      ],
+      "id": "operations",
+      "label": "Ops Coordinator",
+      "maturity": "live",
+      "permissions": [
+        "delivery_jobs.manage",
+        "delivery_jobs.view",
+        "driver_calendar.view",
+        "equipment.manage",
+        "equipment.view",
+        "groups.view",
+        "hiring_contracts.schedule",
+        "hiring_contracts.view",
+        "inventory.manage",
+        "inventory.view",
+        "notifications.emit",
+        "ops_tickets.manage",
+        "ops_tickets.view",
+        "rental_rates.view",
+        "sales.view_all"
+      ],
+      "proposedPermissions": [],
+      "seedUser": {
+        "email": "ops@voltade.com",
+        "name": "Omar Operations"
+      }
+    },
+    {
+      "blurb": "Target role split out of Ops: delivery planning and return collection — routes, driver rosters, split loads.",
+      "department": "operations",
+      "howTheyWork": [
+        "Plans the day's Delivery and Collection jobs and assigns drivers.",
+        "Splits a DO when a load needs two trucks (move-semantics, nothing duplicated).",
+        "Watches transit events in the Ops notification feed."
+      ],
+      "id": "transport_coordinator",
+      "label": "Transport Coordinator",
+      "maturity": "target",
+      "permissions": [],
+      "proposedPermissions": [
+        "delivery_jobs.view",
+        "delivery_jobs.manage",
+        "driver_calendar.view"
+      ],
+      "seedUser": null
+    },
+    {
+      "blurb": "Runs delivery and collection jobs from the mobile app.",
+      "department": "driver",
+      "howTheyWork": [
+        "Opens assigned orders; starts transit.",
+        "Accepts or refuses each unit; photographs it.",
+        "Uploads the signed HC, then marks Delivered.",
+        "On collection jobs, brings units back so Ops can set them IN."
+      ],
+      "id": "driver",
+      "label": "Driver",
+      "maturity": "live",
+      "permissions": [
+        "driver.app",
+        "notifications.emit"
+      ],
+      "proposedPermissions": [],
+      "seedUser": {
+        "email": "driver@voltade.com",
+        "name": "Danial Driver"
+      }
+    },
+    {
+      "blurb": "Accounts receivable: verifies POs in the Document Hub, bills from the Billing Queue through the IVN ladder, raises credit notes and chases ageing.",
+      "department": "finance",
+      "howTheyWork": [
+        "Starts on the AR dashboard: today's queue, escalated follow-ups, PO receiving.",
+        "Verifies Ops-published POs against the HC (Preview & Verify) — this creates the draft IVN.",
+        "Moves invoices Draft → Approved → Published → Sent; acknowledges PO revisions.",
+        "Raises credit notes for compensation and early returns.",
+        "Reconciles across all customers (`sales.view_all`)."
+      ],
+      "id": "finance",
+      "label": "Finance / AR",
+      "maturity": "prototype",
+      "permissions": [
+        "ar.manage",
+        "ar.view",
+        "customers.view",
+        "groups.view",
+        "notifications.emit",
+        "sales.view_all"
+      ],
+      "proposedPermissions": [],
+      "seedUser": {
+        "email": "finance@voltade.com",
+        "name": "Fiona Finance"
+      }
+    },
+    {
+      "blurb": "Target role: prepares and approves draft invoices; cannot publish.",
+      "department": "finance",
+      "howTheyWork": [
+        "Keys in verified PO details.",
+        "Approves draft IVNs for senior review."
+      ],
+      "id": "ar_junior",
+      "label": "AR Junior",
+      "maturity": "target",
+      "permissions": [],
+      "proposedPermissions": [
+        "ar.view",
+        "ar.manage"
+      ],
+      "seedUser": null
+    },
+    {
+      "blurb": "Target role: publishes and sends invoices, can undo the ladder, applies PO revisions to approved / published invoices.",
+      "department": "finance",
+      "howTheyWork": [
+        "Publishes approved IVNs and marks them sent.",
+        "Decides Apply update vs Keep as is on revised POs."
+      ],
+      "id": "ar_senior",
+      "label": "AR Senior",
+      "maturity": "target",
+      "permissions": [],
+      "proposedPermissions": [
+        "ar.view",
+        "ar.manage",
+        "ar.publish"
+      ],
+      "seedUser": null
+    },
+    {
+      "blurb": "Target role: owns machine readiness — inspection schedules, work-order priorities, sign-off that a unit can go out.",
+      "department": "plant",
+      "howTheyWork": [
+        "Reviews breakdown jobs from Ops.",
+        "Assigns technicians to work orders.",
+        "Signs pre-delivery inspection so Ops can schedule the unit."
+      ],
+      "id": "plant_supervisor",
+      "label": "Plant Supervisor",
+      "maturity": "target",
+      "permissions": [],
+      "proposedPermissions": [
+        "plant.view",
+        "plant.manage",
+        "equipment.manage"
+      ],
+      "seedUser": null
+    },
+    {
+      "blurb": "Target role: performs servicing, maintenance and repairs; records parts used and meter readings.",
+      "department": "plant",
+      "howTheyWork": [
+        "Works the work-order list.",
+        "Records technical service + meter reading per unit.",
+        "Marks the unit serviced → back to Store as IN."
+      ],
+      "id": "technician",
+      "label": "Technician / Mechanic",
+      "maturity": "target",
+      "permissions": [],
+      "proposedPermissions": [
+        "plant.view",
+        "plant.manage"
+      ],
+      "seedUser": null
+    },
+    {
+      "blurb": "Target role: manages suppliers, raises supplier RFQs and purchase orders, matches supplier invoices and maintains machine cost.",
+      "department": "procurement",
+      "howTheyWork": [
+        "Sends supplier RFQs and converts the best to a PO.",
+        "Tracks PO delivery + billing status.",
+        "Records purchase value per unit so Sales prices above cost."
+      ],
+      "id": "procurement_officer",
+      "label": "Procurement Officer",
+      "maturity": "target",
+      "permissions": [],
+      "proposedPermissions": [
+        "procurement.view",
+        "procurement.manage",
+        "inventory.view"
+      ],
+      "seedUser": null
+    },
+    {
+      "blurb": "Target role: receives machines from suppliers, keeps the whiteboard and locations accurate, runs stock takes.",
+      "department": "store",
+      "howTheyWork": [
+        "Receives PO deliveries as new item units.",
+        "Issues / transfers units between yards.",
+        "Runs stock-take cycles and adjustments."
+      ],
+      "id": "storekeeper",
+      "label": "Storekeeper",
+      "maturity": "target",
+      "permissions": [],
+      "proposedPermissions": [
+        "inventory.view",
+        "inventory.manage"
+      ],
+      "seedUser": null
+    },
+    {
+      "blurb": "Platform administrator — holds every permission. Manages users, roles, groups and settings. Not a department.",
+      "department": null,
+      "howTheyWork": [
+        "Creates users and assigns roles + branches.",
+        "Edits role permission bundles (roles are DB-driven; none is special)."
+      ],
+      "id": "admin",
+      "label": "Admin",
+      "maturity": "live",
+      "permissions": [
+        "ar.manage",
+        "ar.view",
+        "companies.manage",
+        "companies.view",
+        "customers.create",
+        "customers.delete",
+        "customers.update",
+        "customers.view",
+        "delivery_jobs.manage",
+        "delivery_jobs.view",
+        "driver.app",
+        "driver_calendar.view",
+        "equipment.manage",
+        "equipment.view",
+        "groups.manage",
+        "groups.view",
+        "hiring_contracts.create",
+        "hiring_contracts.delete",
+        "hiring_contracts.schedule",
+        "hiring_contracts.update",
+        "hiring_contracts.view",
+        "industries.manage",
+        "industries.view",
+        "inventory.manage",
+        "inventory.view",
+        "notifications.emit",
+        "ops_tickets.manage",
+        "ops_tickets.view",
+        "quotations.approve",
+        "quotations.assignee",
+        "quotations.assigner",
+        "quotations.create",
+        "quotations.delete",
+        "quotations.lead",
+        "quotations.update",
+        "quotations.view",
+        "rental_rates.manage",
+        "rental_rates.view",
+        "rfqs.create",
+        "rfqs.delete",
+        "rfqs.import",
+        "rfqs.update",
+        "rfqs.view",
+        "sales.view_all",
+        "sales_activities.view",
+        "sales_dashboard.view",
+        "sales_intelligence.view",
+        "sales_log.view",
+        "sales_manager.view",
+        "sales_person.assigned",
+        "settings.manage",
+        "users.view"
+      ],
+      "proposedPermissions": [],
+      "seedUser": {
+        "email": "admin@voltade.com",
+        "name": "Admin Voltade"
+      }
+    }
+  ],
+  "schemaTableCount": 203,
+  "seedUsers": [
+    {
+      "email": "admin@voltade.com",
+      "name": "Admin Voltade",
+      "role": "admin"
+    },
+    {
+      "email": "sales@voltade.com",
+      "name": "Sarah Sales",
+      "role": "sales"
+    },
+    {
+      "email": "ops@voltade.com",
+      "name": "Omar Operations",
+      "role": "operations"
+    },
+    {
+      "email": "finance@voltade.com",
+      "name": "Fiona Finance",
+      "role": "finance"
+    },
+    {
+      "email": "ql@voltade.com",
+      "name": "Quinn Manager",
+      "role": "quotation_manager"
+    },
+    {
+      "email": "quotation@voltade.com",
+      "name": "Qasim Assistant",
+      "role": "quotation_assistant"
+    },
+    {
+      "email": "driver@voltade.com",
+      "name": "Danial Driver",
+      "role": "driver"
+    },
+    {
+      "email": "driver2@voltade.com",
+      "name": "Devi Driver",
+      "role": "driver"
+    },
+    {
+      "email": "driver3@voltade.com",
+      "name": "Daud Driver",
+      "role": "driver"
+    }
+  ],
+  "statusVocabularies": {
+    "hc_ops_ticket": {
+      "action_type": [
+        "return",
+        "replacement",
+        "breakdown"
+      ],
+      "status": [
+        "pending",
+        "processed"
+      ]
+    },
+    "item_code_rate": {
+      "rate_type_name": [
+        "Lowest",
+        "Standard",
+        "Highest"
+      ]
+    },
+    "item_unit": {
+      "item_unit_status": [
+        "IN",
+        "RESERVED",
+        "OUT",
+        "SOLD",
+        "SCRAP",
+        "NA",
+        "LOANED"
+      ]
+    },
+    "machine_return": {
+      "condition_status": [
+        "good_condition",
+        "compensation_required",
+        "under_inspection",
+        "pending_return"
+      ]
+    },
+    "rfq_item": {
+      "item_type": [
+        "package",
+        "product",
+        "custom"
+      ]
+    }
+  },
+  "targetModel": {
+    "$comment": "The PM's target organisation model vs what the code does today. Rendered as annotations in the map, never as shipped behaviour.",
+    "approvalLadder": {
+      "asBuilt": {
+        "evidence": [
+          "server/domains/sales/routes/update-quotation-status.ts",
+          "server/domains/sales/routes/quotation-team.ts",
+          "seed/data/role-permissions.ts"
+        ],
+        "steps": [
+          {
+            "does": "Prepares and prices the quotation; submits to Pending Approval",
+            "gate": "quotations.update",
+            "step": 1,
+            "who": "quotation_assistant / sales"
+          },
+          {
+            "does": "Reviews as lead — no separate status; lead is an assignment, not a gate",
+            "gate": "quotations.lead",
+            "step": 2,
+            "who": "quotation lead (auto-assigned)"
+          },
+          {
+            "does": "Final Approved — the only enforced gate",
+            "gate": "quotations.approve",
+            "step": 3,
+            "who": "quotation_manager / sales_manager"
+          }
+        ],
+        "summary": "One gated transition. Pending Approval → Final Approved requires `quotations.approve`, held by quotation_manager, sales_manager and admin. Operations does not approve."
+      },
+      "target": {
+        "steps": [
+          {
+            "does": "Prepares and prices; first-level check of catalog + rates",
+            "step": 1,
+            "who": "Quotation assistant"
+          },
+          {
+            "does": "Commercial review — tier choice, transport charge, terms",
+            "step": 2,
+            "who": "Quotation lead / manager"
+          },
+          {
+            "does": "Final approval — units available for the hire window, transport feasible",
+            "step": 3,
+            "who": "Operations manager"
+          }
+        ],
+        "summary": "Three approval layers; the Operations manager gives the final approval."
+      }
+    },
+    "gaps": [
+      {
+        "area": "Plant",
+        "asBuilt": "Schema only (work_order, technical_service, fault types); no screens; `plant` notification department reserved.",
+        "target": "Inspection + servicing module with Plant supervisor and Technician roles."
+      },
+      {
+        "area": "Procurement",
+        "asBuilt": "Schema only (supplier_rfq, purchase_order, supplier_invoice, item_unit_supplier).",
+        "target": "Supplier + PO module; cost feeds the rate roster with Sales."
+      },
+      {
+        "area": "Store",
+        "asBuilt": "Inventory screens live but owned by the `operations` role; receive / issue / transfer / stock take are schema only.",
+        "target": "Storekeeper role; whiteboard; receiving from Procurement."
+      },
+      {
+        "area": "Operations roles",
+        "asBuilt": "One `operations` login does coordination, transport and inventory.",
+        "target": "Transport coordinator + Ops manager split out."
+      },
+      {
+        "area": "Finance roles",
+        "asBuilt": "One `finance` role; junior / senior ladder is UI-only in the prototype.",
+        "target": "AR junior approves, AR senior publishes (distinct permissions)."
+      },
+      {
+        "area": "Compensation",
+        "asBuilt": "machine_return.condition_status carries compensation_required; Finance Returns page is a prototype.",
+        "target": "Plant inspection result feeds the assessment; Ops manager signs off; Finance raises the credit note / charge."
+      }
+    ]
+  },
+  "terms": [
+    {
+      "definition": "Customer Request For Quotation. The captured inquiry; the first document.",
+      "department": null,
+      "section": "The four Core-Flow documents",
+      "source": "docs/reference/glossary.md",
+      "term": "CRFQ"
+    },
+    {
+      "definition": "the priced, approvable offer sent to the customer. Has a stored `status` and a **derived** `stage`.",
+      "department": null,
+      "section": "The four Core-Flow documents",
+      "source": "docs/reference/glossary.md",
+      "term": "Quotation"
+    },
+    {
+      "definition": "the confirmed agreement: machines, rates, site. Tracks two independent axes (`status` + `workflow_stage`).",
+      "department": null,
+      "section": "The four Core-Flow documents",
+      "source": "docs/reference/glossary.md",
+      "term": "Hiring Contract (HC)"
+    },
+    {
+      "definition": "the physical delivery/collection job a driver runs.",
+      "department": null,
+      "section": "The four Core-Flow documents",
+      "source": "docs/reference/glossary.md",
+      "term": "Delivery Order (DO)"
+    },
+    {
+      "definition": "a machine _model_ (e.g. a 25-tonne crane). The catalog entry.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "Item code"
+    },
+    {
+      "definition": "an item code flagged **`is_serialized`** (\"Tracked by machine ID\"): a machine whose HC lines must be filled with per-unit machine assignments before scheduling. Non-serialized codes (consumables, spares) carry a quantity only.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "Serialized item"
+    },
+    {
+      "definition": "the independent, hand-curated labels on an item code (`is_serialized`, `stock_type`, `item_type`, `show_in_white_board`). Each answers exactly one question; none is inferred from another, and none stands in for another when it's empty — an unreadable label shows `—`.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "Classification labels"
+    },
+    {
+      "definition": "what kind of thing an item code is: Machine · Spareparts · Services · General · Others · Transport · Accessories. A governed vocabulary, not free text, but **optional** — a third of codes have none, and no reader may supply one. Distinct from the line-level `item_type` on RFQ / quotation / order lines, which describes the line rather than the item.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "item_type"
+    },
+    {
+      "definition": "a single physical asset of an item code (serial-numbered). Its `item_unit_status` is the one axis for where it is.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "Machine unit"
+    },
+    {
+      "definition": "the unit's lifecycle: IN (available) · RESERVED (bound) · OUT (on hire) · SOLD/SCRAP/LOANED/NA (terminal).",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "item_unit_status"
+    },
+    {
+      "definition": "a named bundle of item codes (e.g. \"Cranes\"). Many-to-many with categories; a group can be both hire and sale.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "Item group"
+    },
+    {
+      "definition": "how a line is classified for pricing (Hire of Machinery, Sale of Machinery, …). Whether it's rental is the **`is_rental`** boolean, _not_ the name.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "Sales category"
+    },
+    {
+      "definition": "per-item rental pricing in three tiers: **Lowest / Standard / Highest** (SGD). Standard is the default.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "Rate card / rate tier"
+    },
+    {
+      "definition": "the consolidated view of every item's rate tiers.",
+      "department": null,
+      "section": "Machines & inventory",
+      "source": "docs/reference/glossary.md",
+      "term": "Rate Roster"
+    },
+    {
+      "definition": "a return / replacement / breakdown request raised against a Delivered HC; spawns the matching DO.",
+      "department": null,
+      "section": "Operations",
+      "source": "docs/reference/glossary.md",
+      "term": "Ops ticket"
+    },
+    {
+      "definition": "the kind of DO: Delivery · Collection · Replacement · Service_Breakdown.",
+      "department": null,
+      "section": "Operations",
+      "source": "docs/reference/glossary.md",
+      "term": "Job type"
+    },
+    {
+      "definition": "moving part of a delivery onto a separate child DO (move-semantics; nothing duplicated).",
+      "department": null,
+      "section": "Operations",
+      "source": "docs/reference/glossary.md",
+      "term": "Split DO"
+    },
+    {
+      "definition": "releasing a unit: re-point it to another slot that needs it, or free it to IN if nothing does.",
+      "department": null,
+      "section": "Operations",
+      "source": "docs/reference/glossary.md",
+      "term": "Free-or-repoint"
+    },
+    {
+      "definition": "the mobile view a driver uses for delivery + collection. Gated by the `driver.app` permission.",
+      "department": null,
+      "section": "Operations",
+      "source": "docs/reference/glossary.md",
+      "term": "Driver app"
+    },
+    {
+      "definition": "the shared suffix carried down CRFQ → QTN → HC → DO, so one deal is traceable end-to-end.",
+      "department": null,
+      "section": "Cross-cutting",
+      "source": "docs/reference/glossary.md",
+      "term": "Deal number"
+    },
+    {
+      "definition": "Person In Charge at the delivery site; required to convert a quotation to an HC.",
+      "department": null,
+      "section": "Cross-cutting",
+      "source": "docs/reference/glossary.md",
+      "term": "Site PIC"
+    },
+    {
+      "definition": "the compound freeze on editing an HC/quotation: editable status **and** not Delivered **and** not Repeated-order **and** no live DO.",
+      "department": null,
+      "section": "Cross-cutting",
+      "source": "docs/reference/glossary.md",
+      "term": "Edit lock"
+    },
+    {
+      "definition": "a value computed on read, never stored (e.g. quotation stage).",
+      "department": null,
+      "section": "Cross-cutting",
+      "source": "docs/reference/glossary.md",
+      "term": "Derived state"
+    },
+    {
+      "definition": "a value frozen onto a document at conversion (e.g. delivery address, item description, and unit of measure on the HC) so later source edits don't rewrite history.",
+      "department": null,
+      "section": "Cross-cutting",
+      "source": "docs/reference/glossary.md",
+      "term": "Snapshot"
+    },
+    {
+      "definition": "a deal-level delivery fee set on the quotation, carried onto the HC and itemised there; advisory-only (never re-billed) at the delivery order.",
+      "department": null,
+      "section": "Cross-cutting",
+      "source": "docs/reference/glossary.md",
+      "term": "Transport charge"
+    },
+    {
+      "definition": "the operating unit a document belongs to; most numbering and reads scope by branch.",
+      "department": null,
+      "section": "Cross-cutting",
+      "source": "docs/reference/glossary.md",
+      "term": "Branch"
+    },
+    {
+      "definition": "Invoice number / the invoice record in the Billing Queue. Climbs the ladder Draft → Approved (junior) → Published (senior) → Sent.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "prototypes/INDEX.md",
+      "term": "IVN"
+    },
+    {
+      "definition": "Finance's work list: every contract that reached Finance with a verified PO carries a real draft IVN here, with priority dot, billing type (STD / ADV / COD) and progress.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "prototypes/INDEX.md",
+      "term": "Billing Queue"
+    },
+    {
+      "definition": "One shared PO record per contract: upload → match → cross-check → stamp → publish. Finance's Preview & Verify step lives here.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "prototypes/document-hub",
+      "term": "Document Hub"
+    },
+    {
+      "definition": "Company-grouped PO ageing board shared by Ops and Finance, driven by one stored po_flagged_date. Ops flags + publishes; Finance verifies.",
+      "department": "operations",
+      "section": "Department vocabulary",
+      "source": "prototypes/po-follow-up-tracker",
+      "term": "PO Follow-up"
+    },
+    {
+      "definition": "Where a PO sits with Finance: preview_verify (asking) → verified. Green is reserved for verified; asking states wear the warning outline.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "prototypes/finance-po-receiving",
+      "term": "AR state"
+    },
+    {
+      "definition": "standard (one PO : one HC) or split (one PO governs several contracts / several POs on one contract). Split flows can keep, supersede or replace the governing PO.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "prototypes/finance-po-receiving",
+      "term": "Billing tag"
+    },
+    {
+      "definition": "A revised customer PO replacing the governing one; draft IVNs auto-sync the new PO number + cut-off, approved / published ones get a guarded compare, sent ones are locked.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "prototypes/finance-po-receiving",
+      "term": "Superseded PO"
+    },
+    {
+      "definition": "The PO's billing cut-off carried onto the invoice; a PO-vs-invoice mismatch shows a banner in the composer.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "prototypes/finance-po-receiving",
+      "term": "Cut-off date"
+    },
+    {
+      "definition": "Finance document reversing part of an invoice — compensation on damaged return, early return, or a billing correction.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "src/domains/finance/pages/credit-notes",
+      "term": "Credit note"
+    },
+    {
+      "definition": "What a salesperson raises from My Service Tickets: breakdown, replacement, upgrade, full or partial return on a Delivered HC. Stored as an ops ticket (hc_ops_ticket).",
+      "department": "sales",
+      "section": "Department vocabulary",
+      "source": "server/domains/sales/routes/create-service-ticket.ts",
+      "term": "Service ticket"
+    },
+    {
+      "definition": "Ops' judgement of a returned machine's condition: good_condition · compensation_required · under_inspection · pending_return. compensation_required goes to Finance.",
+      "department": "operations",
+      "section": "Department vocabulary",
+      "source": "server/domains/operations/schema/machine-return.ts",
+      "term": "Compensation assessment"
+    },
+    {
+      "definition": "Target role: plans delivery and return-collection jobs and driver rosters (today part of the operations role).",
+      "department": "operations",
+      "section": "Department vocabulary",
+      "source": "target-model",
+      "term": "Transport coordinator"
+    },
+    {
+      "definition": "Plant checks a unit before it leaves the yard and after it returns; the return check feeds the compensation assessment.",
+      "department": "plant",
+      "section": "Department vocabulary",
+      "source": "target-model",
+      "term": "Pre-/post-delivery inspection"
+    },
+    {
+      "definition": "A Plant repair / maintenance job on a unit with required parts and status (work_order_status, item_status Required → …).",
+      "department": "plant",
+      "section": "Department vocabulary",
+      "source": "server/domains/inventory/schema/work-order.ts",
+      "term": "Work order"
+    },
+    {
+      "definition": "A servicing record per unit (item_unit_technical_service) with meter reading and next due.",
+      "department": "plant",
+      "section": "Department vocabulary",
+      "source": "server/domains/inventory/schema/technical-service.ts",
+      "term": "Technical service"
+    },
+    {
+      "definition": "Procurement's request for quotation to a supplier (rfq_status Sent → …); the winning quote becomes a purchase order.",
+      "department": "procurement",
+      "section": "Department vocabulary",
+      "source": "server/domains/inventory/schema/supplier-rfq.ts",
+      "term": "Supplier RFQ"
+    },
+    {
+      "definition": "Procurement's order to a supplier with three status axes: po_status, delivery_status, billing_status. Not the customer PO Finance verifies.",
+      "department": "procurement",
+      "section": "Department vocabulary",
+      "source": "server/domains/inventory/schema/purchase-order.ts",
+      "term": "Purchase order (supplier)"
+    },
+    {
+      "definition": "The customer's purchase order for a hire / sale — Ops publishes it, Finance verifies it, the invoice quotes it. Distinct from a supplier PO.",
+      "department": "finance",
+      "section": "Department vocabulary",
+      "source": "prototypes/INDEX.md",
+      "term": "Customer PO"
+    },
+    {
+      "definition": "A counting cycle over item units at a location with adjustments and reasons (stock_take_cycle, stock_adjustment).",
+      "department": "store",
+      "section": "Department vocabulary",
+      "source": "server/domains/inventory/schema/stock-take-cycle.ts",
+      "term": "Stock take"
+    },
+    {
+      "definition": "The yard's at-a-glance machine board; an item code opts in via show_in_white_board (one of the four independent classification labels).",
+      "department": "store",
+      "section": "Department vocabulary",
+      "source": "docs/inventory/surface-attribute-map.md",
+      "term": "Whiteboard"
+    },
+    {
+      "definition": "Binary label Stock / Non-Stock on an item code — never inferred from item_type or any other label.",
+      "department": "store",
+      "section": "Department vocabulary",
+      "source": "docs/inventory/surface-attribute-map.md",
+      "term": "stock_type"
+    },
+    {
+      "definition": "Rep-only workspace of prospective accounts with a parking-state pipeline, AI snapshot and a background-scan gate into the Customer Master.",
+      "department": "sales",
+      "section": "Department vocabulary",
+      "source": "prototypes/leads-management",
+      "term": "Leads management"
+    },
+    {
+      "definition": "The partner dossier: identity header, risk strip, and tabs for order history, relationships, payment and documents.",
+      "department": "sales",
+      "section": "Department vocabulary",
+      "source": "prototypes/customer-master-revamp",
+      "term": "Customer Master"
+    },
+    {
+      "definition": "A Hiring Contract tracks status (Draft / Scheduled / …) and workflow_stage (… / Delivered) independently; Delivered is the pair Scheduled + Delivered.",
+      "department": "operations",
+      "section": "Department vocabulary",
+      "source": "docs/core-flow/hiring-contract.md",
+      "term": "Dual-axis HC"
+    },
+    {
+      "definition": "A notification scoped to a whole department feed (sales, quotation, ops, plant, ar, finance) rather than a person.",
+      "department": null,
+      "section": "Department vocabulary",
+      "source": "src/lib/notifications.ts",
+      "term": "Department notification"
+    }
+  ]
+}

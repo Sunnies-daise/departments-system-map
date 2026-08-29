@@ -1,0 +1,30 @@
+{
+  "$comment": "The PM's target organisation model vs what the code does today. Rendered as annotations in the map, never as shipped behaviour.",
+  "approvalLadder": {
+    "asBuilt": {
+      "summary": "One gated transition. Pending Approval → Final Approved requires `quotations.approve`, held by quotation_manager, sales_manager and admin. Operations does not approve.",
+      "steps": [
+        { "step": 1, "who": "quotation_assistant / sales", "does": "Prepares and prices the quotation; submits to Pending Approval", "gate": "quotations.update" },
+        { "step": 2, "who": "quotation lead (auto-assigned)", "does": "Reviews as lead — no separate status; lead is an assignment, not a gate", "gate": "quotations.lead" },
+        { "step": 3, "who": "quotation_manager / sales_manager", "does": "Final Approved — the only enforced gate", "gate": "quotations.approve" }
+      ],
+      "evidence": ["server/domains/sales/routes/update-quotation-status.ts", "server/domains/sales/routes/quotation-team.ts", "seed/data/role-permissions.ts"]
+    },
+    "target": {
+      "summary": "Three approval layers; the Operations manager gives the final approval.",
+      "steps": [
+        { "step": 1, "who": "Quotation assistant", "does": "Prepares and prices; first-level check of catalog + rates" },
+        { "step": 2, "who": "Quotation lead / manager", "does": "Commercial review — tier choice, transport charge, terms" },
+        { "step": 3, "who": "Operations manager", "does": "Final approval — units available for the hire window, transport feasible" }
+      ]
+    }
+  },
+  "gaps": [
+    { "area": "Plant", "asBuilt": "Schema only (work_order, technical_service, fault types); no screens; `plant` notification department reserved.", "target": "Inspection + servicing module with Plant supervisor and Technician roles." },
+    { "area": "Procurement", "asBuilt": "Schema only (supplier_rfq, purchase_order, supplier_invoice, item_unit_supplier).", "target": "Supplier + PO module; cost feeds the rate roster with Sales." },
+    { "area": "Store", "asBuilt": "Inventory screens live but owned by the `operations` role; receive / issue / transfer / stock take are schema only.", "target": "Storekeeper role; whiteboard; receiving from Procurement." },
+    { "area": "Operations roles", "asBuilt": "One `operations` login does coordination, transport and inventory.", "target": "Transport coordinator + Ops manager split out." },
+    { "area": "Finance roles", "asBuilt": "One `finance` role; junior / senior ladder is UI-only in the prototype.", "target": "AR junior approves, AR senior publishes (distinct permissions)." },
+    { "area": "Compensation", "asBuilt": "machine_return.condition_status carries compensation_required; Finance Returns page is a prototype.", "target": "Plant inspection result feeds the assessment; Ops manager signs off; Finance raises the credit note / charge." }
+  ]
+}

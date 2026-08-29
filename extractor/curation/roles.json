@@ -1,0 +1,222 @@
+{
+  "$comment": "Role pill content. As-built roles get permissions + seed persona merged from the ERP repo by extract.py; target-only roles carry proposedPermissions instead.",
+  "roles": [
+    {
+      "id": "sales",
+      "label": "Salesperson",
+      "department": "sales",
+      "maturity": "live",
+      "blurb": "Owns a book of customers. Captures inquiries as CRFQs, builds or hands off the quotation, keeps the customer master current and raises service tickets once machines are on hire.",
+      "howTheyWork": [
+        "Starts the day in Leads / My Customers — follow-ups, dormant accounts, payment alerts from Finance.",
+        "Logs a customer inquiry as a CRFQ: items, hire window, site PIC, delivery address.",
+        "Can price the quotation (catalog-only lines, must pick a rate tier) but cannot approve it.",
+        "Confirms the order with the customer once the quotation is Final Approved + sent.",
+        "Raises breakdown / replacement / upgrade / return tickets from My Service Tickets and tracks Ops progress.",
+        "Sees only their own book — no cross-rep visibility (`sales.view_all` withheld)."
+      ],
+      "seedEmail": "sales@voltade.com"
+    },
+    {
+      "id": "sales_manager",
+      "label": "Sales Manager (approver)",
+      "department": "sales",
+      "maturity": "live",
+      "blurb": "Everything a salesperson does plus team oversight: approve quotations, act as quotation lead, assign work, view users.",
+      "howTheyWork": [
+        "Reviews Pending Approval quotations and approves or sends them back.",
+        "Can be auto-assigned as the lead on a quotation (`quotations.lead`).",
+        "Assigns CRFQs and quotations across the team (`quotations.assigner`)."
+      ],
+      "seedEmail": null
+    },
+    {
+      "id": "sale_manager",
+      "label": "Sales Manager (demo)",
+      "department": "sales",
+      "maturity": "prototype",
+      "blurb": "The demo-branch sales manager: team dashboard, pipeline funnel, account allocation and cross-book visibility — deliberately WITHOUT approval or inventory rights.",
+      "howTheyWork": [
+        "Opens /manager/dashboard for team activity + conversion metrics.",
+        "Re-allocates customer accounts between reps (proposes into the rep-side assignment seam).",
+        "Sees every rep's CRFQs, quotations and contracts (`sales.view_all`).",
+        "Cannot approve quotations — scope narrowed by the PM on purpose."
+      ],
+      "seedEmail": null
+    },
+    {
+      "id": "quotation_assistant",
+      "label": "Quotation Assistant",
+      "department": "quotation",
+      "maturity": "live",
+      "blurb": "Prices the quotation: builds the lines from the catalog, picks the rate tier per period, sets transport charge and tax, and submits for approval.",
+      "howTheyWork": [
+        "Picks up quotations from In Queue → In Progress.",
+        "Prices each rental line off the rate card; a group counts as rated once one member has a rate.",
+        "Submits to Pending Approval; edits after that point invalidate the approval.",
+        "Can convert a Final Approved quotation to a Hiring Contract and schedule it.",
+        "Cannot approve or delete."
+      ],
+      "seedEmail": "quotation@voltade.com"
+    },
+    {
+      "id": "quotation_manager",
+      "label": "Quotation Manager",
+      "department": "quotation",
+      "maturity": "live",
+      "blurb": "Runs the quotation desk across every rep: assigns work, is the auto-assigned lead, gives Final Approval, marks quotations sent, and owns the Hiring Contract lifecycle.",
+      "howTheyWork": [
+        "Sees every quotation (`sales.view_all`); assigns lead + assistants.",
+        "Approves Pending Approval → Final Approved (`quotations.approve`) — the one gate as built.",
+        "Marks the quotation emailed so the stage flips to Quotation Sent.",
+        "Creates / updates / deletes Hiring Contracts and triggers Schedule.",
+        "Re-approves edited reorders; the cascade rewrites the linked HC lines."
+      ],
+      "seedEmail": "ql@voltade.com"
+    },
+    {
+      "id": "ops_manager",
+      "label": "Operations Manager",
+      "department": "operations",
+      "alsoIn": ["quotation"],
+      "maturity": "target",
+      "blurb": "Target role: final approver on quotations (checks machine availability + transport feasibility), signs off compensation assessments and owns the Ops team.",
+      "howTheyWork": [
+        "Third approval layer: sees a quotation after the quotation lead has reviewed it.",
+        "Approves only if Store can commit the units for the hire window.",
+        "Signs off compensation_required returns before Finance raises a credit note."
+      ],
+      "proposedPermissions": ["quotations.approve", "ops_tickets.manage", "delivery_jobs.manage"],
+      "seedEmail": null
+    },
+    {
+      "id": "operations",
+      "label": "Ops Coordinator",
+      "department": "operations",
+      "maturity": "live",
+      "blurb": "Fulfils contracts: binds units, creates delivery orders and jobs, assigns drivers, processes ops tickets, validates deliveries and keeps the inventory screens.",
+      "howTheyWork": [
+        "Works the Ops Tickets board: pending → processed, spawning Collection / Replacement / Service_Breakdown DOs.",
+        "Schedules HCs — binds item units (IN → RESERVED) and creates the DO + Job.",
+        "Plans transport on the Delivery Order Job board; splits DOs; assigns drivers.",
+        "Validates Delivered → Completed after the driver uploads the signed HC (units go OUT).",
+        "Assesses machine condition on return and flags compensation.",
+        "Flags and publishes customer POs to Finance in the PO workspace.",
+        "Also maintains item codes, units, groups and rates (`inventory.manage`)."
+      ],
+      "seedEmail": "ops@voltade.com"
+    },
+    {
+      "id": "transport_coordinator",
+      "label": "Transport Coordinator",
+      "department": "operations",
+      "maturity": "target",
+      "blurb": "Target role split out of Ops: delivery planning and return collection — routes, driver rosters, split loads.",
+      "howTheyWork": [
+        "Plans the day's Delivery and Collection jobs and assigns drivers.",
+        "Splits a DO when a load needs two trucks (move-semantics, nothing duplicated).",
+        "Watches transit events in the Ops notification feed."
+      ],
+      "proposedPermissions": ["delivery_jobs.view", "delivery_jobs.manage", "driver_calendar.view"],
+      "seedEmail": null
+    },
+    {
+      "id": "driver",
+      "label": "Driver",
+      "department": "driver",
+      "maturity": "live",
+      "blurb": "Runs delivery and collection jobs from the mobile app.",
+      "howTheyWork": [
+        "Opens assigned orders; starts transit.",
+        "Accepts or refuses each unit; photographs it.",
+        "Uploads the signed HC, then marks Delivered.",
+        "On collection jobs, brings units back so Ops can set them IN."
+      ],
+      "seedEmail": "driver@voltade.com"
+    },
+    {
+      "id": "finance",
+      "label": "Finance / AR",
+      "department": "finance",
+      "maturity": "prototype",
+      "blurb": "Accounts receivable: verifies POs in the Document Hub, bills from the Billing Queue through the IVN ladder, raises credit notes and chases ageing.",
+      "howTheyWork": [
+        "Starts on the AR dashboard: today's queue, escalated follow-ups, PO receiving.",
+        "Verifies Ops-published POs against the HC (Preview & Verify) — this creates the draft IVN.",
+        "Moves invoices Draft → Approved → Published → Sent; acknowledges PO revisions.",
+        "Raises credit notes for compensation and early returns.",
+        "Reconciles across all customers (`sales.view_all`)."
+      ],
+      "seedEmail": "finance@voltade.com"
+    },
+    {
+      "id": "ar_junior",
+      "label": "AR Junior",
+      "department": "finance",
+      "maturity": "target",
+      "blurb": "Target role: prepares and approves draft invoices; cannot publish.",
+      "howTheyWork": ["Keys in verified PO details.", "Approves draft IVNs for senior review."],
+      "proposedPermissions": ["ar.view", "ar.manage"],
+      "seedEmail": null
+    },
+    {
+      "id": "ar_senior",
+      "label": "AR Senior",
+      "department": "finance",
+      "maturity": "target",
+      "blurb": "Target role: publishes and sends invoices, can undo the ladder, applies PO revisions to approved / published invoices.",
+      "howTheyWork": ["Publishes approved IVNs and marks them sent.", "Decides Apply update vs Keep as is on revised POs."],
+      "proposedPermissions": ["ar.view", "ar.manage", "ar.publish"],
+      "seedEmail": null
+    },
+    {
+      "id": "plant_supervisor",
+      "label": "Plant Supervisor",
+      "department": "plant",
+      "maturity": "target",
+      "blurb": "Target role: owns machine readiness — inspection schedules, work-order priorities, sign-off that a unit can go out.",
+      "howTheyWork": ["Reviews breakdown jobs from Ops.", "Assigns technicians to work orders.", "Signs pre-delivery inspection so Ops can schedule the unit."],
+      "proposedPermissions": ["plant.view", "plant.manage", "equipment.manage"],
+      "seedEmail": null
+    },
+    {
+      "id": "technician",
+      "label": "Technician / Mechanic",
+      "department": "plant",
+      "maturity": "target",
+      "blurb": "Target role: performs servicing, maintenance and repairs; records parts used and meter readings.",
+      "howTheyWork": ["Works the work-order list.", "Records technical service + meter reading per unit.", "Marks the unit serviced → back to Store as IN."],
+      "proposedPermissions": ["plant.view", "plant.manage"],
+      "seedEmail": null
+    },
+    {
+      "id": "procurement_officer",
+      "label": "Procurement Officer",
+      "department": "procurement",
+      "maturity": "target",
+      "blurb": "Target role: manages suppliers, raises supplier RFQs and purchase orders, matches supplier invoices and maintains machine cost.",
+      "howTheyWork": ["Sends supplier RFQs and converts the best to a PO.", "Tracks PO delivery + billing status.", "Records purchase value per unit so Sales prices above cost."],
+      "proposedPermissions": ["procurement.view", "procurement.manage", "inventory.view"],
+      "seedEmail": null
+    },
+    {
+      "id": "storekeeper",
+      "label": "Storekeeper",
+      "department": "store",
+      "maturity": "target",
+      "blurb": "Target role: receives machines from suppliers, keeps the whiteboard and locations accurate, runs stock takes.",
+      "howTheyWork": ["Receives PO deliveries as new item units.", "Issues / transfers units between yards.", "Runs stock-take cycles and adjustments."],
+      "proposedPermissions": ["inventory.view", "inventory.manage"],
+      "seedEmail": null
+    },
+    {
+      "id": "admin",
+      "label": "Admin",
+      "department": null,
+      "maturity": "live",
+      "blurb": "Platform administrator — holds every permission. Manages users, roles, groups and settings. Not a department.",
+      "howTheyWork": ["Creates users and assigns roles + branches.", "Edits role permission bundles (roles are DB-driven; none is special)."],
+      "seedEmail": "admin@voltade.com"
+    }
+  ]
+}

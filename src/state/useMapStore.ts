@@ -1,0 +1,56 @@
+import { create } from "zustand";
+
+import type { Mode } from "@/data/types";
+
+interface MapState {
+  mode: Mode;
+  hovered: string | null;
+  selected: string | null;
+  selectedRole: string | null;
+  highlightedEdge: string | null;
+  glossaryOpen: boolean;
+  helpOpen: boolean;
+  reducedMotion: boolean;
+  setMode: (mode: Mode) => void;
+  setHovered: (id: string | null) => void;
+  select: (id: string | null) => void;
+  selectRole: (id: string | null) => void;
+  highlightEdge: (id: string | null) => void;
+  setGlossaryOpen: (open: boolean) => void;
+  setHelpOpen: (open: boolean) => void;
+  closeAll: () => void;
+}
+
+const prefersReducedMotion =
+  typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+export const useMapStore = create<MapState>((set) => ({
+  mode: "target",
+  hovered: null,
+  selected: null,
+  selectedRole: null,
+  highlightedEdge: null,
+  glossaryOpen: false,
+  helpOpen: false,
+  reducedMotion: Boolean(prefersReducedMotion),
+  setMode: (mode) => set({ mode, highlightedEdge: null }),
+  setHovered: (hovered) => set({ hovered }),
+  select: (selected) => set({ selected, selectedRole: null, highlightedEdge: null }),
+  selectRole: (selectedRole) => set({ selectedRole }),
+  highlightEdge: (highlightedEdge) => set({ highlightedEdge }),
+  setGlossaryOpen: (glossaryOpen) => set({ glossaryOpen }),
+  setHelpOpen: (helpOpen) => set({ helpOpen }),
+  closeAll: () =>
+    set((s) =>
+      s.selectedRole
+        ? { selectedRole: null }
+        : s.glossaryOpen || s.helpOpen
+          ? { glossaryOpen: false, helpOpen: false }
+          : { selected: null, highlightedEdge: null },
+    ),
+}));
+
+/** The block the scene is focused on: hover wins over selection. */
+export function focusId(s: Pick<MapState, "hovered" | "selected">): string | null {
+  return s.hovered ?? s.selected;
+}

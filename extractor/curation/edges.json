@@ -1,0 +1,158 @@
+{
+  "$comment": "Directed data flows between department blocks. evidence paths are relative to the ERP repo root and are asserted to exist by extract.py.",
+  "edges": [
+    {
+      "id": "sales-quotation-crfq",
+      "from": "sales", "to": "quotation",
+      "record": "CRFQ → Quotation",
+      "trigger": "Sales converts a reviewed CRFQ; the deal number carries over (CRFQ-2026-0042 → QTN-2026-0042).",
+      "statusPath": ["Draft", "In Review", "Converted"],
+      "maturity": "live",
+      "evidence": ["docs/core-flow/crfq.md", "server/domains/sales/routes/create-quotation.ts"]
+    },
+    {
+      "id": "quotation-sales-sent",
+      "from": "quotation", "to": "sales",
+      "record": "Final Approved quotation, emailed",
+      "trigger": "Quotation desk approves + marks sent; the rep confirms the order with the customer (stage: Quotation Sent → Customer Confirm).",
+      "statusPath": ["Pending Approval", "Final Approved", "Quotation Sent", "Customer Confirm"],
+      "maturity": "live",
+      "evidence": ["docs/core-flow/quotation.md", "server/domains/sales/routes/mark-quotation-sent.ts", "server/domains/sales/routes/send-quotation-email.ts"]
+    },
+    {
+      "id": "quotation-operations-hc",
+      "from": "quotation", "to": "operations",
+      "record": "Hiring Contract (HC) → Schedule",
+      "trigger": "Quotation converts to an HC (Site PIC + address gate); Ops schedules it — binds units and creates the first Delivery Order + Job.",
+      "statusPath": ["HC Draft", "Scheduled", "Delivered"],
+      "maturity": "live",
+      "evidence": ["docs/core-flow/hiring-contract.md", "server/domains/sales/routes/create-hiring-contract.ts", "server/domains/sales/routes/schedule-hiring-contract.ts"]
+    },
+    {
+      "id": "operations-store-units",
+      "from": "operations", "to": "store",
+      "record": "Item unit binding",
+      "trigger": "Scheduling reserves units (IN → RESERVED); Completed delivery sets them OUT; a processed return brings them back IN.",
+      "statusPath": ["IN", "RESERVED", "OUT", "IN"],
+      "maturity": "live",
+      "evidence": ["docs/core-flow/machine-units.md", "server/domains/inventory/routes/update-item-unit-status.ts", "server/domains/inventory/schema/item-unit-status-history.ts"]
+    },
+    {
+      "id": "operations-driver-do",
+      "from": "operations", "to": "driver",
+      "record": "Delivery Order assigned",
+      "trigger": "Ops assigns a driver to a DO; the driver gets a delivery.driver_assigned notification and the job appears in the app.",
+      "statusPath": ["Scheduled", "In Transit"],
+      "maturity": "live",
+      "evidence": ["docs/core-flow/delivery-order.md", "src/lib/notifications.ts", "server/domains/driver/routes/list-driver-orders.ts"]
+    },
+    {
+      "id": "driver-operations-evidence",
+      "from": "driver", "to": "operations",
+      "record": "Transit / Delivered + signed HC + photos",
+      "trigger": "Driver uploads the signed HC and marks Delivered; Ops validates → Completed and the HC stage becomes Delivered.",
+      "statusPath": ["In Transit", "Delivered", "Completed"],
+      "maturity": "live",
+      "evidence": ["docs/core-flow/driver-app.md", "server/domains/driver/routes/upload-signed-hc.ts", "server/domains/driver/routes/deliver-do.ts", "server/domains/operations/routes/validate-delivery-order.ts"]
+    },
+    {
+      "id": "sales-operations-ticket",
+      "from": "sales", "to": "operations",
+      "record": "Service ticket (hc_ops_ticket)",
+      "trigger": "Rep raises breakdown / replacement / upgrade / return on a Delivered HC; Ops processes it into a Collection / Replacement / Service_Breakdown DO.",
+      "statusPath": ["pending", "processed"],
+      "maturity": "prototype",
+      "evidence": ["server/domains/sales/routes/create-service-ticket.ts", "server/domains/operations/schema/hc-ops-ticket.ts", "docs/core-flow/ops-tickets.md", "server/domains/operations/routes/process-ops-ticket.ts"]
+    },
+    {
+      "id": "operations-finance-po",
+      "from": "operations", "to": "finance",
+      "record": "Customer PO + verified HC",
+      "trigger": "Ops flags and publishes the PO in the PO workspace; Finance previews & verifies it in the Document Hub, which creates the draft IVN in the Billing Queue.",
+      "statusPath": ["PO flagged", "Published", "Preview & Verify", "AR verified", "Draft IVN"],
+      "maturity": "prototype",
+      "evidence": ["prototypes/INDEX.md", "src/domains/finance/pages/document-hub", "src/domains/finance/pages/po-follow-up", "src/domains/finance/pages/billing-queue"]
+    },
+    {
+      "id": "operations-finance-compensation",
+      "from": "operations", "to": "finance",
+      "record": "Machine return — compensation assessment",
+      "trigger": "On collection Ops records condition_status; compensation_required flows to Finance Returns for a credit note / charge.",
+      "statusPath": ["pending_return", "under_inspection", "compensation_required | good_condition"],
+      "maturity": "prototype",
+      "evidence": ["server/domains/operations/schema/machine-return.ts", "src/domains/finance/pages/returns", "src/domains/finance/pages/credit-notes"]
+    },
+    {
+      "id": "finance-sales-alerts",
+      "from": "finance", "to": "sales",
+      "record": "Payment health + overdue alerts",
+      "trigger": "AR overlay surfaces overdue / flagged customers on My Customers, Leads and the Customer Master risk strip.",
+      "statusPath": null,
+      "maturity": "prototype",
+      "evidence": ["prototypes/INDEX.md", "src/domains/sales/pages/salesperson-dashboard", "src/domains/customer/pages/customer-canvas"]
+    },
+    {
+      "id": "operations-plant-breakdown",
+      "from": "operations", "to": "plant",
+      "record": "Service_Breakdown job / inspection request",
+      "trigger": "A breakdown ticket spawns a Service_Breakdown DO; returned units under_inspection go to Plant for post-delivery inspection and repair.",
+      "statusPath": ["breakdown ticket", "Service_Breakdown DO", "work_order Created", "serviced"],
+      "maturity": "schema-only",
+      "evidence": ["server/domains/operations/schema/hc-breakdown-log.ts", "server/domains/operations/schema/job-service-details.ts", "server/domains/inventory/schema/work-order.ts"]
+    },
+    {
+      "id": "plant-store-serviced",
+      "from": "plant", "to": "store",
+      "record": "Serviced unit → available",
+      "trigger": "Plant closes the work order / technical service; the unit's status returns to IN and its meter reading + service history update.",
+      "statusPath": ["under service", "IN"],
+      "maturity": "schema-only",
+      "evidence": ["server/domains/inventory/schema/technical-service.ts", "server/domains/inventory/schema/item-unit-technical-service.ts", "server/domains/inventory/schema/item-unit-meter-reading-history.ts"]
+    },
+    {
+      "id": "plant-operations-readiness",
+      "from": "plant", "to": "operations",
+      "record": "Pre-delivery inspection pass",
+      "trigger": "Target: Ops may only schedule a unit that passed pre-delivery inspection.",
+      "statusPath": ["inspection pending", "passed"],
+      "maturity": "target",
+      "evidence": ["docs/core-flow/machine-units.md"]
+    },
+    {
+      "id": "procurement-store-receive",
+      "from": "procurement", "to": "store",
+      "record": "Purchase order → inventory receive → item unit",
+      "trigger": "A delivered PO is received into stock; each machine becomes an item unit with its supplier and purchase value.",
+      "statusPath": ["PO Draft", "delivery Pending", "Received", "item_unit IN"],
+      "maturity": "schema-only",
+      "evidence": ["server/domains/inventory/schema/purchase-order.ts", "server/domains/inventory/schema/inventory-receive.ts", "server/domains/inventory/schema/item-unit-supplier.ts"]
+    },
+    {
+      "id": "procurement-sales-cost",
+      "from": "procurement", "to": "sales",
+      "record": "Machine cost → rate roster",
+      "trigger": "Target: landed cost per unit informs the 3-tier rate card Sales and the quotation desk price from.",
+      "statusPath": null,
+      "maturity": "target",
+      "evidence": ["server/domains/inventory/schema/item-unit-price.ts", "server/domains/inventory/schema/item-code-rate.ts", "src/domains/inventory/pages/rate-roster"]
+    },
+    {
+      "id": "store-quotation-rates",
+      "from": "store", "to": "quotation",
+      "record": "Rate roster + availability",
+      "trigger": "The quotation desk prices rental lines off the item's current 3-tier rates; serialized items must have units to bind before scheduling.",
+      "statusPath": null,
+      "maturity": "live",
+      "evidence": ["docs/core-flow/machine-units.md", "server/domains/inventory/schema/item-code-rate.ts", "server/domains/sales/routes/available-item-units.ts"]
+    },
+    {
+      "id": "quotation-operations-final-approval",
+      "from": "operations", "to": "quotation",
+      "record": "Final approval (3rd layer)",
+      "trigger": "Target: after the quotation lead's review, the Operations manager gives final approval based on unit availability and transport feasibility.",
+      "statusPath": ["assistant prepared", "lead reviewed", "Ops manager approved"],
+      "maturity": "target",
+      "evidence": ["server/domains/sales/routes/update-quotation-status.ts"]
+    }
+  ]
+}
