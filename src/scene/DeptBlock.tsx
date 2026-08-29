@@ -130,7 +130,7 @@ export function DeptBlock({ dept }: { dept: Department }) {
   return (
     <group position={[dept.position[0], 0, dept.position[2]]}>
       {/* Drop shadow — offset so it reads as sitting on the grid. */}
-      <mesh position={[0.32, 0.004, 0.32]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0.4, 0.004, 0.4]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[w, w]} />
         <meshBasicMaterial color="#1b2140" transparent opacity={ghost ? 0.05 : 0.11} userData={{ baseOpacity: ghost ? 0.05 : 0.11 }} />
       </mesh>

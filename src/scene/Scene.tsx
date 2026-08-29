@@ -41,7 +41,7 @@ function FitZoom() {
   const { size, camera } = useThree();
   useEffect(() => {
     const cam = camera as THREE.OrthographicCamera;
-    cam.zoom = THREE.MathUtils.clamp(size.width / 30, 26, 60);
+    cam.zoom = THREE.MathUtils.clamp(size.width / 33, 22, 56);
     cam.updateProjectionMatrix();
   }, [size.width, camera]);
   return null;
@@ -104,7 +104,7 @@ export function Scene() {
         enablePan
         enableDamping
         dampingFactor={0.1}
-        minZoom={18}
+        minZoom={14}
         maxZoom={110}
         screenSpacePanning
         mouseButtons={{ LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN }}

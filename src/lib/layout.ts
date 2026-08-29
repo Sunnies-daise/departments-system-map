@@ -3,8 +3,8 @@ import * as THREE from "three";
 import type { Department, Edge } from "@/data/types";
 
 /** Tile footprint (world units) and thickness for the isometric tiles. */
-export const BLOCK_WIDTH = 2.4;
-export const TILE_HEIGHT = 0.34;
+export const BLOCK_WIDTH = 3.0;
+export const TILE_HEIGHT = 0.42;
 export const LINE_Y = 0.02;
 
 export function blockWidth(d: Department): number {
@@ -15,7 +15,7 @@ export function tileHeight(d: Department): number {
 }
 /** The block chip that sits on the tile. */
 export function chipSize(d: Department): number {
-  return 0.72 * d.size;
+  return 0.95 * d.size;
 }
 
 export interface EdgePath {
@@ -32,7 +32,7 @@ export interface EdgePath {
 export function edgePath(edge: Edge, from: Department, to: Department): EdgePath {
   const y = LINE_Y;
   const sign = edge.from < edge.to ? 1 : -1;
-  const lane = 0.4 * sign;
+  const lane = 0.5 * sign;
   const a = new THREE.Vector3(from.position[0], y, from.position[2]);
   const b = new THREE.Vector3(to.position[0], y, to.position[2]);
   const dx = b.x - a.x;
@@ -69,4 +69,4 @@ function trim(pts: THREE.Vector3[], i: number, j: number, by: number) {
 
 /** Isometric: camera on the (1,1,1) diagonal looking at the target. */
 export const CAMERA_POSITION: [number, number, number] = [16, 16, 16];
-export const CAMERA_TARGET: [number, number, number] = [0.3, 0, -1.8];
+export const CAMERA_TARGET: [number, number, number] = [0.4, 0, -2.4];

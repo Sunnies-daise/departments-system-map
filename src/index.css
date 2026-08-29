@@ -46,7 +46,7 @@ code { font-family: var(--mono); font-size: 0.85em; }
 .mode-toggle button.active { background: var(--accent); color: #fff; font-weight: 600; }
 
 /* Block labels (DOM, positioned by drei Html) */
-.block-label { pointer-events: auto; background: #ffffff; color: var(--text); border: 1.5px solid var(--dept); border-radius: 8px; padding: 4px 11px; font-size: 12px; font-weight: 650; letter-spacing: 0.02em; cursor: pointer; box-shadow: 0 2px 8px rgba(27, 33, 64, 0.12); transition: box-shadow 160ms, opacity 160ms, transform 160ms; white-space: nowrap; }
+.block-label { pointer-events: auto; background: #ffffff; color: var(--text); border: 1.5px solid var(--dept); border-radius: 8px; padding: 5px 13px; font-size: 13px; font-weight: 650; letter-spacing: 0.02em; cursor: pointer; box-shadow: 0 2px 8px rgba(27, 33, 64, 0.12); transition: box-shadow 160ms, opacity 160ms, transform 160ms; white-space: nowrap; }
 .block-label.emphasis-active { background: var(--dept); color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--dept) 25%, transparent), 0 6px 18px color-mix(in srgb, var(--dept) 45%, transparent); transform: scale(1.06); }
 .block-label.emphasis-related { box-shadow: 0 0 0 3px color-mix(in srgb, var(--dept) 25%, transparent); }
 .block-label.emphasis-dimmed { opacity: 0.4; }

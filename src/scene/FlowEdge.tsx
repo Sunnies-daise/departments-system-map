@@ -57,14 +57,14 @@ export function FlowEdge({ edge, from, to }: { edge: Edge; from: Department; to:
   return (
     <group>
       <Line points={path.points} color={color} lineWidth={state === "active" ? 2.4 : 1.4} transparent opacity={opacity} dashed={dashed} dashSize={0.22} gapSize={0.14} />
-      <Dot position={start} color={color} opacity={opacity} r={0.07} />
+      <Dot position={start} color={color} opacity={opacity} r={0.09} />
       {path.bends.map((b, i) => (
-        <Dot key={i} position={b} color={color} opacity={opacity} r={0.06} />
+        <Dot key={i} position={b} color={color} opacity={opacity} r={0.08} />
       ))}
-      <Dot position={end} color={state === "active" ? to.color : IDLE} opacity={opacity} r={0.11} />
+      <Dot position={end} color={state === "active" ? to.color : IDLE} opacity={opacity} r={0.13} />
       {state === "active" && (
         <instancedMesh ref={particles} args={[undefined, undefined, PARTICLES]}>
-          <sphereGeometry args={[0.09, 12, 12]} />
+          <sphereGeometry args={[0.11, 12, 12]} />
           <meshBasicMaterial color={from.color} />
         </instancedMesh>
       )}

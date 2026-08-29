@@ -7,7 +7,7 @@
       "short": "SALES",
       "color": "#F59E0B",
       "position": [
-        -7.5,
+        -10.5,
         0,
         0
       ],
@@ -131,7 +131,7 @@
       "short": "QUOTE",
       "color": "#8B5CF6",
       "position": [
-        -2.5,
+        -3.5,
         0,
         0
       ],
@@ -230,7 +230,7 @@
       "short": "OPS",
       "color": "#3B82F6",
       "position": [
-        2.5,
+        3.5,
         0,
         0
       ],
@@ -354,9 +354,9 @@
       "short": "DRIVER",
       "color": "#60A5FA",
       "position": [
-        2.5,
+        3.5,
         0,
-        4.6
+        6.5
       ],
       "size": 0.55,
       "maturity": "live",
@@ -416,7 +416,7 @@
       "short": "FINANCE",
       "color": "#10B981",
       "position": [
-        7.5,
+        10.5,
         0,
         0
       ],
@@ -520,9 +520,9 @@
       "short": "PLANT",
       "color": "#F97316",
       "position": [
-        5,
+        7,
         0,
-        -6
+        -8.5
       ],
       "size": 1,
       "maturity": "schema-only",
@@ -607,9 +607,9 @@
       "short": "PROCURE",
       "color": "#EC4899",
       "position": [
-        -5,
+        -7,
         0,
-        -6
+        -8.5
       ],
       "size": 1,
       "maturity": "schema-only",
@@ -691,7 +691,7 @@
       "position": [
         0,
         0,
-        -6
+        -8.5
       ],
       "size": 1,
       "maturity": "live",
