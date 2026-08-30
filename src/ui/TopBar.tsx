@@ -11,7 +11,7 @@ export function TopBar() {
   return (
     <header className="topbar">
       <div className="topbar-title">
-        <h1>Lincoln System Map</h1>
+        <h1>Departments System Map</h1>
         <p>
           {systemMap.departments.length} departments · {roles} roles · {flows} data flows
           {systemMap.erpCommit && <span className="muted"> · ERP @ {systemMap.erpCommit}</span>}

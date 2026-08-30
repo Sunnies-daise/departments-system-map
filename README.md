@@ -1,4 +1,4 @@
-# Lincoln System Map
+# Departments System Map
 
 An interactive 3D map of the **Lincoln Digital Brain** ERP: every department as a
 block, the roles inside it as pill tags, the crucial data each department enters,
