@@ -78,7 +78,6 @@ p { margin: 0; }
 .overview > * { padding: 0 32px; }
 .overview { position: relative; }
 .overview > .ov-close { position: absolute; top: 16px; right: 16px; padding: 0; z-index: 2; width: 36px; height: 36px; background: #fff; }
-.ov-sys .key-msg { margin-right: 36px; }
 .ov-head { grid-area: head; padding-top: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
 .ov-sys { grid-area: sys; padding-top: 28px; padding-bottom: 24px; display: grid; gap: 12px; align-content: start; border-bottom: 1px solid var(--line); border-left: 1px solid var(--line); }
 .ov-lens { grid-area: lens; padding-top: 24px; padding-bottom: 26px; }
@@ -93,16 +92,8 @@ p { margin: 0; }
 .ov-points li::before { content: counter(pt); flex: none; width: 24px; height: 24px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 14%, #fff); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, #fff); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
 .ov-points li > span { min-width: 0; }
 .ov-points b { color: var(--text); font-weight: 650; }
-.key-msg { font-size: 14px; line-height: 1.5; color: var(--text); padding: 10px 12px; border-left: 3px solid var(--text); background: var(--panel-2); border-radius: 0 8px 8px 0; }
 .btn-primary { background: var(--text); color: #fff; border: 1px solid var(--text); border-radius: 9px; padding: 9px 18px; font-weight: 650; cursor: pointer; flex: none; }
 .btn-primary:hover { background: #2d3566; }
-.chain { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; counter-reset: step; }
-.chain li { position: relative; padding: 30px 14px 0 0; counter-increment: step; font-size: 12.5px; line-height: 1.45; }
-.chain li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--dept); font-size: 11px; font-weight: 700; display: grid; place-items: center; z-index: 1; }
-.chain li::after { content: ""; position: absolute; left: 22px; right: 0; top: 10px; height: 2px; background: #d5dbea; }
-.chain li:last-child::after { display: none; }
-.chain b { display: block; font-weight: 650; margin-bottom: 3px; }
-.chain .who { color: var(--muted); }
 .chain-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
 .jny { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .jny > li { position: relative; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--dept); border-radius: 10px; padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 1.45; }
@@ -137,7 +128,7 @@ p { margin: 0; }
 .say-list li { position: relative; padding-left: 12px; }
 .say-list li::before { content: ""; position: absolute; left: 1px; top: 0.6em; width: 5px; height: 5px; border-radius: 50%; background: var(--sev); }
 .say b { display: block; font-size: 11px; color: var(--dept-ink); margin-bottom: 2px; }
-.say[hidden], .tool-tag[data-hide="true"] { display: none; }
+.say[hidden] { display: none; }
 .say.pop { animation: pop 260ms cubic-bezier(.2, .9, .3, 1.3) both; animation-delay: var(--delay, 0ms); }
 @keyframes pop { from { opacity: 0; transform: translateY(-50%) translateX(-6px) scale(calc(var(--k, 1) * 0.92)); } to { opacity: 1; transform: translateY(-50%) scale(var(--k, 1)); } }
 .top-card { position: absolute; z-index: 30; top: 14px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 30px rgba(27, 33, 64, 0.14); }
@@ -180,37 +171,19 @@ p { margin: 0; }
 .kind-list { display: grid; gap: 8px; }
 .kind-row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: start; }
 .kind-name { font-size: 11.5px; color: var(--muted); padding-top: 3px; line-height: 1.3; }
-.tool-tag { position: absolute; transform: translateY(-60%) scale(var(--k, 1)); transform-origin: 0 60%; pointer-events: none; width: 188px; z-index: 1; display: grid; gap: 6px; padding: 8px 10px 10px; background: rgba(255,255,255,0.94); border: 1px solid color-mix(in srgb, var(--dept) 45%, #e1e5f0); border-left: 3px solid var(--dept); border-radius: 8px; box-shadow: 0 2px 8px rgba(27, 33, 64, 0.08); transition: opacity 200ms; }
-.tool-tag-head { font-size: 11px; font-weight: 650; color: #3a4166; }
-.tool-tag .tool { font-size: 10.5px; padding: 1px 6px; }
-.tool-tag[data-emphasis="dimmed"] { opacity: 0.25; }
-.tool-tag { display: none !important; }
 #dim { position: absolute; inset: 0; z-index: 1; background: rgba(28, 31, 42, 0.72); opacity: 0; pointer-events: none; transition: opacity 220ms ease-out; }
 body.lens-on #dim { opacity: 1; }
 body.lens-on .block-label, body.lens-on .entry-label, body.lens-on .group-label { z-index: 0 !important; }
 body.lens-on .say { z-index: 5; }
-.tool-tag[data-emphasis="active"] { z-index: 2; box-shadow: 0 6px 18px rgba(27, 33, 64, 0.14); }
-.tool-tag.compact { width: auto; }
-.tool-tag.compact .tools { display: none; }
-.kind-dots { display: none; gap: 3px; margin-left: 8px; vertical-align: middle; }
-.kind-dots .tool { padding: 0; border: 0; background: none; }
-.kind-dots .tool i { width: 8px; height: 8px; }
-.kind-dots .k-paper i { width: 7px; height: 7px; }
-.tool-tag.compact .kind-dots { display: inline-flex; }
-.tool-tag-head { display: inline-flex; align-items: center; white-space: nowrap; }
 .tool { font-size: 11px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: #3a4166; }
 .lenses { display: grid; gap: 10px; }
 .lens { text-align: left; background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--sev); border-radius: 8px; padding: 11px 13px; cursor: pointer; display: grid; gap: 5px; }
 .lens:hover { border-color: var(--sev); }
 .lens[aria-pressed="true"] { background: color-mix(in srgb, var(--sev) 9%, #fff); border-color: var(--sev); }
 .lens-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-weight: 650; font-size: 13px; }
-.lens p { font-size: 12px; color: #3a4166; line-height: 1.45; }
 .lens-points { margin: 2px 0 4px; padding: 0; list-style: none; display: grid; gap: 5px; }
 .lens-points li { position: relative; padding-left: 12px; font-size: 12px; line-height: 1.45; color: #3a4166; }
 .lens-points li::before { content: ""; position: absolute; left: 1px; top: 0.6em; width: 5px; height: 5px; border-radius: 50%; background: var(--sev); }
-.lens-depts { display: flex; gap: 3px; margin-top: 3px; }
-.lens-depts span { width: 14px; height: 6px; border-radius: 2px; background: var(--dept); }
-.lens-depts span.off { background: #e3e7f1; }
 
 /* Chips */
 .chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 650; border: 1px solid transparent; white-space: nowrap; }
@@ -220,15 +193,6 @@ body.lens-on .say { z-index: 5; }
 .sev-low { color: var(--low); border-color: color-mix(in srgb, var(--low) 40%, transparent); background: color-mix(in srgb, var(--low) 8%, transparent); }
 .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--dept); flex: none; }
 
-/* Hover card */
-.hover-card { position: absolute; z-index: 35; bottom: 12px; right: 12px; width: 290px; pointer-events: none; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--dept); border-radius: var(--radius); padding: 10px 12px; box-shadow: var(--shadow); }
-.hover-card[hidden] { display: none; }
-.hover-card-head { display: flex; align-items: center; gap: 8px; }
-.hover-card-stats { margin: 6px 0; display: flex; gap: 12px; color: var(--muted); font-size: 12px; }
-.hover-card-stats b { color: var(--text); font-size: 14px; }
-.hover-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; font-size: 12px; }
-.hover-card li { display: flex; gap: 7px; align-items: flex-start; }
-.sev-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin-top: 5px; background: var(--sev); }
 
 /* Hand-off card */
 .edge-card { position: absolute; z-index: 36; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(420px, calc(100% - 24px)); background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--critical); border-radius: var(--radius); padding: 11px 13px; box-shadow: var(--shadow); display: grid; gap: 6px; }
@@ -250,9 +214,6 @@ body.lens-on .say { z-index: 5; }
 .blurb { font-size: 14px; line-height: 1.55; }
 .stat-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; }
-.subteam { display: grid; gap: 6px; margin-bottom: 12px; }
-.subteam:last-child { margin-bottom: 0; }
-.subteam-name { font-size: 12px; font-weight: 650; color: var(--muted); }
 .block-label .sub { display: block; font-size: 10.5px; font-weight: 500; color: var(--muted); line-height: 1.2; }
 .block-label[data-emphasis="active"] .sub { color: rgba(255,255,255,0.85); }
 .role-pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--dept) 70%, transparent); background: color-mix(in srgb, var(--dept) 13%, transparent); padding: 4px 5px 4px 8px; font-size: 12px; font-weight: 600; }
@@ -285,10 +246,7 @@ body.lens-on .say { z-index: 5; }
   .ov-sys { border-left: 0; border-top: 1px solid var(--line); }
   .ov-lens .lenses { grid-template-columns: 1fr; }
   .overview h2 { font-size: 21px; }
-  .chain { grid-template-columns: 1fr; }
   .jny { grid-template-columns: 1fr; }
-  .chain li { padding: 0 0 14px 34px; }
-  .chain li::after { left: 10px; right: auto; top: 22px; bottom: 0; width: 2px; height: auto; }
   .ov-foot { flex-direction: column; align-items: stretch; }
   .lens-bar-label { display: none; }
   .say { display: none !important; }
@@ -297,7 +255,6 @@ body.lens-on .say { z-index: 5; }
   .intro-list { display: grid !important; }
   .lens-intro .intro-hint { display: block; }
   .dept-panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 64dvh; }
-  .hover-card { display: none !important; }
   .topbar { flex-wrap: wrap; }
 }
 /* Embedded as a tab in the Departments System Map: the host app's bar names the page, so drop the duplicate title. */
@@ -332,7 +289,6 @@ html.embedded .topbar h1 { display: none; }
       <div class="lens-intro" id="lensIntro" hidden></div>
     </div>
 
-    <div class="hover-card" id="hoverCard" hidden></div>
     <div class="edge-card" id="edgeCard" hidden></div>
     <aside class="dept-panel" id="deptPanel" hidden></aside>
   </main>
@@ -356,7 +312,6 @@ html.embedded .topbar h1 { display: none; }
       </ul>
     </header>
     <div class="ov-sys">
-      <p class="key-msg"><b><i>Each team's mix of platforms is shown beside its block on the map.</i></b></p>
       <div class="sec-title">Systems an order passes through <span class="muted" id="toolCount"></span></div>
       <div class="kind-list" id="toolCloud"></div>
     </div>
@@ -740,12 +695,11 @@ function drawBlocks() {
     grp.addEventListener("mouseleave", () => { if (state.hovered === d.id) setHover(null); });
     grp.addEventListener("click", ev => { ev.stopPropagation(); select(state.selected === d.id ? null : d.id); });
     const ta = [cx + half + 0.9, 0, cz - half - 0.9];
-    const l0 = P(cx + half, h, cz - half), l1 = P(...ta);
     blockEls[d.id] = { grp, top, anchor: [cx, h + chip * 2 + 0.25, cz], toolAnchor: ta };
   }
 }
 
-const toolEls = {}, sayEls = {};
+const sayEls = {};
 let entryEl = null, entryBlock = null, groupEl = null, groupPoly = null;
 const GROUP_PAD = 2.8;
 function groupGeom() {
@@ -790,12 +744,6 @@ function drawEntry() {
 function drawLabels() {
   const host = document.getElementById("labels");
   for (const d of DEPTS) {
-    const t = document.createElement("div");
-    t.className = "tool-tag";
-    t.style.setProperty("--dept", d.color);
-    t.innerHTML = `<span class="tool-tag-head">Works in ${d.tools.length} places<span class="kind-dots" aria-hidden="true">${d.tools.map(x => `<span class="tool k-${TOOL_KIND[x] || "app"}"><i></i></span>`).join("")}</span></span><span class="tools">${d.tools.map(toolChip).join("")}</span>`;
-    host.appendChild(t);
-    toolEls[d.id] = t;
     const say = document.createElement("div");
     say.className = "say";
     say.hidden = true;
@@ -824,7 +772,7 @@ function drawLabels() {
 /* ---------- Camera: fit the map into the free area, with pan / zoom ---------- */
 /* Labels, tool cards and bubbles are drawn at 100% when the map is at S0 px per unit,
    and scale with the map below that, so the layout that is clean at S0 stays clean everywhere. */
-const S0 = 14, K_MIN = 0.62, K_MAX = 1.1, K_COMPACT = 0.8;
+const S0 = 14, K_MIN = 0.62, K_MAX = 1.1;
 const overlayK = () => Math.max(K_MIN, Math.min(K_MAX, cam.scale / S0));
 let BOUNDS = null;
 function computeBounds() {
@@ -834,12 +782,11 @@ function computeBounds() {
     pts.push(P(x - h, 0, z - h), P(x + h, 0, z - h), P(x - h, 0, z + h), P(x + h, 0, z + h));
     // Overlay boxes, measured at full size and converted to map units.
     const a = P(...blockEls[d.id].anchor), q = P(...blockEls[d.id].toolAnchor);
-    const lab = labelEls[d.id], tag = toolEls[d.id];
+    const lab = labelEls[d.id];
     const lw = lab.offsetWidth / S0, lh = lab.offsetHeight / S0;
     pts.push([a[0] - lw / 2, a[1] - lh - 0.6], [a[0] + lw / 2, a[1]]);
     const left = Math.max(q[0], a[0] + lw / 2 + 8 / S0);
-    const tw = tag.offsetWidth / S0, th = tag.offsetHeight / S0;
-    pts.push([left, q[1] - 0.6 * th], [left + Math.max(tw, 226 / S0), q[1] + 0.5 * th]);
+    pts.push([left, q[1]], [left + 226 / S0, q[1]]); // room for the speech bubble
   }
   for (const e of EDGES) for (const [x, z] of e.pts) pts.push(P(x, 0, z));
   if (groupEl) {
@@ -903,11 +850,8 @@ function applyCam() {
     labelEls[d.id].style.top = (p[1] * cam.scale + cam.ty - liftPx(d.id)) + "px";
     const q = P(...blockEls[d.id].toolAnchor);
     const lab = labelEls[d.id], labRight = p[0] * cam.scale + cam.tx + (lab.offsetWidth / 2 + 8) * k;
-    toolEls[d.id].style.left = Math.max(q[0] * cam.scale + cam.tx, labRight) + "px";
-    toolEls[d.id].style.top = (q[1] * cam.scale + cam.ty) + "px";
     sayEls[d.id].style.left = (Math.max(q[0] * cam.scale + cam.tx, labRight) + 8 * k) + "px";
     sayEls[d.id].style.top = (q[1] * cam.scale + cam.ty - 14 * k) + "px";
-    toolEls[d.id].classList.toggle("compact", (k < K_COMPACT || state.selected) && emphasisOf(d.id) !== "active");
   }
 }
 function liftPx(id) { const e = emphasisOf(id); return (e === "active" ? 0.42 : e === "related" ? 0.16 : 0) * cam.scale; }
@@ -971,10 +915,8 @@ function render() {
     blockEls[d.id].top.setAttribute("fill", em === "active" || em === "related" ? mix("#ffffff", d.color, 0.16) : "#ffffff");
     labelEls[d.id].dataset.emphasis = em;
     labelEls[d.id].setAttribute("aria-pressed", String(state.selected === d.id));
-    toolEls[d.id].dataset.emphasis = em;
     const line = state.lens && !state.selected && !state.hovered && !state.edge ? (SAYS[state.lens] || {})[d.id] : null;
     const say = sayEls[d.id];
-    toolEls[d.id].dataset.hide = String(!!line);
     if (line) {
       const key = state.lens + d.id;
       if (say.dataset.key !== key) {
@@ -999,14 +941,13 @@ function render() {
   }
   applyCam();
   renderLenses();
-  renderHover();
   renderEdgeCard();
 }
 
 /* ---------- Overview ---------- */
 document.getElementById("toolCloud").innerHTML = KINDS.map(([k, name]) => `<div class="kind-row"><span class="kind-name">${name}</span><span class="tools">${TOOLS.filter(t => TOOL_KIND[t] === k).map(toolChip).join("")}${k === "app" ? `<span class="tool k-app"><i></i>+ 20 IT-built tools</span>` : ""}</span></div>`).join("");
 document.getElementById("toolCount").textContent = `(${TOOLS.length} + 20 stop-gaps)`;
-/* Order journey section: two layouts to preview. */
+/* Order journey shown in the overview. */
 const JOURNEY = [
   { dept: "sales", title: "Sales request", who: "Sales", sys: [["WhatsApp", "chat"], ["LincolnERP", "erp"]], next: "Re-typed from chat" },
   { dept: "quote", title: "Quotation", who: "Operations · Quotation", sys: [["LincolnERP", "erp"]], dataLabel: "Key data", data: ["Rental rates: daily, weekly, fortnightly, monthly"], next: "Not linked: HC re-keyed from the quote" },
@@ -1060,7 +1001,6 @@ function equalizeIntro() {
 function renderLenses() {
   const host = document.getElementById("lenses");
   host.innerHTML = LENSES.map(l => {
-    const ds = lensDepts(l.id);
     return `<button type="button" class="lens" data-lens="${l.id}" aria-pressed="${state.lens === l.id}" style="--sev:${SEV_COLOR[l.sev]}">
       <span class="lens-head"><span>${l.name}</span></span>
       <ul class="lens-points">${l.points.map(t => `<li>${t}</li>`).join("")}</ul>
@@ -1085,23 +1025,7 @@ function renderLenses() {
   }));
 }
 
-/* ---------- Hover card ---------- */
-function worstSev(d) { return d.problems.reduce((w, p) => SEV_ORDER[p[1]] < SEV_ORDER[w] ? p[1] : w, "low"); }
 function headcount(d) { const named = d.roles.reduce((s, r) => s + (r[1] || 0), 0); const tbc = d.roles.some(r => r[1] == null); return { named, tbc }; }
-function renderHover() {
-  const card = document.getElementById("hoverCard");
-  card.hidden = true; return; // Hover summary removed: hovering only highlights the block; click opens the full panel.
-  const d = state.hovered && !state.selected ? DEPT[state.hovered] : null;
-  if (!d) { card.hidden = true; return; }
-  const hc = headcount(d);
-  const top = [...d.problems].sort((a, b) => SEV_ORDER[a[1]] - SEV_ORDER[b[1]]).slice(0, 3);
-  card.style.setProperty("--dept", d.color);
-  card.innerHTML = `<div class="hover-card-head"><span class="swatch"></span><strong>${d.name}</strong><span class="chip sev-${worstSev(d)}">${SEV_LABEL[worstSev(d)]}</span></div>
-    <div class="hover-card-stats"><span><b>${d.roles.length}</b> roles</span><span><b>${hc.named}${hc.tbc ? "+" : ""}</b> staff</span><span><b>${d.problems.length}</b> problems</span></div>
-    <ul>${top.map(p => `<li><span class="sev-dot" style="--sev:${SEV_COLOR[p[1]]}"></span>${p[0]}</li>`).join("")}</ul>
-    ${d.problems.length > 3 ? `<p class="hint">+${d.problems.length - 3} more. Click to open.</p>` : ""}`;
-  card.hidden = false;
-}
 
 /* ---------- Edge card ---------- */
 function renderEdgeCard() {
@@ -1145,12 +1069,7 @@ function renderPanel() {
     <p class="blurb">${d.blurb}</p>
     <section>
       <div class="sec-title">Team <span class="muted">${d.roles.length} roles · ${hc.named} staff named${hc.tbc ? " + TBC" : ""}</span></div>
-      ${(() => {
-        const pill = ([r, n]) => `<span class="role-pill"><span class="role-pill-swatch"></span>${r}<span class="n${n == null ? " tbc" : ""}">${n == null ? "TBC" : "×" + n}</span></span>`;
-        const groups = [...new Set(d.roles.map(r => r[2]).filter(Boolean))];
-        if (!groups.length) return `<div class="pills">${d.roles.map(pill).join("")}</div>`;
-        return groups.map(g => `<div class="subteam"><span class="subteam-name">${g}</span><div class="pills">${d.roles.filter(r => r[2] === g).map(pill).join("")}</div></div>`).join("");
-      })()}
+      <div class="pills">${d.roles.map(([r, n]) => `<span class="role-pill"><span class="role-pill-swatch"></span>${r}<span class="n${n == null ? " tbc" : ""}">${n == null ? "TBC" : "×" + n}</span></span>`).join("")}</div>
     </section>
     <section>
       <div class="sec-title">Problems <span class="muted">${state.lens ? `highlighting “${LENS[state.lens].name}”` : "most severe first"}</span></div>
@@ -1213,7 +1132,7 @@ addEventListener("resize", () => { equalizeIntro(); refit(true); });
 /* ---------- Boot ---------- */
 const roleCount = DEPTS.reduce((s, d) => s + d.roles.length, 0);
 const probCount = DEPTS.reduce((s, d) => s + d.problems.length, 0);
-document.getElementById("topstats").textContent = `8 departments · ${DEPTS.length} teams · ${roleCount} roles · ${probCount} problems · ${EDGES.length} broken hand-offs · 4 shared problems`;
+document.getElementById("topstats").textContent = `8 departments · ${DEPTS.length} teams · ${roleCount} roles · ${probCount} problems · ${EDGES.length} broken hand-offs · ${LENSES.length} shared problems`;
 drawGrid(); drawGroup(); drawEdges(); drawEntry(); drawBlocks(); drawLabels();
 computeBounds();
 render(); equalizeIntro(); refit(true); requestAnimationFrame(tick);
