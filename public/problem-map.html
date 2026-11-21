@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light" />
+<title>Lincoln Business Operations Problem Map</title>
+<style>
+:root {
+  --bg: #f7f8fc;
+  --panel: #ffffff;
+  --panel-2: #f3f5fb;
+  --line: #e1e5f0;
+  --text: #1b2140;
+  --muted: #6b7595;
+  --accent: #4f6bed;
+  --critical: #c8102e;
+  --high: #d9480f;
+  --moderate: #a16207;
+  --low: #64748b;
+  --shadow: 0 18px 50px rgba(27, 33, 64, 0.14);
+  --radius: 12px;
+  --font: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--text); font: 14px/1.45 var(--font); overflow: hidden; }
+button { font: inherit; color: inherit; }
+h1, h2, h3, h4 { margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+.app { display: flex; flex-direction: column; height: 100dvh; }
+.stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+#map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+#map.dragging { cursor: grabbing; }
+#labels { position: absolute; inset: 0; pointer-events: none; }
+
+/* Top bar */
+.topbar { position: relative; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: #fff; }
+.topbar h1 { font-size: 17px; }
+.topbar p { font-size: 12px; color: var(--muted); }
+.topbar-title { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; row-gap: 2px; }
+.topbar .icon-btn { width: 32px; height: 32px; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.btn { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.btn:hover, .btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.icon-btn { background: transparent; border: 1px solid var(--line); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; font-size: 18px; line-height: 1; color: var(--muted); flex: none; }
+.icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Block labels */
+.block-label { position: absolute; z-index: 3; padding-left: 6px !important; transform: translate(-50%, -100%) scale(var(--k, 1)); transform-origin: 50% 100%; pointer-events: auto; background: #fff; color: var(--text); border: 1.5px solid var(--dept); border-radius: 8px; padding: 5px 11px 5px 13px; font-size: 13px; font-weight: 650; letter-spacing: 0.01em; cursor: pointer; box-shadow: 0 2px 8px rgba(27, 33, 64, 0.12); transition: box-shadow 160ms, opacity 160ms, background 160ms, color 160ms; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+.block-label .count { font-size: 11px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--dept); color: #fff; }
+.block-label[data-emphasis="active"] { background: var(--dept); color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--dept) 25%, transparent), 0 6px 18px color-mix(in srgb, var(--dept) 45%, transparent); }
+.block-label[data-emphasis="active"] .count { background: #fff; color: var(--dept-ink, var(--text)); }
+.block-label[data-emphasis="related"] { box-shadow: 0 0 0 3px color-mix(in srgb, var(--dept) 25%, transparent); }
+.block-label[data-emphasis="dimmed"] { opacity: 0.4; }
+
+/* Map SVG states */
+.block-lift { transition: transform 220ms ease-out, opacity 220ms; }
+.block[data-emphasis="active"] .block-lift { transform: translateY(-0.42px); }
+.block[data-emphasis="related"] .block-lift { transform: translateY(-0.16px); }
+.block[data-emphasis="dimmed"] { opacity: 0.32; }
+.block { transition: opacity 220ms; cursor: pointer; }
+.edge { transition: opacity 200ms; cursor: pointer; }
+.edge[data-state="dimmed"] { opacity: 0.16; }
+.edge .flow { display: none; }
+.edge[data-state="active"] .flow { display: inline; animation: flow 1.6s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -1.8; } }
+.break-mark { cursor: pointer; }
+
+/* Overview card */
+.ov-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(27, 33, 64, 0.38); display: grid; place-items: center; padding: 24px; }
+.ov-backdrop[hidden] { display: none; }
+.overview { width: min(1040px, 100%); max-height: calc(100dvh - 48px); overflow-y: auto; background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: 16px; box-shadow: 0 30px 80px rgba(27, 33, 64, 0.28); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "head sys" "lens lens" "chain chain" "foot foot"; }
+.overview > * { padding: 0 32px; }
+.overview { position: relative; }
+.overview > .ov-close { position: absolute; top: 16px; right: 16px; padding: 0; z-index: 2; width: 36px; height: 36px; background: #fff; }
+.ov-sys .key-msg { margin-right: 36px; }
+.ov-head { grid-area: head; padding-top: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.ov-sys { grid-area: sys; padding-top: 28px; padding-bottom: 24px; display: grid; gap: 12px; align-content: start; border-bottom: 1px solid var(--line); border-left: 1px solid var(--line); }
+.ov-lens { grid-area: lens; padding-top: 24px; padding-bottom: 26px; }
+.ov-lens .lenses { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch; }
+.ov-lens .lens { align-content: start; }
+.ov-lens .lens-head { flex-direction: column; align-items: flex-start; }
+.ov-chain { grid-area: chain; padding-top: 24px; padding-bottom: 26px; background: var(--panel-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.ov-foot { grid-area: foot; padding-top: 18px; padding-bottom: 22px; display: flex; gap: 20px; align-items: center; justify-content: space-between; }
+.overview h2 { font-size: 26px; line-height: 1.2; max-width: 22ch; letter-spacing: -0.02em; }
+.ov-points { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; max-width: 62ch; counter-reset: pt; }
+.ov-points li { counter-increment: pt; display: flex; align-items: center; gap: 10px; padding: 7px 16px 7px 7px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; font-size: 13.5px; line-height: 1.4; color: #3a4166; }
+.ov-points li::before { content: counter(pt); flex: none; width: 24px; height: 24px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 14%, #fff); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, #fff); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.ov-points li > span { min-width: 0; }
+.ov-points b { color: var(--text); font-weight: 650; }
+.key-msg { font-size: 14px; line-height: 1.5; color: var(--text); padding: 10px 12px; border-left: 3px solid var(--text); background: var(--panel-2); border-radius: 0 8px 8px 0; }
+.btn-primary { background: var(--text); color: #fff; border: 1px solid var(--text); border-radius: 9px; padding: 9px 18px; font-weight: 650; cursor: pointer; flex: none; }
+.btn-primary:hover { background: #2d3566; }
+.chain { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; counter-reset: step; }
+.chain li { position: relative; padding: 30px 14px 0 0; counter-increment: step; font-size: 12.5px; line-height: 1.45; }
+.chain li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--dept); font-size: 11px; font-weight: 700; display: grid; place-items: center; z-index: 1; }
+.chain li::after { content: ""; position: absolute; left: 22px; right: 0; top: 10px; height: 2px; background: #d5dbea; }
+.chain li:last-child::after { display: none; }
+.chain b { display: block; font-weight: 650; margin-bottom: 3px; }
+.chain .who { color: var(--muted); }
+.chain-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.jny { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.jny > li { position: relative; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--dept); border-radius: 10px; padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 1.45; }
+.jny-n { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--dept); display: grid; place-items: center; font-size: 11px; font-weight: 700; }
+.jny b { font-size: 13.5px; font-weight: 650; }
+.jny-who { color: var(--muted); }
+.jny-note { color: var(--critical); font-size: 12px; }
+.jny-data { background: var(--panel-2); border-radius: 8px; padding: 8px 10px; display: grid; gap: 4px; }
+.jny-data > span { font-size: 11.5px; font-weight: 650; color: var(--text); }
+.jny-data ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.jny-data li { position: relative; padding-left: 10px; font-size: 12px; line-height: 1.4; color: #3a4166; }
+.jny-data li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 4px; height: 4px; border-radius: 50%; background: var(--dept); }
+.jny-next { margin-top: auto; padding-top: 8px; border-top: 1px dashed #d5dbea; color: var(--high); font-size: 12px; font-weight: 600; }
+.chain-end { margin-top: 16px; font-size: 13px; padding: 10px 12px; border-radius: 8px; background: color-mix(in srgb, var(--critical) 7%, #fff); border: 1px solid color-mix(in srgb, var(--critical) 35%, transparent); }
+
+/* Entry point of the order journey: styled like a team label */
+.entry-label { --dept: #4ADE80; --dept-ink: #15803d; pointer-events: none; cursor: default; flex-direction: column; align-items: flex-start; gap: 2px; white-space: normal; width: max-content; max-width: 190px; padding: 6px 12px 7px 8px !important; }
+.entry-label .row { display: inline-flex; align-items: center; gap: 8px; }
+.entry-label .count { font-size: 10px; color: #14532d; }
+.entry-label small { font-size: 11.5px; font-weight: 500; color: var(--muted); line-height: 1.35; padding-left: 28px; }
+.entry-label[data-dim="true"] { opacity: 0.4; }
+
+/* Operations group label, sitting on the blue outline */
+.group-label { --dept: #3B82F6; pointer-events: none; cursor: default; transform: translate(-88%, -50%) scale(var(--k, 1)) !important; transform-origin: 88% 50% !important; border-radius: 999px; padding: 6px 8px 6px 6px !important; z-index: 4; }
+.group-label .n { font-size: 11px; font-weight: 700; color: #1d4ed8; background: #eff4ff; border: 1px solid #bfd3fb; border-radius: 999px; padding: 0 7px; }
+.group-label[data-dim="true"] { opacity: 0.4; }
+
+/* Speech bubbles for a highlighted problem */
+.say { position: absolute; z-index: 2; transform: translateY(-50%) scale(var(--k, 1)); transform-origin: 0 50%; pointer-events: none; width: 220px; background: #fff; color: var(--text); font-size: 13.5px; line-height: 1.45; padding: 9px 12px; border-radius: 14px; border: 1.5px solid var(--sev); box-shadow: 0 8px 22px rgba(27, 33, 64, 0.14); }
+.say::before { content: ""; position: absolute; left: -8px; top: 50%; width: 13px; height: 13px; background: #fff; border-left: 1.5px solid var(--sev); border-bottom: 1.5px solid var(--sev); transform: translateY(-50%) rotate(45deg); }
+.say-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.say-list li { position: relative; padding-left: 12px; }
+.say-list li::before { content: ""; position: absolute; left: 1px; top: 0.6em; width: 5px; height: 5px; border-radius: 50%; background: var(--sev); }
+.say b { display: block; font-size: 11px; color: var(--dept-ink); margin-bottom: 2px; }
+.say[hidden], .tool-tag[data-hide="true"] { display: none; }
+.say.pop { animation: pop 260ms cubic-bezier(.2, .9, .3, 1.3) both; animation-delay: var(--delay, 0ms); }
+@keyframes pop { from { opacity: 0; transform: translateY(-50%) translateX(-6px) scale(calc(var(--k, 1) * 0.92)); } to { opacity: 1; transform: translateY(-50%) scale(var(--k, 1)); } }
+.top-card { position: absolute; z-index: 30; top: 14px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 30px rgba(27, 33, 64, 0.14); }
+@media (min-width: 861px) { body.has-panel .top-card { left: calc((100% - 452px) / 2); max-width: calc(100% - 476px); } }
+.lens-intro { width: 0; min-width: calc(100% - 16px); box-sizing: border-box; margin: 0 8px 8px; border: 1.5px solid var(--accent); border-radius: 10px; padding: 10px 14px 12px; display: grid; gap: 4px; background: #fff; }
+.lens-intro[hidden] { display: none; }
+.lens-intro-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; font-weight: 650; font-size: 14px; }
+.lens-intro p { font-size: 13px; line-height: 1.5; color: #3a4166; }
+.lens-intro .hint { margin-top: 2px; }
+.lens-intro .intro-hint { display: none; }
+.lens-intro { align-content: start; }
+.lens-intro.resting { background: #fff; border-color: color-mix(in srgb, var(--accent) 45%, #fff); }
+.lens-intro.resting .lens-intro-head { color: #3a4166; font-weight: 600; }
+.intro-list { display: none; list-style: none; margin: 6px 0 0; padding: 0; gap: 6px; }
+.intro-list li { font-size: 12.5px; line-height: 1.45; padding-left: 10px; border-left: 3px solid var(--dept); }
+.intro-list b { display: block; font-size: 11.5px; }
+
+/* Lens bar on the map */
+.lens-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 10px; }
+.lens-bar .btn { background: var(--text); color: #fff; border-color: var(--text); font-weight: 600; }
+.lens-bar .btn:hover { background: #2d3566; color: #fff; }
+.lens-bar-label { font-size: 12px; color: var(--muted); margin-left: 6px; padding-left: 12px; border-left: 1px solid var(--line); }
+.lens-pill { background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--sev); border-radius: 8px; padding: 6px 11px; font-size: 12.5px; cursor: pointer; display: inline-flex; gap: 7px; align-items: center; }
+.lens-pill:hover { border-color: var(--sev); }
+.lens-pill[aria-pressed="true"] { background: color-mix(in srgb, var(--sev) 10%, #fff); border-color: var(--sev); font-weight: 650; }
+.lens-pill .n { font-size: 11px; color: var(--muted); }
+.overview-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.kicker { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.sec-title { font-size: 13px; font-weight: 650; margin-bottom: 10px; display: flex; gap: 6px; align-items: baseline; }
+.sec-title .muted { font-weight: 500; }
+.tools { display: flex; flex-wrap: wrap; gap: 5px; }
+.tool { display: inline-flex; align-items: center; gap: 5px; }
+.tool i { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.k-erp i { background: #1b2140; }
+.k-sheet i { background: #15803d; }
+.k-chat i { background: #4f6bed; }
+.k-paper { border-style: dashed !important; border-color: #b4bbd0 !important; background: #fff !important; }
+.k-paper i { background: transparent; border: 1.5px solid #6b7595; width: 6px; height: 6px; }
+.k-app i { background: #a3aac2; }
+.kind-list { display: grid; gap: 8px; }
+.kind-row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: start; }
+.kind-name { font-size: 11.5px; color: var(--muted); padding-top: 3px; line-height: 1.3; }
+.tool-tag { position: absolute; transform: translateY(-60%) scale(var(--k, 1)); transform-origin: 0 60%; pointer-events: none; width: 188px; z-index: 1; display: grid; gap: 6px; padding: 8px 10px 10px; background: rgba(255,255,255,0.94); border: 1px solid color-mix(in srgb, var(--dept) 45%, #e1e5f0); border-left: 3px solid var(--dept); border-radius: 8px; box-shadow: 0 2px 8px rgba(27, 33, 64, 0.08); transition: opacity 200ms; }
+.tool-tag-head { font-size: 11px; font-weight: 650; color: #3a4166; }
+.tool-tag .tool { font-size: 10.5px; padding: 1px 6px; }
+.tool-tag[data-emphasis="dimmed"] { opacity: 0.25; }
+.tool-tag { display: none !important; }
+#dim { position: absolute; inset: 0; z-index: 1; background: rgba(28, 31, 42, 0.72); opacity: 0; pointer-events: none; transition: opacity 220ms ease-out; }
+body.lens-on #dim { opacity: 1; }
+body.lens-on .block-label, body.lens-on .entry-label, body.lens-on .group-label { z-index: 0 !important; }
+body.lens-on .say { z-index: 5; }
+.tool-tag[data-emphasis="active"] { z-index: 2; box-shadow: 0 6px 18px rgba(27, 33, 64, 0.14); }
+.tool-tag.compact { width: auto; }
+.tool-tag.compact .tools { display: none; }
+.kind-dots { display: none; gap: 3px; margin-left: 8px; vertical-align: middle; }
+.kind-dots .tool { padding: 0; border: 0; background: none; }
+.kind-dots .tool i { width: 8px; height: 8px; }
+.kind-dots .k-paper i { width: 7px; height: 7px; }
+.tool-tag.compact .kind-dots { display: inline-flex; }
+.tool-tag-head { display: inline-flex; align-items: center; white-space: nowrap; }
+.tool { font-size: 11px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: #3a4166; }
+.lenses { display: grid; gap: 10px; }
+.lens { text-align: left; background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--sev); border-radius: 8px; padding: 11px 13px; cursor: pointer; display: grid; gap: 5px; }
+.lens:hover { border-color: var(--sev); }
+.lens[aria-pressed="true"] { background: color-mix(in srgb, var(--sev) 9%, #fff); border-color: var(--sev); }
+.lens-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-weight: 650; font-size: 13px; }
+.lens p { font-size: 12px; color: #3a4166; line-height: 1.45; }
+.lens-points { margin: 2px 0 4px; padding: 0; list-style: none; display: grid; gap: 5px; }
+.lens-points li { position: relative; padding-left: 12px; font-size: 12px; line-height: 1.45; color: #3a4166; }
+.lens-points li::before { content: ""; position: absolute; left: 1px; top: 0.6em; width: 5px; height: 5px; border-radius: 50%; background: var(--sev); }
+.lens-depts { display: flex; gap: 3px; margin-top: 3px; }
+.lens-depts span { width: 14px; height: 6px; border-radius: 2px; background: var(--dept); }
+.lens-depts span.off { background: #e3e7f1; }
+
+/* Chips */
+.chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 650; border: 1px solid transparent; white-space: nowrap; }
+.sev-critical { color: var(--critical); border-color: color-mix(in srgb, var(--critical) 50%, transparent); background: color-mix(in srgb, var(--critical) 10%, transparent); }
+.sev-high { color: var(--high); border-color: color-mix(in srgb, var(--high) 50%, transparent); background: color-mix(in srgb, var(--high) 10%, transparent); }
+.sev-moderate { color: var(--moderate); border-color: color-mix(in srgb, var(--moderate) 45%, transparent); background: color-mix(in srgb, var(--moderate) 10%, transparent); }
+.sev-low { color: var(--low); border-color: color-mix(in srgb, var(--low) 40%, transparent); background: color-mix(in srgb, var(--low) 8%, transparent); }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--dept); flex: none; }
+
+/* Hover card */
+.hover-card { position: absolute; z-index: 35; bottom: 12px; right: 12px; width: 290px; pointer-events: none; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--dept); border-radius: var(--radius); padding: 10px 12px; box-shadow: var(--shadow); }
+.hover-card[hidden] { display: none; }
+.hover-card-head { display: flex; align-items: center; gap: 8px; }
+.hover-card-stats { margin: 6px 0; display: flex; gap: 12px; color: var(--muted); font-size: 12px; }
+.hover-card-stats b { color: var(--text); font-size: 14px; }
+.hover-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; font-size: 12px; }
+.hover-card li { display: flex; gap: 7px; align-items: flex-start; }
+.sev-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin-top: 5px; background: var(--sev); }
+
+/* Hand-off card */
+.edge-card { position: absolute; z-index: 36; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(420px, calc(100% - 24px)); background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--critical); border-radius: var(--radius); padding: 11px 13px; box-shadow: var(--shadow); display: grid; gap: 6px; }
+.edge-card[hidden] { display: none; }
+.edge-route { display: flex; gap: 6px; align-items: center; font-weight: 650; font-size: 13px; flex-wrap: wrap; }
+.edge-route .arrow { color: var(--muted); font-weight: 400; }
+.edge-card .what { font-size: 12px; color: var(--muted); }
+.edge-card .brk { font-size: 13px; line-height: 1.5; }
+.edge-card-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+
+/* Department panel */
+.dept-panel { position: absolute; z-index: 40; top: 12px; right: 12px; bottom: 12px; width: min(440px, calc(100% - 24px)); overflow-y: auto; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--dept); border-radius: var(--radius); padding: 20px 22px 28px; box-shadow: var(--shadow); display: grid; gap: 24px; align-content: start; }
+.dept-panel[hidden] { display: none; }
+.dept-panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.crumbs { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+.crumbs button { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; }
+.crumbs button:hover { text-decoration: underline; }
+.dept-panel h2 { font-size: 22px; margin-top: 2px; }
+.blurb { font-size: 14px; line-height: 1.55; }
+.stat-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.subteam { display: grid; gap: 6px; margin-bottom: 12px; }
+.subteam:last-child { margin-bottom: 0; }
+.subteam-name { font-size: 12px; font-weight: 650; color: var(--muted); }
+.block-label .sub { display: block; font-size: 10.5px; font-weight: 500; color: var(--muted); line-height: 1.2; }
+.block-label[data-emphasis="active"] .sub { color: rgba(255,255,255,0.85); }
+.role-pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--dept) 70%, transparent); background: color-mix(in srgb, var(--dept) 13%, transparent); padding: 4px 5px 4px 8px; font-size: 12px; font-weight: 600; }
+.role-pill .n { font-size: 11px; font-weight: 700; background: #fff; border-radius: 999px; padding: 0 7px; border: 1px solid color-mix(in srgb, var(--dept) 55%, transparent); }
+.role-pill .n.tbc { color: var(--muted); border-style: dashed; font-weight: 600; }
+.role-pill-swatch { width: 8px; height: 8px; border-radius: 50%; background: var(--dept); }
+.problem-list, .flow-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.problem { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 7px; }
+.problem[data-dim="true"] { opacity: 0.38; }
+.problem-top { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; font-size: 13px; line-height: 1.45; }
+.problem-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.tag { font-size: 10.5px; color: var(--muted); border: 1px solid var(--line); background: #fff; border-radius: 5px; padding: 0 6px; }
+.impact { font-size: 13px; line-height: 1.5; padding: 9px 11px; border-radius: 8px; background: color-mix(in srgb, var(--critical) 6%, #fff); border: 1px solid color-mix(in srgb, var(--critical) 30%, transparent); }
+.flow-row { width: 100%; text-align: left; background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--other); border-radius: 8px; padding: 10px 12px; cursor: pointer; display: grid; gap: 5px; font-size: 13px; }
+.flow-row:hover, .flow-row[aria-pressed="true"] { border-color: var(--other); background: color-mix(in srgb, var(--other) 9%, #fff); }
+.flow-row .route { display: flex; gap: 6px; align-items: center; font-weight: 600; }
+.flow-row .brk { font-size: 12px; color: #3a4166; line-height: 1.45; }
+
+/* Help */
+.help-backdrop { position: fixed; inset: 0; background: rgba(27, 33, 64, 0.35); display: grid; place-items: center; z-index: 80; }
+.help-backdrop[hidden] { display: none; }
+.help { width: min(560px, calc(100% - 32px)); background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; display: grid; gap: 14px; }
+.help ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; line-height: 1.5; }
+.legend { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12px; }
+
+@media (max-width: 860px) {
+  .ov-backdrop { padding: 10px; }
+  .overview { grid-template-columns: 1fr; grid-template-areas: "head" "lens" "chain" "sys" "foot"; }
+  .overview > * { padding-left: 20px; padding-right: 20px; }
+  .ov-sys { border-left: 0; border-top: 1px solid var(--line); }
+  .ov-lens .lenses { grid-template-columns: 1fr; }
+  .overview h2 { font-size: 21px; }
+  .chain { grid-template-columns: 1fr; }
+  .jny { grid-template-columns: 1fr; }
+  .chain li { padding: 0 0 14px 34px; }
+  .chain li::after { left: 10px; right: auto; top: 22px; bottom: 0; width: 2px; height: auto; }
+  .ov-foot { flex-direction: column; align-items: stretch; }
+  .lens-bar-label { display: none; }
+  .say { display: none !important; }
+  .top-card { left: 12px; right: 12px; transform: none; width: auto; max-width: none; }
+  .lens-intro { max-height: 46dvh; overflow-y: auto; }
+  .intro-list { display: grid !important; }
+  .lens-intro .intro-hint { display: block; }
+  .dept-panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 64dvh; }
+  .hover-card { display: none !important; }
+  .topbar { flex-wrap: wrap; }
+}
+/* Embedded as a tab in the Departments System Map: the host app's bar names the page, so drop the duplicate title. */
+html.embedded .topbar h1 { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  #dim { transition: none; }
+  .say.pop { animation: none; }
+  .block-lift, .block, .edge, .block-label { transition: none; }
+  .edge[data-state="active"] .flow { animation: none; }
+}
+</style>
+</head>
+<body>
+<script>if (window.self !== window.top) document.documentElement.classList.add("embedded");</script>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1>Lincoln Business Operations Problem Map</h1>
+      <p id="topstats"></p>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="icon-btn" id="helpBtn" aria-label="How to use this map">?</button>
+    </div>
+  </header>
+  <main class="stage" id="stage">
+    <svg id="map" role="img" aria-label="Isometric map of Lincoln's teams and the hand-offs between them"></svg>
+    <div id="dim" aria-hidden="true"></div>
+    <div id="labels"></div>
+
+    <div class="top-card" id="topCard">
+      <div class="lens-bar" id="lensBar"></div>
+      <div class="lens-intro" id="lensIntro" hidden></div>
+    </div>
+
+    <div class="hover-card" id="hoverCard" hidden></div>
+    <div class="edge-card" id="edgeCard" hidden></div>
+    <aside class="dept-panel" id="deptPanel" hidden></aside>
+  </main>
+</div>
+
+<div class="ov-backdrop" id="ovBackdrop">
+  <section class="overview" id="overview" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+    <button type="button" class="icon-btn ov-close" id="overviewClose" aria-label="Close overview">×</button>
+    <header class="ov-head">
+      <div class="overview-head">
+        <div>
+          <div class="kicker">Overall problem</div>
+          <h2 id="ovTitle">Every order crosses nine teams, and no single system carries it from start to finish</h2>
+        </div>
+      </div>
+      <ul class="ov-points">
+        <li><span><b>Two ERPs, no link.</b> BMS and LincolnERP are updated side by side.</span></li>
+        <li><span><b>Chat fills the gaps.</b> Teams pass updates on WhatsApp, Teams or email.</span></li>
+        <li><span><b>Data moves by CSV.</b> Exported from one system, filtered in Excel, imported into another.</span></li>
+        <li><span><b>Every hand-off is manual.</b> Each one adds errors, rework and slower cash.</span></li>
+      </ul>
+    </header>
+    <div class="ov-sys">
+      <p class="key-msg"><b><i>Each team's mix of platforms is shown beside its block on the map.</i></b></p>
+      <div class="sec-title">Systems an order passes through <span class="muted" id="toolCount"></span></div>
+      <div class="kind-list" id="toolCloud"></div>
+    </div>
+    <div class="ov-lens">
+      <div class="sec-title">Four problems shared across teams</div>
+      <div class="lenses" id="lenses"></div>
+      <p class="hint">Pick one to see on the map which teams and hand-offs it affects.</p>
+    </div>
+    <div class="ov-chain">
+      <div class="chain-head">
+        <div class="sec-title" id="journeyTitle" style="margin:0"></div>
+      </div>
+      <div class="chain-end" id="journeyEnd" style="margin: 0 0 16px"></div>
+      <div id="journeyBody"></div>
+    </div>
+    <footer class="ov-foot">
+      <p class="hint" style="margin:0">Headcounts are the people named in discovery sessions; TBC means the team size wasn't recorded. IT (1) supports every team with 20+ stop-gap tools.</p>
+      <button type="button" class="btn-primary" id="exploreBtn">Explore the map</button>
+    </footer>
+  </section>
+</div>
+
+<div class="help-backdrop" id="help" hidden>
+  <div class="help" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="dept-panel-head"><h2 id="helpTitle" style="font-size:18px">How to read this map</h2><button type="button" class="icon-btn" id="helpClose" aria-label="Close">×</button></div>
+    <ul>
+      <li><b>Blocks</b> are departments. The number on each label is its step in the order journey: 1–4 follow the order from sales request to invoice, 5–8 are the teams that support it.</li>
+      <li><b>Lines</b> are hand-offs between teams. A red ring marks where information breaks or has to be re-keyed. Click a line or ring for detail.</li>
+      <li><b>Overall problem</b> opens the company-wide summary. The bar above the map lights up where each of the four shared problems appears.</li>
+      <li><b>Click a block</b> to see its roles and headcount, every problem ranked by severity, and its broken hand-offs.</li>
+      <li>Drag to pan, scroll to zoom, press Esc to step back.</li>
+    </ul>
+    <div class="legend">
+      <span class="chip sev-critical">Critical</span> blocks the work or causes wrong invoices
+      <span class="chip sev-high">High</span> major rework or delay
+      <span class="chip sev-moderate">Moderate</span> friction with a workaround
+      <span class="chip sev-low">Low</span> minor
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Data (from Lincoln discovery notes; names removed) ---------- */
+const LENSES = [
+  { id: "frag", short: "Fragmented data", name: "Fragmented data, no source of truth", sev: "critical",
+    points: ["One order is split across a CRFQ, QTN, Hiring Contract, PO, DOs, return notes and an invoice, each kept in a different place.", "Data is re-typed at every hand-off between teams.", "Finding and cross-checking a customer's documents across teams often takes 1–2 days.", "No audit log: nobody can see who owns a record, or what was edited at which step."] },
+  { id: "version", short: "No version control", name: "No version control", sev: "critical",
+    points: ["Quotations are overwritten in place.", "Late changes are handwritten on paper.", "The only change log is a separate Excel sheet."] },
+  { id: "status", short: "Status by hand", name: "Status updated by hand", sev: "high",
+    points: ["Status lives on whiteboards, spreadsheets and calendar reminders.", "Nobody can see where an order or approval is stuck without asking."] },
+  { id: "change", short: "Last-minute changes", name: "Customer changes the order at the last minute", sev: "critical",
+    points: ["Each change creates another QTN.", "The change never reaches the HC, DO or invoice.", "Operations and Finance re-create invoices by hand."] }
+];
+const LENS = Object.fromEntries(LENSES.map(l => [l.id, l]));
+LENSES.find(l => l.id === "frag").intro = "Lincoln has no single record of an order. Each team keeps its own copy in its own tool, so information is re-typed at every hand-off and the copies drift apart.";
+LENSES.find(l => l.id === "version").intro = "When an order changes, the old version is overwritten or crossed out on paper. Nobody can see what changed, when, or which copy is current, and no one clearly owns each document.";
+LENSES.find(l => l.id === "status").intro = "No system shows where an order or approval stands. Junior staff update status by hand on whiteboards and calendars, so seniors easily miss changes.";
+LENSES.find(l => l.id === "change").intro = "One customer change ripples through six teams by hand. Each team patches its own document, and Finance (AR) is always the last to be updated.";
+/* One line per team (or a short list): how each shared problem shows up there. */
+const sayHTML = v => Array.isArray(v) ? `<ul class="say-list">${v.map(t => `<li>${t}</li>`).join("")}</ul>` : v;
+const SAYS = {
+  frag: {
+    sales: "Orders leave Sales as WhatsApp text, and Quotation types them in again.",
+    quote: "Each quote is built across BMS tabs, Excel and Teams.",
+    fulfil: "The Hiring Contract is re-keyed from the quote; they aren't linked.",
+    transport: "Trucks are tracked in Logisfleet, which isn't linked to orders.",
+    ar: ["Contract changes reach AR late, or not at all.", "Outdated details mean invoices get reworked."],
+    ap: "Records are downloaded from BMS and checked line by line.",
+    procurement: "Approvals sit in Power Automate, outside the ERP.",
+    store: "Goods received are checked on paper, then scanned.",
+    plant: "Service readings go in a paper book, then get re-typed into BMS."
+  },
+  version: {
+    quote: "Quotes are overwritten, so every change becomes a new QTN.",
+    fulfil: "Late changes are handwritten on the paper Hiring Contract.",
+    ar: "Customer details change by email; invoices under old names get rejected.",
+    ap: "Invoice changes are traced in a separate Excel log.",
+    store: "A new work order per parts draw, instead of one per job.",
+    plant: "Swapped parts never update the HC or invoice."
+  },
+  status: {
+    sales: "Follow-up reminders are sent by hand from a calendar.",
+    quote: "Price approvals are chased again on Teams.",
+    fulfil: "Staff check BMS by hand to see if signed documents are back.",
+    transport: "Routes and driver availability are planned by hand.",
+    ar: "Billing starts from a Teams message, not from the order.",
+    ap: "No one can see where an approval is stuck.",
+    procurement: "Most POs are raised only after the goods arrive.",
+    store: "There's no live view of stock levels.",
+    plant: "Job status lives on a whiteboard."
+  },
+  change: {
+    sales: "The change arrives as a WhatsApp message.",
+    quote: "Each change means another QTN.",
+    fulfil: "The HC, DO and PO stay out of date.",
+    transport: "Return dates and on-site swaps aren't passed back.",
+    ar: "AR re-creates the invoice from outdated paperwork.",
+    ap: "Accounting fixes the mismatch, often a month later.",
+    plant: "Replacement parts don't reach Ops paperwork."
+  }
+};
+
+const DEPTS = [
+  { id: "sales", name: "Sales", color: "#F59E0B", cell: [-1.5, 0.5],
+    blurb: "Wins rental and machinery orders and owns customer accounts.",
+    roles: [["Salesperson", 2], ["Sales support (offshore)", null]],
+    tools: ["WhatsApp", "Excel", "LincolnERP mobile"],
+    problems: [
+      ["Orders are sent as free-text remarks on WhatsApp because the CRFQ form takes too long", "high", ["frag", "change"]],
+      ["Offshore support fills in the form for sales, then goes back with questions (delivery, accessories, certs)", "moderate", ["frag"]],
+      ["Account allocation and customer profiles are kept in Excel, with no record of customer interactions", "moderate", ["frag"]],
+      ["No mobile view of past orders, outstanding payments or estimated commission. The UI doesn't fit an iPad", "moderate", ["frag"]],
+      ["Follow-up reminders are sent by hand from a calendar", "low", ["status"]]
+    ],
+    impact: "Quotes are slow and error-prone, and sales support time goes to admin instead of accounts." },
+
+  { id: "quote", name: "Quotation", color: "#3B82F6", cell: [-0.5, 0.5], group: "ops",
+    sub: "Operations",
+    blurb: "Part of Operations. Prices the customer's request and issues the quotation (QTN).",
+    roles: [["Quotation executive", 1], ["Offshore quotation team", null]],
+    tools: ["LincolnERP", "BMS", "Excel remarks sheet", "Teams"],
+    problems: [
+      ["Amendments overwrite the quotation with no history, so each customer change becomes another QTN", "critical", ["version", "change"]],
+      ["One quote means switching BMS tabs and an Excel remarks sheet, then asking for approval again on Teams", "high", ["frag", "status"]],
+      ["The quote isn't linked to the Hiring Contract, so Order Fulfilment re-keys it", "high", ["frag", "change"]],
+      ["Common errors in rates, remarks and transport charges. LincolnERP search is slow and noisy", "moderate", ["frag"]]
+    ],
+    impact: "Every customer change starts a new QTN that the rest of the chain has to catch up with." },
+
+  { id: "fulfil", name: "Order Fulfilment", color: "#6366F1", cell: [-0.5, 1.5], group: "ops",
+    sub: "Operations",
+    blurb: "Part of Operations. Turns the confirmed quote into the Hiring Contract, PO and delivery orders.",
+    roles: [["Ops executive", 1], ["Order support supervisor", 1], ["Order admin", 1]],
+    tools: ["LincolnERP", "BMS", "Paper HC", "Teams"],
+    problems: [
+      ["Changes are passed to the HC, DO and PO by hand. The real flow is QTN → HC → QTN → PO, and some POs change daily", "critical", ["change", "frag"]],
+      ["The Hiring Contract is re-keyed from the quote because the two aren't linked", "high", ["frag"]],
+      ["Last-minute changes are written on the signed paper Hiring Contract and keyed in later", "high", ["version", "change"]],
+      ["Returned HCs and return notes are sorted and checked against BMS by hand to confirm they're back from drivers", "moderate", ["status"]]
+    ],
+    impact: "Most of the mismatches that reach Finance start here." },
+
+  { id: "transport", name: "Transport & Vehicle", color: "#60A5FA", cell: [0.5, 1.5], size: 0.8,
+    sub: "Part of Order Fulfilment",
+    blurb: "Part of Order Fulfilment. Delivers and collects machines, and keeps the fleet roadworthy.",
+    roles: [["Transport coordinator", 1], ["Vehicle supervisor", 1], ["Drivers", null]],
+    tools: ["Logisfleet", "Paper DO", "WhatsApp"],
+    problems: [
+      ["Collection and return dates don't reach Finance in time to bill correctly", "high", ["change", "frag"]],
+      ["Vehicles are tracked in a separate fleet app that isn't linked to orders", "moderate", ["frag"]],
+      ["Routes, driver availability and licences are scheduled by hand", "moderate", ["status"]],
+      ["Fuel, inspections and road-tax renewals are tracked outside the ERP", "low", ["status"]]
+    ],
+    impact: "Routing is inefficient and return billing is missed or wrong." },
+
+  { id: "ar", name: "AR & Credit Control", color: "#10B981", cell: [0.5, 0.5],
+    blurb: "Bills customers, sends statements and chases payment.",
+    roles: [["Finance head", 1], ["AR executive", 4], ["Credit controller", 1]],
+    tools: ["BMS", "Teams", "Telegram", "OneDrive", "Scanner", "Excel"],
+    problems: [
+      ["Invoices are rebuilt from Ops paperwork that is often outdated or wrong", "critical", ["change", "frag"]],
+      ["Billing is triggered informally: COD over Teams, with no structured trigger for standard, advance or return billing", "high", ["status", "change"]],
+      ["Return, partial-return and transport charges are calculated by hand", "high", ["change"]],
+      ["Big customers need their own invoice formats and reject invoices with an old company name", "high", ["version"]],
+      ["Payment chasing is manual, and 2 weeks to 1 month late is common", "high", ["status"]],
+      ["Customer master changes arrive by email or Telegram and are logged by hand", "moderate", ["frag", "version"]]
+    ],
+    impact: "Corrections, re-issued invoices and slower cash collection." },
+
+  { id: "ap", name: "AP & Accounting", color: "#8B5CF6", cell: [1.5, 0.5],
+    blurb: "Pays suppliers, reconciles the books and files GST.",
+    roles: [["Finance manager", 1], ["AP executive", 1], ["Accountant", 2]],
+    tools: ["BMS", "Excel", "Email approvals", "Power BI", "Bank statements"],
+    problems: [
+      ["BMS can't produce an accurate GST return, so the F5 is prepared by hand and missed items roll into next month", "critical", ["frag"]],
+      ["DOs are matched to supplier invoices by hand, and approvals by email or Power BI show nowhere where they're stuck", "high", ["status", "frag"]],
+      ["Records are downloaded from BMS and checked line by line, with frequent category and amount errors", "high", ["frag"]],
+      ["Deposits, fixed assets, petty cash and commissions are tracked outside the system", "moderate", ["frag"]],
+      ["Invoice changes are traced through a separate Excel change log", "moderate", ["version", "change"]]
+    ],
+    impact: "Month-end close is slow, with higher audit and tax-filing risk." },
+
+  { id: "procurement", name: "Procurement & SMP", color: "#EC4899", cell: [-1.5, -0.5],
+    blurb: "Buys machines and parts, and runs sales of machinery.",
+    roles: [["SMP manager", 1], ["Procurement staff", null]],
+    tools: ["Power Automate", "BMS", "Email"],
+    problems: [
+      ["About 80% of POs are raised after the goods arrive", "high", ["status"]],
+      ["Purchase requisitions are approved in a separate Power Automate chain", "moderate", ["frag", "status"]],
+      ["Machinery sales are pushed through the rental CRFQ flow, which doesn't fit a sale", "moderate", ["frag"]],
+      ["No supplier master, background-check record or price-trend view", "moderate", ["frag"]]
+    ],
+    impact: "Weak spend control, and purchases are hard to trace through to stock and payment." },
+
+  { id: "store", name: "Store & Inventory", color: "#14B8A6", cell: [-0.5, -0.5],
+    blurb: "Receives, issues and tracks spare parts and stock.",
+    roles: [["Storeman", 1], ["Inventory admin", 1], ["Store assistant", 1]],
+    tools: ["Paper DO", "Scanner", "BMS", "Stock app"],
+    problems: [
+      ["Goods received are checked by hand against the PR and supplier DO, then scanned", "high", ["frag", "status"]],
+      ["No live view of stock levels, usage or machine ROI to guide buying", "high", ["status", "frag"]],
+      ["A new work order is raised for each parts draw instead of one per breakdown", "moderate", ["version"]],
+      ["It's unclear whether a parts draw needs approval", "moderate", ["status"]]
+    ],
+    impact: "Stock is inaccurate, and work orders are missing cost and selling prices." },
+
+  { id: "plant", name: "Plant Service", color: "#F97316", cell: [0.5, -0.5],
+    blurb: "Services rented machines on site and responds to breakdowns within 4 hours.",
+    roles: [["Plant manager", 1], ["Service supervisor", 1], ["Service coordinator", 1], ["Service planner", 1], ["Servicemen", null]],
+    tools: ["Whiteboard", "Serviceman book", "Excel", "Power BI", "BMS"],
+    problems: [
+      ["Spare parts swapped for customers don't show up on Ops paperwork or invoices", "high", ["change", "version"]],
+      ["The daily service list and job status are kept on a whiteboard", "high", ["status"]],
+      ["Readings go into a paper book, then the office re-keys them into BMS", "high", ["frag"]],
+      ["Service status for the ISO audit is tracked in a spreadsheet", "high", ["status"]],
+      ["Breakdown jobs and leave cover are allocated by hand", "moderate", ["status"]]
+    ],
+    impact: "Data is entered twice, machine-health data arrives late, and the ISO audit is at risk." }
+];
+const CELL = 24, BW = 6.5, H = BW / 2, TILE_H = 0.5;
+DEPTS.forEach(d => { d.pos = [d.cell[0] * CELL, d.cell[1] * CELL]; });
+/* Order of the journey: the main order path first (matches the journey in the overview), then the teams that support it. */
+const STEP_ORDER = ["sales", "quote", "fulfil", "transport", "ar", "plant", "store", "procurement", "ap"];
+DEPTS.forEach(d => { d.step = STEP_ORDER.indexOf(d.id) + 1; });
+const DEPT = Object.fromEntries(DEPTS.map(d => [d.id, d]));
+
+/* Hand-offs on the ground plane: [x, z] waypoints between tile edges. */
+const EDGES = [
+  { id: "e1", from: "sales", to: "quote", what: "CRFQ: order request", sev: "high", lenses: ["frag", "change"],
+    brk: "Sent as free text over WhatsApp. The offshore team re-keys it and asks follow-up questions.", pts: [[-1.5*CELL+H, 0.5*CELL], [-0.5*CELL-H, 0.5*CELL]], mark: 0.5 },
+  { id: "e12", from: "quote", to: "fulfil", what: "Confirmed quote → Hiring Contract", sev: "critical", lenses: ["frag", "change", "version"],
+    brk: "Quotation and Order Fulfilment don't share one record. The HC is re-keyed from the quote, and later quote changes are passed on by hand.", pts: [[-0.5*CELL, 0.5*CELL+H], [-0.5*CELL, 1.5*CELL-H]], mark: 0.5 },
+  { id: "e2", from: "fulfil", to: "ar", what: "Hiring Contract · PO", sev: "critical", lenses: ["change", "version", "frag"],
+    brk: "Customer changes create new QTNs and paper notes that never reach the invoice, so AR rebuilds it by hand.", pts: [[-0.5*CELL+H, 1.5*CELL-1.2], [0, 1.5*CELL-1.2], [0, 0.5*CELL+1.2], [0.5*CELL-H, 0.5*CELL+1.2]], mark: 0.5 },
+  { id: "e3", from: "fulfil", to: "transport", what: "Delivery orders · driver notes", sev: "moderate", lenses: ["status", "change"],
+    brk: "DOs are split per lorry by hand, and the signed Hiring Contract comes back on paper.", pts: [[-0.5*CELL+H, 1.5*CELL+0.8], [0.5*CELL-0.8*H, 1.5*CELL+0.8]], mark: 0.6 },
+  { id: "e4", from: "transport", to: "ar", what: "Collection & return dates", sev: "high", lenses: ["change", "frag"],
+    brk: "Late collections aren't passed on, so return billing is missed or wrong.", pts: [[0.5*CELL+0.5, 1.5*CELL-0.8*H], [0.5*CELL+0.5, 0.5*CELL+H]], mark: 0.5 },
+  { id: "e5", from: "plant", to: "fulfil", what: "Replacement parts issued", sev: "high", lenses: ["change", "version"],
+    brk: "Parts swapped for the customer aren't reflected on the HC, DO or invoice.", pts: [[0.5*CELL-H, -0.5*CELL+1.6], [-2.6, -0.5*CELL+1.6], [-2.6, 1.5*CELL-2.4], [-0.5*CELL+H, 1.5*CELL-2.4]], mark: 0.35 },
+  { id: "e6", from: "plant", to: "store", what: "Work orders · parts draws", sev: "moderate", lenses: ["status", "version"],
+    brk: "A separate work order is raised for each draw, and the approval rule is unclear.", pts: [[0.5*CELL-H, -0.5*CELL-0.6], [-0.5*CELL+H, -0.5*CELL-0.6]], mark: 0.5 },
+  { id: "e7", from: "procurement", to: "store", what: "PO · goods received", sev: "high", lenses: ["status", "frag"],
+    brk: "The PO is often raised after the goods arrive, and receiving checks are done on paper.", pts: [[-1.5*CELL+H, -0.5*CELL], [-0.5*CELL-H, -0.5*CELL]], mark: 0.5 },
+  { id: "e8", from: "store", to: "ap", what: "PR · supplier DO", sev: "high", lenses: ["frag"],
+    brk: "AP scans and matches the same documents again.", pts: [[-0.5*CELL-0.6, -0.5*CELL+H], [-0.5*CELL-0.6, 0.8], [1.5*CELL-0.5, 0.8], [1.5*CELL-0.5, 0.5*CELL-H]], mark: 0.72 },
+  { id: "e9", from: "procurement", to: "ap", what: "Supplier invoices", sev: "moderate", lenses: ["frag"],
+    brk: "There's no supplier master, so bank details and contra customers are checked by hand.", pts: [[-1.5*CELL+0.5, -0.5*CELL+H], [-1.5*CELL+0.5, -0.8], [1.5*CELL+0.5, -0.8], [1.5*CELL+0.5, 0.5*CELL-H]], mark: 0.55 },
+  { id: "e10", from: "ar", to: "ap", what: "Receipts · GST collected", sev: "critical", lenses: ["frag"],
+    brk: "GST collected and paid are tallied by hand for the IRAS filing.", pts: [[0.5*CELL+H, 0.5*CELL], [1.5*CELL-H, 0.5*CELL]], mark: 0.5 },
+  { id: "e11", from: "ar", to: "sales", what: "Payment status · commission", sev: "moderate", lenses: ["status", "frag"],
+    brk: "Sales chases payments without a shared view, and commission is estimated in Excel.", pts: [[0.5*CELL-0.6, 0.5*CELL-H], [0.5*CELL-0.6, 2.6], [-1.5*CELL+0.6, 2.6], [-1.5*CELL+0.6, 0.5*CELL-H]], mark: 0.25 }
+];
+const EDGE = Object.fromEntries(EDGES.map(e => [e.id, e]));
+
+
+const TOOL_KIND = {
+  "BMS": "erp", "LincolnERP": "erp", "LincolnERP mobile": "erp",
+  "Excel": "sheet", "Excel remarks sheet": "sheet", "Power BI": "sheet",
+  "WhatsApp": "chat", "Teams": "chat", "Telegram": "chat", "Email": "chat", "Email approvals": "chat",
+  "Paper HC": "paper", "Paper DO": "paper", "Whiteboard": "paper", "Serviceman book": "paper", "Scanner": "paper", "Paper forms & books": "paper", "Bank statements": "paper",
+  "Logisfleet": "app", "Power Automate": "app", "PowerApps": "app", "OneDrive": "app", "OneDrive / SharePoint": "app", "Stock app": "app"
+};
+const KINDS = [["erp", "ERP"], ["sheet", "Spreadsheets & reports"], ["chat", "Chat & email"], ["paper", "Paper & whiteboard"], ["app", "Other apps"]];
+const TOOLS = ["BMS", "LincolnERP", "Excel", "Power BI", "WhatsApp", "Teams", "Telegram", "Email", "Paper forms & books", "Whiteboard", "PowerApps", "Power Automate", "OneDrive / SharePoint", "Logisfleet"];
+const toolChip = t => `<span class="tool k-${TOOL_KIND[t] || "app"}"><i></i>${t}</span>`;
+
+/* ---------- State ---------- */
+const state = { hovered: null, selected: null, lens: null, edge: null, overview: true, lastFocus: null };
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SEV_ORDER = { critical: 0, high: 1, moderate: 2, low: 3 };
+const SEV_LABEL = { critical: "Critical", high: "High", moderate: "Moderate", low: "Low" };
+const SEV_COLOR = { critical: "#c8102e", high: "#d9480f", moderate: "#a16207", low: "#64748b" };
+
+/* ---------- Isometric projection (camera on the (1,1,1) diagonal) ---------- */
+const C30 = Math.SQRT1_2, S30 = 1 / Math.sqrt(6), YK = Math.sqrt(2 / 3);
+const P = (x, y, z) => [(x - z) * C30, (x + z) * S30 - y * YK];
+const pstr = pts => pts.map(p => p.map(n => n.toFixed(3)).join(",")).join(" ");
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+
+function mix(hex, to, t) {
+  const a = parseInt(hex.slice(1), 16), b = parseInt(to.slice(1), 16);
+  const ch = (s) => Math.round(((a >> s) & 255) * (1 - t) + ((b >> s) & 255) * t);
+  return "#" + [16, 8, 0].map(s => ch(s).toString(16).padStart(2, "0")).join("");
+}
+
+const svg = document.getElementById("map");
+const world = el("g", { id: "world" }, svg);
+
+function drawGrid() {
+  const g = el("g", { "pointer-events": "none" }, world);
+  const R = 3 * CELL;
+  for (let i = -R; i <= R; i += 1) {
+    const sect = i % CELL === 0;
+    const col = sect ? "#cfd6e8" : "#e9ecf4", w = sect ? 0.05 : 0.025;
+    el("line", { x1: P(i, 0, -R)[0], y1: P(i, 0, -R)[1], x2: P(i, 0, R)[0], y2: P(i, 0, R)[1], stroke: col, "stroke-width": w }, g);
+    el("line", { x1: P(-R, 0, i)[0], y1: P(-R, 0, i)[1], x2: P(R, 0, i)[0], y2: P(R, 0, i)[1], stroke: col, "stroke-width": w }, g);
+  }
+  // Soft fade towards the edges.
+  const defs = el("defs", {}, svg);
+  const rg = el("radialGradient", { id: "fade", cx: "50%", cy: "50%", r: "55%" }, defs);
+  el("stop", { offset: "55%", "stop-color": "#f7f8fc", "stop-opacity": 0 }, rg);
+  el("stop", { offset: "100%", "stop-color": "#f7f8fc", "stop-opacity": 1 }, rg);
+  const c = P(0, 0, 0);
+  el("rect", { x: c[0] - 60, y: c[1] - 34, width: 120, height: 68, fill: "url(#fade)" }, g);
+}
+
+function quad(pts, fill, parent) {
+  return el("polygon", { points: pstr(pts), fill, stroke: "#2a2f52", "stroke-opacity": 0.5, "stroke-width": 0.035, "stroke-linejoin": "round" }, parent);
+}
+function isoBox(parent, cx, cz, half, y0, y1, top, sideX, sideZ) {
+  quad([P(cx + half, y0, cz - half), P(cx + half, y0, cz + half), P(cx + half, y1, cz + half), P(cx + half, y1, cz - half)], sideX, parent);
+  quad([P(cx - half, y0, cz + half), P(cx + half, y0, cz + half), P(cx + half, y1, cz + half), P(cx - half, y1, cz + half)], sideZ, parent);
+  return quad([P(cx - half, y1, cz - half), P(cx + half, y1, cz - half), P(cx + half, y1, cz + half), P(cx - half, y1, cz + half)], top, parent);
+}
+
+const edgeEls = {}, blockEls = {}, labelEls = {};
+
+function drawEdges() {
+  const g = el("g", {}, world);
+  for (const e of EDGES) {
+    const pts = e.pts.map(([x, z]) => P(x, 0.02, z));
+    const grp = el("g", { class: "edge", "data-id": e.id, tabindex: "-1" }, g);
+    el("polyline", { points: pstr(pts), fill: "none", stroke: "transparent", "stroke-width": 0.6 }, grp); // hit area
+    const base = el("polyline", { class: "base", points: pstr(pts), fill: "none", stroke: "#7d89b0", "stroke-width": 0.07, "stroke-linejoin": "round" }, grp);
+    const flow = el("polyline", { class: "flow", points: pstr(pts), fill: "none", stroke: DEPT[e.from].color, "stroke-width": 0.16, "stroke-linecap": "round", "stroke-dasharray": "0.01 0.6" }, grp);
+    const dots = pts.slice(0, -1).map(p => el("circle", { cx: p[0], cy: p[1], r: 0.085, fill: "#7d89b0" }, grp));
+    // Arrowhead at the receiving end, pointing along the last segment, so the flow direction reads at a glance.
+    const [ax, ay] = pts[pts.length - 1], [bx, by] = pts[pts.length - 2];
+    const ang = Math.atan2(ay - by, ax - bx) * 180 / Math.PI;
+    const arrow = el("path", { d: "M0.05,0 L-0.85,-0.48 L-0.62,0 L-0.85,0.48 Z", fill: "#7d89b0", transform: `translate(${ax.toFixed(3)},${ay.toFixed(3)}) rotate(${ang.toFixed(2)})` }, grp);
+    // A second arrowhead mid-way along long lines.
+    let mid = null;
+    let best = -1, bi = 0;
+    for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); if (l > best) { best = l; bi = i; } }
+    if (best > 9) {
+      const [p0, p1] = [pts[bi - 1], pts[bi]], t = e.mark > 0.4 && e.mark < 0.6 ? 0.3 : 0.55;
+      const mx2 = p0[0] + (p1[0] - p0[0]) * t, my2 = p0[1] + (p1[1] - p0[1]) * t, a2 = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]) * 180 / Math.PI;
+      mid = el("path", { d: "M0.4,0 L-0.4,-0.38 L-0.22,0 L-0.4,0.38 Z", fill: "#7d89b0", transform: `translate(${mx2.toFixed(3)},${my2.toFixed(3)}) rotate(${a2.toFixed(2)})` }, grp);
+    }
+    // Break marker at a point along the path.
+    const lens = [];
+    let total = 0;
+    for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); lens.push(l); total += l; }
+    let target = total * e.mark, mx = pts[0][0], my = pts[0][1];
+    for (let i = 0; i < lens.length; i++) {
+      if (target <= lens[i]) { const t = target / lens[i]; mx = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t; my = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t; break; }
+      target -= lens[i];
+    }
+    const mk = el("g", { class: "break-mark", transform: `translate(${mx.toFixed(3)},${my.toFixed(3)})` }, grp);
+    el("circle", { r: 0.34, fill: "#fff", stroke: SEV_COLOR[e.sev], "stroke-width": 0.08 }, mk);
+    el("path", { d: "M-0.13,-0.13 L0.13,0.13 M0.13,-0.13 L-0.13,0.13", stroke: SEV_COLOR[e.sev], "stroke-width": 0.08, "stroke-linecap": "round" }, mk);
+    el("title", {}, grp).textContent = `${DEPT[e.from].name} → ${DEPT[e.to].name}: ${e.what}. ${e.brk}`;
+    grp.addEventListener("click", ev => { ev.stopPropagation(); toggleEdge(e.id); });
+    edgeEls[e.id] = { grp, base, flow, dots, arrow, mid };
+  }
+}
+
+function drawBlocks() {
+  const g = el("g", {}, world);
+  const order = [...DEPTS].sort((a, b) => (a.pos[0] + a.pos[1]) - (b.pos[0] + b.pos[1]));
+  for (const d of order) {
+    const [cx, cz] = d.pos, s = d.size || 1, half = (BW * s) / 2, h = TILE_H * (s < 1 ? 0.85 : 1), chip = 0.17 * BW * s;
+    const grp = el("g", { class: "block", "data-id": d.id }, g);
+    const plate = H + 2.4;
+    el("polygon", { points: pstr([P(cx - plate, 0, cz - plate), P(cx + plate, 0, cz - plate), P(cx + plate, 0, cz + plate), P(cx - plate, 0, cz + plate)]), fill: "#ffffff", "fill-opacity": 0.6, stroke: "#cdd4e6", "stroke-width": 0.04 }, grp);
+    el("polygon", { points: pstr([P(cx - half + 0.5, 0, cz - half + 0.5), P(cx + half + 0.5, 0, cz - half + 0.5), P(cx + half + 0.5, 0, cz + half + 0.5), P(cx - half + 0.5, 0, cz + half + 0.5)]), fill: "#1b2140", "fill-opacity": 0.11 }, grp);
+    const lift = el("g", { class: "block-lift" }, grp);
+    const top = isoBox(lift, cx, cz, half, 0, h, "#ffffff", mix(d.color, "#000000", 0.22), mix(d.color, "#ffffff", 0.12));
+    isoBox(lift, cx, cz, chip, h, h + chip * 2, mix(d.color, "#ffffff", 0.42), mix(d.color, "#000000", 0.16), d.color);
+    // Severity ticks on the tile top, one per problem.
+    const n = d.problems.length;
+    const sorted = [...d.problems].sort((a, b) => SEV_ORDER[a[1]] - SEV_ORDER[b[1]]);
+    sorted.forEach((p, i) => {
+      const x = cx - half + 0.6 + i * 0.55, z = cz + half - 0.6;
+      const c = P(x, h, z);
+      el("ellipse", { cx: c[0], cy: c[1], rx: 0.21, ry: 0.12, fill: SEV_COLOR[p[1]] }, lift);
+    });
+    grp.addEventListener("mouseenter", () => setHover(d.id));
+    grp.addEventListener("mouseleave", () => { if (state.hovered === d.id) setHover(null); });
+    grp.addEventListener("click", ev => { ev.stopPropagation(); select(state.selected === d.id ? null : d.id); });
+    const ta = [cx + half + 0.9, 0, cz - half - 0.9];
+    const l0 = P(cx + half, h, cz - half), l1 = P(...ta);
+    blockEls[d.id] = { grp, top, anchor: [cx, h + chip * 2 + 0.25, cz], toolAnchor: ta };
+  }
+}
+
+const toolEls = {}, sayEls = {};
+let entryEl = null, entryBlock = null, groupEl = null, groupPoly = null;
+const GROUP_PAD = 2.8;
+function groupGeom() {
+  const ids = ["quote", "fulfil"], xs = ids.map(i => DEPT[i].pos[0]), zs = ids.map(i => DEPT[i].pos[1]);
+  const x0 = Math.min(...xs) - H - GROUP_PAD, x1 = Math.max(...xs) + H + GROUP_PAD, z0 = Math.min(...zs) - H - GROUP_PAD, z1 = Math.max(...zs) + H + GROUP_PAD;
+  return { x0, x1, z0, z1, label: [x0, 0, z0 + (z1 - z0) * 0.38] };
+}
+function drawGroup() {
+  const g = groupGeom();
+  groupPoly = el("polygon", { points: pstr([P(g.x0, 0, g.z0), P(g.x1, 0, g.z0), P(g.x1, 0, g.z1), P(g.x0, 0, g.z1)]), fill: "#3B82F6", "fill-opacity": 0.05, stroke: "#3B82F6", "stroke-width": 0.12, "stroke-linejoin": "round", "pointer-events": "none" }, world);
+  groupEl = document.createElement("div");
+  groupEl.className = "block-label group-label";
+  groupEl.innerHTML = `<span class="count" aria-hidden="true">★</span><span>Operations director<span class="sub">Leads Quotation & Order Fulfilment</span></span><span class="n">×1</span>`;
+  document.getElementById("labels").appendChild(groupEl);
+}
+const ENTRY = { cell: [-2.5, 0.5], size: 0.85, color: "#4ADE80" };
+function entryGeom() {
+  const cx = ENTRY.cell[0] * CELL, cz = ENTRY.cell[1] * CELL, half = (BW * ENTRY.size) / 2, h = TILE_H * 0.85, chip = 0.17 * BW * ENTRY.size;
+  const [sx, sz] = DEPT.sales.pos;
+  return { cx, cz, half, h, chip, plate: H + 2.4, anchor: [cx, h + chip * 2 + 0.25, cz], from: [cx + half + 0.4, 0.02, cz], to: [sx - H - 0.4, 0.02, sz] };
+}
+function drawEntry() {
+  const g = entryGeom();
+  const defs = svg.querySelector("defs") || el("defs", {}, svg);
+  const m = el("marker", { id: "entryArrow", viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 5, markerHeight: 5, orient: "auto-start-reverse" }, defs);
+  el("path", { d: "M0,0 L10,5 L0,10 z", fill: "#16a34a" }, m);
+  const grp = el("g", { class: "block entry-block", style: "cursor: default" }, world);
+  entryBlock = grp;
+  const plate = g.plate;
+  el("polygon", { points: pstr([P(g.cx - plate, 0, g.cz - plate), P(g.cx + plate, 0, g.cz - plate), P(g.cx + plate, 0, g.cz + plate), P(g.cx - plate, 0, g.cz + plate)]), fill: mix(ENTRY.color, "#ffffff", 0.88), "fill-opacity": 0.75, stroke: mix(ENTRY.color, "#ffffff", 0.4), "stroke-width": 0.05 }, grp);
+  el("polygon", { points: pstr([P(g.cx - g.half + 0.5, 0, g.cz - g.half + 0.5), P(g.cx + g.half + 0.5, 0, g.cz - g.half + 0.5), P(g.cx + g.half + 0.5, 0, g.cz + g.half + 0.5), P(g.cx - g.half + 0.5, 0, g.cz + g.half + 0.5)]), fill: "#1b2140", "fill-opacity": 0.11 }, grp);
+  const ink = ENTRY.color;
+  isoBox(grp, g.cx, g.cz, g.half, 0, g.h, "#ffffff", mix(ink, "#000000", 0.22), mix(ink, "#ffffff", 0.12));
+  isoBox(grp, g.cx, g.cz, g.chip, g.h, g.h + g.chip * 2, mix(ink, "#ffffff", 0.42), mix(ink, "#000000", 0.16), ink);
+  const a = P(...g.from), b = P(...g.to);
+  el("line", { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: "#16a34a", "stroke-width": 0.1, "stroke-dasharray": "0.3 0.2", "marker-end": "url(#entryArrow)" }, world);
+  entryEl = document.createElement("div");
+  entryEl.className = "block-label entry-label";
+  entryEl.innerHTML = `<span class="row"><span class="count" aria-hidden="true">▶</span><span>Start here</span></span><small>A customer sends an order request to Sales</small>`;
+  document.getElementById("labels").appendChild(entryEl);
+}
+function drawLabels() {
+  const host = document.getElementById("labels");
+  for (const d of DEPTS) {
+    const t = document.createElement("div");
+    t.className = "tool-tag";
+    t.style.setProperty("--dept", d.color);
+    t.innerHTML = `<span class="tool-tag-head">Works in ${d.tools.length} places<span class="kind-dots" aria-hidden="true">${d.tools.map(x => `<span class="tool k-${TOOL_KIND[x] || "app"}"><i></i></span>`).join("")}</span></span><span class="tools">${d.tools.map(toolChip).join("")}</span>`;
+    host.appendChild(t);
+    toolEls[d.id] = t;
+    const say = document.createElement("div");
+    say.className = "say";
+    say.hidden = true;
+    say.style.setProperty("--dept-ink", mix(d.color, "#000000", 0.25));
+    host.appendChild(say);
+    sayEls[d.id] = say;
+  }
+  for (const d of DEPTS) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "block-label";
+    b.style.setProperty("--dept", d.color);
+    b.setAttribute("aria-label", `Step ${d.step}, ${d.name}: ${d.problems.length} problems`);
+    b.innerHTML = `<span class="count" aria-hidden="true">${d.step}</span><span>${d.name}${d.sub ? `<span class="sub">${d.sub}</span>` : ""}</span>`;
+    b.addEventListener("mouseenter", () => setHover(d.id));
+    b.addEventListener("mouseleave", () => { if (state.hovered === d.id) setHover(null); });
+    b.addEventListener("focus", () => setHover(d.id));
+    b.addEventListener("blur", () => { if (state.hovered === d.id) setHover(null); });
+    b.addEventListener("click", ev => { ev.stopPropagation(); select(state.selected === d.id ? null : d.id); });
+    host.appendChild(b);
+    b.style.setProperty("--dept-ink", mix(d.color, "#000000", 0.3));
+    labelEls[d.id] = b;
+  }
+}
+
+/* ---------- Camera: fit the map into the free area, with pan / zoom ---------- */
+/* Labels, tool cards and bubbles are drawn at 100% when the map is at S0 px per unit,
+   and scale with the map below that, so the layout that is clean at S0 stays clean everywhere. */
+const S0 = 14, K_MIN = 0.62, K_MAX = 1.1, K_COMPACT = 0.8;
+const overlayK = () => Math.max(K_MIN, Math.min(K_MAX, cam.scale / S0));
+let BOUNDS = null;
+function computeBounds() {
+  const pts = [];
+  for (const d of DEPTS) {
+    const [x, z] = d.pos, h = H + 1.2;
+    pts.push(P(x - h, 0, z - h), P(x + h, 0, z - h), P(x - h, 0, z + h), P(x + h, 0, z + h));
+    // Overlay boxes, measured at full size and converted to map units.
+    const a = P(...blockEls[d.id].anchor), q = P(...blockEls[d.id].toolAnchor);
+    const lab = labelEls[d.id], tag = toolEls[d.id];
+    const lw = lab.offsetWidth / S0, lh = lab.offsetHeight / S0;
+    pts.push([a[0] - lw / 2, a[1] - lh - 0.6], [a[0] + lw / 2, a[1]]);
+    const left = Math.max(q[0], a[0] + lw / 2 + 8 / S0);
+    const tw = tag.offsetWidth / S0, th = tag.offsetHeight / S0;
+    pts.push([left, q[1] - 0.6 * th], [left + Math.max(tw, 226 / S0), q[1] + 0.5 * th]);
+  }
+  for (const e of EDGES) for (const [x, z] of e.pts) pts.push(P(x, 0, z));
+  if (groupEl) {
+    const gg = groupGeom(), gp = P(...gg.label), w = groupEl.offsetWidth / S0, h = groupEl.offsetHeight / S0;
+    pts.push([gp[0] - 0.88 * w, gp[1] - h / 2], [gp[0] + 0.12 * w, gp[1] + h / 2], P(gg.x0, 0, gg.z0), P(gg.x1, 0, gg.z1), P(gg.x0, 0, gg.z1), P(gg.x1, 0, gg.z0));
+  }
+  if (entryEl) {
+    const g = entryGeom(), e = P(...g.anchor), w = entryEl.offsetWidth / S0, h = entryEl.offsetHeight / S0, pl = g.plate;
+    pts.push([e[0] - w / 2, e[1] - h - 0.6], [e[0] + w / 2, e[1]], P(g.cx - pl, 0, g.cz + pl), P(g.cx + pl, 0, g.cz + pl), P(g.cx - pl, 0, g.cz - pl));
+  }
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  BOUNDS = { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+}
+const cam = { scale: 20, tx: 0, ty: 0, goal: null, user: false };
+
+function freeArea() {
+  const st = document.getElementById("stage").getBoundingClientRect();
+  const narrow = st.width <= 860;
+  let left = 0, right = 0, top = 0, bottom = 0;
+  if (!narrow) {
+    top = document.getElementById("topCard").offsetHeight + 14;
+    if (state.selected) right = 452;
+  } else {
+    top = document.getElementById("topCard").offsetHeight + 14;
+    if (state.selected) bottom = st.height * 0.64 + 8;
+  }
+  return { w: st.width, h: st.height, left, right, top, bottom };
+}
+function fitGoal() {
+  const a = freeArea(), M = 28;
+  const aw = Math.max(160, a.w - a.left - a.right - 2 * M), ah = Math.max(140, a.h - a.top - a.bottom - 2 * M);
+  const bw = BOUNDS.maxX - BOUNDS.minX, bh = BOUNDS.maxY - BOUNDS.minY;
+  // On small screens keep text readable and let people drag the map instead of shrinking it further.
+  const scale = Math.max(Math.min(aw / bw, ah / bh, S0 * K_MAX), S0 * K_MIN);
+  const cxs = a.left + M + aw / 2, cys = a.top + M + ah / 2;
+  return { scale, tx: cxs - ((BOUNDS.minX + BOUNDS.maxX) / 2) * scale, ty: cys - ((BOUNDS.minY + BOUNDS.maxY) / 2) * scale };
+}
+function refit(instant) { cam.goal = fitGoal(); if (instant || reduced) { Object.assign(cam, cam.goal); cam.goal = null; } applyCam(); }
+function applyCam() {
+  world.setAttribute("transform", `translate(${cam.tx.toFixed(2)},${cam.ty.toFixed(2)}) scale(${cam.scale.toFixed(4)})`);
+  const k = overlayK();
+  document.getElementById("labels").style.setProperty("--k", k.toFixed(3));
+  if (groupEl) {
+    const gp = P(...groupGeom().label);
+    groupEl.style.left = (gp[0] * cam.scale + cam.tx) + "px";
+    groupEl.style.top = (gp[1] * cam.scale + cam.ty) + "px";
+    const dim = emphasisOf("quote") === "dimmed" && emphasisOf("fulfil") === "dimmed";
+    groupEl.dataset.dim = String(dim);
+    groupPoly.setAttribute("stroke-opacity", dim ? 0.3 : 1);
+  }
+  if (entryEl) {
+    const e = P(...entryGeom().anchor);
+    entryEl.style.left = (e[0] * cam.scale + cam.tx) + "px";
+    entryEl.style.top = (e[1] * cam.scale + cam.ty) + "px";
+    entryEl.dataset.dim = String(emphasisOf("sales") === "dimmed");
+    entryBlock.dataset.emphasis = emphasisOf("sales") === "dimmed" ? "dimmed" : "idle";
+  }
+  for (const d of DEPTS) {
+    const p = P(...blockEls[d.id].anchor);
+    labelEls[d.id].style.left = (p[0] * cam.scale + cam.tx) + "px";
+    labelEls[d.id].style.top = (p[1] * cam.scale + cam.ty - liftPx(d.id)) + "px";
+    const q = P(...blockEls[d.id].toolAnchor);
+    const lab = labelEls[d.id], labRight = p[0] * cam.scale + cam.tx + (lab.offsetWidth / 2 + 8) * k;
+    toolEls[d.id].style.left = Math.max(q[0] * cam.scale + cam.tx, labRight) + "px";
+    toolEls[d.id].style.top = (q[1] * cam.scale + cam.ty) + "px";
+    sayEls[d.id].style.left = (Math.max(q[0] * cam.scale + cam.tx, labRight) + 8 * k) + "px";
+    sayEls[d.id].style.top = (q[1] * cam.scale + cam.ty - 14 * k) + "px";
+    toolEls[d.id].classList.toggle("compact", (k < K_COMPACT || state.selected) && emphasisOf(d.id) !== "active");
+  }
+}
+function liftPx(id) { const e = emphasisOf(id); return (e === "active" ? 0.42 : e === "related" ? 0.16 : 0) * cam.scale; }
+function tick() {
+  if (cam.goal) {
+    const k = 0.16;
+    cam.scale += (cam.goal.scale - cam.scale) * k; cam.tx += (cam.goal.tx - cam.tx) * k; cam.ty += (cam.goal.ty - cam.ty) * k;
+    if (Math.abs(cam.goal.scale - cam.scale) < 0.01 && Math.abs(cam.goal.tx - cam.tx) < 0.3 && Math.abs(cam.goal.ty - cam.ty) < 0.3) { Object.assign(cam, cam.goal); cam.goal = null; }
+    applyCam();
+  }
+  requestAnimationFrame(tick);
+}
+
+// Pan & zoom
+let drag = null, justDragged = false;
+svg.addEventListener("click", e => { if (justDragged) e.stopPropagation(); }, true);
+svg.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, tx: cam.tx, ty: cam.ty, moved: false, id: e.pointerId }; });
+svg.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (Math.abs(dx) + Math.abs(dy) > 4) { if (!drag.moved) svg.setPointerCapture(drag.id); drag.moved = true; svg.classList.add("dragging"); cam.goal = null; cam.tx = drag.tx + dx; cam.ty = drag.ty + dy; applyCam(); }
+});
+svg.addEventListener("pointerup", e => {
+  const moved = drag && drag.moved; drag = null; svg.classList.remove("dragging");
+  if (moved) { justDragged = true; setTimeout(() => { justDragged = false; }, 0); }
+  if (!moved && e.target === svg) { clearAll(); }
+});
+svg.addEventListener("wheel", e => {
+  e.preventDefault();
+  const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  const f = Math.exp(-e.deltaY * 0.0015), ns = Math.max(6, Math.min(120, cam.scale * f));
+  cam.goal = null; cam.tx = mx - (mx - cam.tx) * (ns / cam.scale); cam.ty = my - (my - cam.ty) * (ns / cam.scale); cam.scale = ns; applyCam();
+}, { passive: false });
+
+/* ---------- Emphasis ---------- */
+function related(id) {
+  const s = new Set();
+  for (const e of EDGES) { if (e.from === id) s.add(e.to); if (e.to === id) s.add(e.from); }
+  return s;
+}
+function lensDepts(lensId) { return new Set(DEPTS.filter(d => d.problems.some(p => p[2].includes(lensId))).map(d => d.id)); }
+function emphasisOf(id) {
+  if (state.edge) { const e = EDGE[state.edge]; return e.from === id || e.to === id ? "active" : "dimmed"; }
+  const focus = state.selected || state.hovered;
+  if (focus) return focus === id ? "active" : related(focus).has(id) ? "related" : "dimmed";
+  if (state.lens) return lensDepts(state.lens).has(id) ? "related" : "dimmed";
+  return "idle";
+}
+function edgeState(e) {
+  if (state.edge) return state.edge === e.id ? "active" : "dimmed";
+  const focus = state.selected || state.hovered;
+  if (focus) return e.from === focus || e.to === focus ? "active" : "dimmed";
+  if (state.lens) return e.lenses.includes(state.lens) ? "active" : "dimmed";
+  return "idle";
+}
+function render() {
+  document.body.classList.toggle("lens-on", !!state.lens && !state.selected && !state.hovered && !state.edge);
+  for (const d of DEPTS) {
+    const em = emphasisOf(d.id);
+    blockEls[d.id].grp.dataset.emphasis = em;
+    blockEls[d.id].top.setAttribute("fill", em === "active" || em === "related" ? mix("#ffffff", d.color, 0.16) : "#ffffff");
+    labelEls[d.id].dataset.emphasis = em;
+    labelEls[d.id].setAttribute("aria-pressed", String(state.selected === d.id));
+    toolEls[d.id].dataset.emphasis = em;
+    const line = state.lens && !state.selected && !state.hovered && !state.edge ? (SAYS[state.lens] || {})[d.id] : null;
+    const say = sayEls[d.id];
+    toolEls[d.id].dataset.hide = String(!!line);
+    if (line) {
+      const key = state.lens + d.id;
+      if (say.dataset.key !== key) {
+        say.innerHTML = `<b>${d.name}</b>${sayHTML(line)}`;
+        say.style.setProperty("--sev", SEV_COLOR[LENS[state.lens].sev]);
+        say.style.setProperty("--delay", (DEPTS.indexOf(d) * 45) + "ms");
+        say.classList.remove("pop"); void say.offsetWidth; say.classList.add("pop");
+        say.dataset.key = key;
+      }
+      say.hidden = false;
+    } else { say.hidden = true; say.dataset.key = ""; }
+  }
+  for (const e of EDGES) {
+    const st = edgeState(e), els = edgeEls[e.id];
+    els.grp.dataset.state = st;
+    const col = st === "active" ? DEPT[e.from].color : "#7d89b0";
+    els.base.setAttribute("stroke", col);
+    els.base.setAttribute("stroke-width", st === "active" ? 0.13 : 0.09);
+    els.dots.forEach(c => c.setAttribute("fill", col));
+    els.arrow.setAttribute("fill", col);
+    if (els.mid) els.mid.setAttribute("fill", col);
+  }
+  applyCam();
+  renderLenses();
+  renderHover();
+  renderEdgeCard();
+}
+
+/* ---------- Overview ---------- */
+document.getElementById("toolCloud").innerHTML = KINDS.map(([k, name]) => `<div class="kind-row"><span class="kind-name">${name}</span><span class="tools">${TOOLS.filter(t => TOOL_KIND[t] === k).map(toolChip).join("")}${k === "app" ? `<span class="tool k-app"><i></i>+ 20 IT-built tools</span>` : ""}</span></div>`).join("");
+document.getElementById("toolCount").textContent = `(${TOOLS.length} + 20 stop-gaps)`;
+/* Order journey section: two layouts to preview. */
+const JOURNEY = [
+  { dept: "sales", title: "Sales request", who: "Sales", sys: [["WhatsApp", "chat"], ["LincolnERP", "erp"]], next: "Re-typed from chat" },
+  { dept: "quote", title: "Quotation", who: "Operations · Quotation", sys: [["LincolnERP", "erp"]], dataLabel: "Key data", data: ["Rental rates: daily, weekly, fortnightly, monthly"], next: "Not linked: HC re-keyed from the quote" },
+  { dept: "fulfil", title: "Hiring Contract & PO", who: "Operations · Order Fulfilment", sys: [["LincolnERP", "erp"]], next: "Re-keyed into BMS" },
+  { dept: "transport", title: "Delivery & lorry assignment", who: "Transport · Order Fulfilment", sys: [["BMS", "erp"]], note: "No driver app: lorries are assigned by phone and chat.", dataLabel: "Key data", data: ["Effective date", "Breakdowns & replacements", "Service charge", "Cut-off date"], next: "Paper DO and return dates passed by hand" },
+  { dept: "ar", title: "Invoice", who: "Finance · AR", sys: [["BMS", "erp"]], dataLabel: "Pulls together", data: ["Rates (step 2)", "Service data & dates (step 4)"], next: "Exported as CSV, filtered in Excel" },
+  { dept: "sales", title: "Payment follow-up", who: "Credit Control & Sales", sys: [["Payment app (IT-built)", "app"]] }
+];
+const sysChip = ([n, k]) => `<span class="tool k-${k}"><i></i>${n}</span>`;
+function renderJourney() {
+  const body = document.getElementById("journeyBody");
+    document.getElementById("journeyTitle").textContent = "One order, three systems, no handover";
+    body.innerHTML = `<ol class="jny">${JOURNEY.map((j, i) => `<li style="--dept:${DEPT[j.dept].color}">
+      <span class="jny-n">${i + 1}</span>
+      <b>${j.title}</b>
+      <span class="jny-who">${j.who}</span>
+      <span class="tools">${j.sys.map(sysChip).join("")}</span>
+      ${j.note ? `<span class="jny-note">${j.note}</span>` : ""}
+      ${j.data ? `<div class="jny-data"><span>${j.dataLabel}</span><ul>${j.data.map(x => `<li>${x}</li>`).join("")}</ul></div>` : ""}
+      ${j.next ? `<span class="jny-next"><span aria-hidden="true">→</span> ${j.next}</span>` : ""}
+    </li>`).join("")}</ol>`;
+    document.getElementById("journeyEnd").innerHTML = "<b>When the customer changes the order,</b> each system has to be updated by hand, and the invoice is the last to know.";
+}
+renderJourney();
+
+function fillIntro(intro, L) {
+  intro.classList.toggle("resting", !L);
+  if (!L) {
+    intro.style.setProperty("--sev", "#b9c1d9");
+    intro.innerHTML = `<div class="lens-intro-head"><span>Pick a problem above to see where it shows up</span></div>
+      <p>Each team gets a speech bubble explaining how that problem affects its work. Click any team block for its full detail.</p>`;
+    return;
+  }
+  intro.style.setProperty("--sev", SEV_COLOR[L.sev]);
+  intro.innerHTML = `<div class="lens-intro-head"><span>${L.name}</span><span class="chip sev-${L.sev}">${lensDepts(L.id).size} of ${DEPTS.length} teams</span></div>
+    <p>${L.intro}</p><p class="hint intro-hint">Each bubble shows how it plays out in that team. Click a team for the full detail.</p>
+    <ul class="intro-list">${DEPTS.filter(d => SAYS[L.id][d.id]).map(d => `<li style="--dept:${d.color}"><b>${d.name}</b>${sayHTML(SAYS[L.id][d.id])}</li>`).join("")}</ul>`;
+}
+/* Give the intro one fixed height (the tallest of its states) so switching problems never moves the map. */
+function equalizeIntro() {
+  const intro = document.getElementById("lensIntro");
+  intro.style.minHeight = "";
+  if (innerWidth <= 860) return;
+  const wasHidden = intro.hidden; intro.hidden = false;
+  let max = 0;
+  for (const L of [null, ...LENSES]) { fillIntro(intro, L); max = Math.max(max, intro.offsetHeight); }
+  intro.style.minHeight = max + "px";
+  intro.hidden = wasHidden;
+  fillIntro(intro, state.lens ? LENS[state.lens] : null);
+}
+function renderLenses() {
+  const host = document.getElementById("lenses");
+  host.innerHTML = LENSES.map(l => {
+    const ds = lensDepts(l.id);
+    return `<button type="button" class="lens" data-lens="${l.id}" aria-pressed="${state.lens === l.id}" style="--sev:${SEV_COLOR[l.sev]}">
+      <span class="lens-head"><span>${l.name}</span></span>
+      <ul class="lens-points">${l.points.map(t => `<li>${t}</li>`).join("")}</ul>
+    </button>`;
+  }).join("");
+  host.querySelectorAll(".lens").forEach(b => b.addEventListener("click", () => {
+    state.lens = b.dataset.lens; state.edge = null;
+    setOverview(false); render(); if (state.selected) renderPanel();
+    document.querySelector(`#lensBar [data-lens="${state.lens}"]`)?.focus();
+  }));
+  const bar = document.getElementById("lensBar");
+  bar.innerHTML = `<button type="button" class="btn" id="barOverview">Overall problem</button><span class="lens-bar-label">Highlight:</span>` +
+    LENSES.map(l => `<button type="button" class="lens-pill" data-lens="${l.id}" aria-pressed="${state.lens === l.id}" style="--sev:${SEV_COLOR[l.sev]}" title="${l.name}">${l.short}<span class="n">${lensDepts(l.id).size}/${DEPTS.length}</span></button>`).join("");
+  bar.querySelector("#barOverview").addEventListener("click", () => setOverview(true));
+  const intro = document.getElementById("lensIntro");
+  fillIntro(intro, state.lens ? LENS[state.lens] : null);
+  intro.hidden = !!state.selected;
+  bar.querySelectorAll(".lens-pill").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.lens; state.lens = state.lens === id ? null : id; state.edge = null;
+    render(); if (state.selected) renderPanel();
+    document.querySelector(`#lensBar [data-lens="${id}"]`)?.focus();
+  }));
+}
+
+/* ---------- Hover card ---------- */
+function worstSev(d) { return d.problems.reduce((w, p) => SEV_ORDER[p[1]] < SEV_ORDER[w] ? p[1] : w, "low"); }
+function headcount(d) { const named = d.roles.reduce((s, r) => s + (r[1] || 0), 0); const tbc = d.roles.some(r => r[1] == null); return { named, tbc }; }
+function renderHover() {
+  const card = document.getElementById("hoverCard");
+  card.hidden = true; return; // Hover summary removed: hovering only highlights the block; click opens the full panel.
+  const d = state.hovered && !state.selected ? DEPT[state.hovered] : null;
+  if (!d) { card.hidden = true; return; }
+  const hc = headcount(d);
+  const top = [...d.problems].sort((a, b) => SEV_ORDER[a[1]] - SEV_ORDER[b[1]]).slice(0, 3);
+  card.style.setProperty("--dept", d.color);
+  card.innerHTML = `<div class="hover-card-head"><span class="swatch"></span><strong>${d.name}</strong><span class="chip sev-${worstSev(d)}">${SEV_LABEL[worstSev(d)]}</span></div>
+    <div class="hover-card-stats"><span><b>${d.roles.length}</b> roles</span><span><b>${hc.named}${hc.tbc ? "+" : ""}</b> staff</span><span><b>${d.problems.length}</b> problems</span></div>
+    <ul>${top.map(p => `<li><span class="sev-dot" style="--sev:${SEV_COLOR[p[1]]}"></span>${p[0]}</li>`).join("")}</ul>
+    ${d.problems.length > 3 ? `<p class="hint">+${d.problems.length - 3} more. Click to open.</p>` : ""}`;
+  card.hidden = false;
+}
+
+/* ---------- Edge card ---------- */
+function renderEdgeCard() {
+  const card = document.getElementById("edgeCard");
+  const e = state.edge && !state.selected ? EDGE[state.edge] : null;
+  if (!e) { card.hidden = true; return; }
+  card.style.borderLeftColor = SEV_COLOR[e.sev];
+  card.innerHTML = `<div class="edge-card-head"><div class="edge-route"><span class="swatch" style="--dept:${DEPT[e.from].color}"></span>${DEPT[e.from].name}<span class="arrow">to</span><span class="swatch" style="--dept:${DEPT[e.to].color}"></span>${DEPT[e.to].name}</div>
+    <button type="button" class="icon-btn" id="edgeClose" aria-label="Close hand-off">×</button></div>
+    <div class="what">Hands over: ${e.what} <span class="chip sev-${e.sev}" style="margin-left:6px">${SEV_LABEL[e.sev]}</span></div>
+    <p class="brk">${e.brk}</p>`;
+  card.hidden = false;
+  card.querySelector("#edgeClose").addEventListener("click", () => toggleEdge(null));
+}
+
+/* ---------- Department panel ---------- */
+function renderPanel() {
+  const panel = document.getElementById("deptPanel");
+  const d = state.selected ? DEPT[state.selected] : null;
+  if (!d) { panel.hidden = true; return; }
+  const hc = headcount(d);
+  const probs = [...d.problems].sort((a, b) => SEV_ORDER[a[1]] - SEV_ORDER[b[1]]);
+  const counts = probs.reduce((m, p) => (m[p[1]] = (m[p[1]] || 0) + 1, m), {});
+  const outs = EDGES.filter(e => e.from === d.id), ins = EDGES.filter(e => e.to === d.id);
+  const flowRow = (e, dir) => {
+    const other = DEPT[dir === "out" ? e.to : e.from];
+    return `<li><button type="button" class="flow-row" data-edge="${e.id}" aria-pressed="${state.edge === e.id}" style="--other:${other.color}">
+      <span class="route"><span class="swatch" style="--dept:${other.color}"></span>${dir === "out" ? "To" : "From"} ${other.name}<span class="muted" style="font-weight:500">· ${e.what}</span><span class="chip sev-${e.sev}" style="margin-left:auto">${SEV_LABEL[e.sev]}</span></span>
+      <span class="brk">${e.brk}</span></button></li>`;
+  };
+  panel.style.setProperty("--dept", d.color);
+  panel.innerHTML = `
+    <header class="dept-panel-head">
+      <div>
+        <div class="crumbs"><button type="button" id="crumbOverview">Overall problem</button><span>/</span><span>${d.name}</span></div>
+        <h2>${d.name}</h2>
+        <div class="stat-row">${["critical", "high", "moderate", "low"].filter(s => counts[s]).map(s => `<span class="chip sev-${s}">${counts[s]} ${SEV_LABEL[s].toLowerCase()}</span>`).join("")}</div>
+      </div>
+      <button type="button" class="icon-btn" id="panelClose" aria-label="Close panel">×</button>
+    </header>
+    <p class="blurb">${d.blurb}</p>
+    <section>
+      <div class="sec-title">Team <span class="muted">${d.roles.length} roles · ${hc.named} staff named${hc.tbc ? " + TBC" : ""}</span></div>
+      ${(() => {
+        const pill = ([r, n]) => `<span class="role-pill"><span class="role-pill-swatch"></span>${r}<span class="n${n == null ? " tbc" : ""}">${n == null ? "TBC" : "×" + n}</span></span>`;
+        const groups = [...new Set(d.roles.map(r => r[2]).filter(Boolean))];
+        if (!groups.length) return `<div class="pills">${d.roles.map(pill).join("")}</div>`;
+        return groups.map(g => `<div class="subteam"><span class="subteam-name">${g}</span><div class="pills">${d.roles.filter(r => r[2] === g).map(pill).join("")}</div></div>`).join("");
+      })()}
+    </section>
+    <section>
+      <div class="sec-title">Problems <span class="muted">${state.lens ? `highlighting “${LENS[state.lens].name}”` : "most severe first"}</span></div>
+      <ul class="problem-list">${probs.map(([t, s, ls]) => `<li class="problem" data-dim="${state.lens && !ls.includes(state.lens)}">
+        <div class="problem-top"><span>${t}</span><span class="chip sev-${s}">${SEV_LABEL[s]}</span></div>
+        <div class="problem-tags">${ls.map(l => `<span class="tag">${LENS[l].name}</span>`).join("")}</div></li>`).join("")}</ul>
+    </section>
+    <div class="impact"><b>Impact:</b> ${d.impact}</div>
+    <section>
+      <div class="sec-title">Broken hand-offs <span class="muted">${outs.length + ins.length}</span></div>
+      <ul class="flow-list">${outs.map(e => flowRow(e, "out")).join("")}${ins.map(e => flowRow(e, "in")).join("")}</ul>
+      <p class="hint">Click a hand-off to trace it on the map.</p>
+    </section>
+`;
+  panel.hidden = false;
+  panel.querySelector("#panelClose").addEventListener("click", () => select(null));
+  panel.querySelector("#crumbOverview").addEventListener("click", () => { select(null); setOverview(true); });
+  panel.querySelectorAll(".flow-row").forEach(b => b.addEventListener("click", () => { state.edge = state.edge === b.dataset.edge ? null : b.dataset.edge; render(); renderPanel(); panel.querySelector(`[data-edge="${b.dataset.edge}"]`)?.focus(); }));
+}
+
+/* ---------- Actions ---------- */
+function setHover(id) { state.hovered = id; render(); }
+function select(id) {
+  state.selected = id; state.edge = null; state.hovered = null;
+  document.body.classList.toggle("has-panel", !!id);
+  render(); renderPanel(); refit(false);
+  if (id) document.getElementById("deptPanel").scrollTop = 0;
+}
+function toggleEdge(id) { state.edge = state.edge === id ? null : id; render(); if (state.selected) renderPanel(); }
+function setOverview(on) {
+  if (on === state.overview) return;
+  state.overview = on;
+  document.getElementById("ovBackdrop").hidden = !on;
+  if (on) { state.lastFocus = document.activeElement; document.getElementById("overview").scrollTop = 0; document.getElementById("overviewClose").focus({ preventScroll: true }); }
+  else if (state.lastFocus && document.contains(state.lastFocus) && state.lastFocus !== document.body) state.lastFocus.focus();
+}
+function clearAll() {
+  if (state.edge) { state.edge = null; render(); if (state.selected) renderPanel(); return; }
+  if (state.selected) { select(null); return; }
+  if (state.lens) { state.lens = null; render(); }
+}
+
+document.getElementById("overviewClose").addEventListener("click", () => setOverview(false));
+document.getElementById("exploreBtn").addEventListener("click", () => setOverview(false));
+const ovBackdrop = document.getElementById("ovBackdrop");
+ovBackdrop.addEventListener("click", e => { if (e.target === ovBackdrop) setOverview(false); });
+ovBackdrop.addEventListener("keydown", e => {
+  if (e.key !== "Tab") return;
+  const f = [...ovBackdrop.querySelectorAll("button")];
+  if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+  else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+});
+const help = document.getElementById("help");
+document.getElementById("helpBtn").addEventListener("click", () => { help.hidden = false; document.getElementById("helpClose").focus(); });
+document.getElementById("helpClose").addEventListener("click", () => { help.hidden = true; });
+help.addEventListener("click", e => { if (e.target === help) help.hidden = true; });
+addEventListener("keydown", e => { if (e.key === "Escape") { if (!help.hidden) help.hidden = true; else if (state.overview) setOverview(false); else clearAll(); } });
+addEventListener("resize", () => { equalizeIntro(); refit(true); });
+
+/* ---------- Boot ---------- */
+const roleCount = DEPTS.reduce((s, d) => s + d.roles.length, 0);
+const probCount = DEPTS.reduce((s, d) => s + d.problems.length, 0);
+document.getElementById("topstats").textContent = `8 departments · ${DEPTS.length} teams · ${roleCount} roles · ${probCount} problems · ${EDGES.length} broken hand-offs · 4 shared problems`;
+drawGrid(); drawGroup(); drawEdges(); drawEntry(); drawBlocks(); drawLabels();
+computeBounds();
+render(); equalizeIntro(); refit(true); requestAnimationFrame(tick);
+document.getElementById("overviewClose").focus({ preventScroll: true });
+</script>
+</body>
+</html>

@@ -92,3 +92,28 @@ test("no mode toggle and no 'Schema only' text anywhere", async ({ page }) => {
     await page.keyboard.press("Escape");
   }
 });
+
+test("Problem map tab switches views and keeps the 3D map's selection", async ({ page }) => {
+  await open(page);
+  await page.getByTestId("block-finance").click();
+  await expect(page.getByTestId("dept-panel")).toBeVisible();
+
+  await page.getByTestId("tab-problems").click();
+  await expect(page).toHaveURL(/#problems$/);
+  await expect(page.getByTestId("tab-problems")).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("block-sales")).toBeHidden();
+  const frame = page.frameLocator('[data-testid="problem-map-frame"]');
+  await expect(frame.locator("#ovTitle")).toContainText("Every order crosses nine teams");
+  await frame.locator("#exploreBtn").click();
+  await expect(frame.locator("#lensBar")).toContainText("Fragmented data");
+
+  await page.getByTestId("tab-system").click();
+  await expect(page.getByTestId("dept-panel")).toBeVisible();
+  await expect(page.getByTestId("dept-panel-title")).toHaveText("Finance");
+});
+
+test("#problems deep link opens the Problem map tab", async ({ page }) => {
+  await page.goto("./#problems");
+  await expect(page.getByTestId("tab-problems")).toHaveAttribute("aria-selected", "true");
+  await expect(page.frameLocator('[data-testid="problem-map-frame"]').locator("#ovTitle")).toBeVisible({ timeout: 20_000 });
+});

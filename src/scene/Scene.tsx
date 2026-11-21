@@ -77,12 +77,14 @@ function Edges() {
   );
 }
 
-export function Scene() {
+export function Scene({ active = true }: { active?: boolean }) {
   const controls = useRef<OrbitControlsImpl | null>(null);
   const setHovered = useMapStore((s) => s.setHovered);
   const select = useMapStore((s) => s.select);
   return (
     <Canvas
+      // Stop rendering while another tab is showing.
+      frameloop={active ? "always" : "never"}
       dpr={[1, 2]}
       flat
       gl={{ antialias: true, alpha: false }}
