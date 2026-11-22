@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 async function open(page: Page) {
-  await page.goto("./");
+  await page.goto("./#architecture");
   await expect(page.getByTestId("block-sales")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -93,27 +93,49 @@ test("no mode toggle and no 'Schema only' text anywhere", async ({ page }) => {
   }
 });
 
-test("Problem map tab switches views and keeps the 3D map's selection", async ({ page }) => {
+test("switching to the Problem map tab and back keeps the 3D map's selection", async ({ page }) => {
   await open(page);
   await page.getByTestId("block-finance").click();
   await expect(page.getByTestId("dept-panel")).toBeVisible();
 
   await page.getByTestId("tab-problems").click();
-  await expect(page).toHaveURL(/#problems$/);
+  await expect(page).not.toHaveURL(/#/);
   await expect(page.getByTestId("tab-problems")).toHaveAttribute("aria-selected", "true");
   await expect(page.getByTestId("block-sales")).toBeHidden();
   const frame = page.frameLocator('[data-testid="problem-map-frame"]');
-  await expect(frame.locator("#ovTitle")).toContainText("Every order crosses nine teams");
+  await expect(frame.locator("#ovTitle")).toContainText("Every order crosses eight teams");
   await frame.locator("#exploreBtn").click();
   await expect(frame.locator("#lensBar")).toContainText("Fragmented data");
 
-  await page.getByTestId("tab-system").click();
+  // Closing the overview shows the welcome bubble over a greyed-out map; its × restores the map.
+  await expect(frame.locator("#welcome")).toBeVisible();
+  await expect(frame.locator("#welcome")).toContainText("Pick a problem above");
+  await expect(frame.locator("body")).toHaveClass(/welcome-on/);
+  await frame.locator("#welcomeClose").click();
+  await expect(frame.locator("#welcome")).toBeHidden();
+  await expect(frame.locator("body")).not.toHaveClass(/welcome-on/);
+  await expect(frame.locator("#lensIntro")).toBeHidden();
+
+  // The 3D tab is hidden from the tab bar for now; its direct link still opens it with state intact.
+  await page.evaluate(() => (window.location.hash = "#architecture"));
+  await expect(page).toHaveURL(/#architecture$/);
   await expect(page.getByTestId("dept-panel")).toBeVisible();
   await expect(page.getByTestId("dept-panel-title")).toHaveText("Finance");
 });
 
-test("#problems deep link opens the Problem map tab", async ({ page }) => {
-  await page.goto("./#problems");
-  await expect(page.getByTestId("tab-problems")).toHaveAttribute("aria-selected", "true");
-  await expect(page.frameLocator('[data-testid="problem-map-frame"]').locator("#ovTitle")).toBeVisible({ timeout: 20_000 });
+test("the site opens on the Problem map; old #problems links still land there", async ({ page }) => {
+  for (const url of ["./", "./#problems"]) {
+    await page.goto(url);
+    await expect(page.getByTestId("tab-problems")).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByTestId("block-sales")).toBeHidden();
+    await expect(page.frameLocator('[data-testid="problem-map-frame"]').locator("#ovTitle")).toBeVisible({ timeout: 20_000 });
+  }
+});
+
+test("Solutions map and Digital Brain architecture are hidden from the tab bar but open by direct link", async ({ page }) => {
+  await page.goto("./");
+  await expect(page.getByRole("tab")).toHaveText(["Problem map"]);
+  await page.goto("./#solutions");
+  await expect(page.frameLocator('[data-testid="solutions-map-frame"]').locator("#ovTitle")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("problem-map-frame")).toBeHidden();
 });

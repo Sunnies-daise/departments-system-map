@@ -74,7 +74,7 @@ p { margin: 0; }
 /* Overview card */
 .ov-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(27, 33, 64, 0.38); display: grid; place-items: center; padding: 24px; }
 .ov-backdrop[hidden] { display: none; }
-.overview { width: min(1040px, 100%); max-height: calc(100dvh - 48px); overflow-y: auto; background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: 16px; box-shadow: 0 30px 80px rgba(27, 33, 64, 0.28); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "head sys" "lens lens" "chain chain" "foot foot"; }
+.overview { width: min(1040px, 100%); max-height: calc(100dvh - 48px); overflow-y: auto; background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: 16px; box-shadow: 0 30px 80px rgba(27, 33, 64, 0.28); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "head sys" "chain chain" "lens lens" "foot foot"; }
 .overview > * { padding: 0 32px; }
 .overview { position: relative; }
 .overview > .ov-close { position: absolute; top: 16px; right: 16px; padding: 0; z-index: 2; width: 36px; height: 36px; background: #fff; }
@@ -84,7 +84,7 @@ p { margin: 0; }
 .ov-lens .lenses { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch; }
 .ov-lens .lens { align-content: start; }
 .ov-lens .lens-head { flex-direction: column; align-items: flex-start; }
-.ov-chain { grid-area: chain; padding-top: 24px; padding-bottom: 26px; background: var(--panel-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.ov-chain { grid-area: chain; padding-top: 24px; padding-bottom: 26px; background: var(--panel-2); border-bottom: 1px solid var(--line); }
 .ov-foot { grid-area: foot; padding-top: 18px; padding-bottom: 22px; display: flex; gap: 20px; align-items: center; justify-content: space-between; }
 .overview h2 { font-size: 26px; line-height: 1.2; max-width: 22ch; letter-spacing: -0.02em; }
 .ov-points { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; max-width: 62ch; counter-reset: pt; }
@@ -140,8 +140,7 @@ p { margin: 0; }
 .lens-intro .hint { margin-top: 2px; }
 .lens-intro .intro-hint { display: none; }
 .lens-intro { align-content: start; }
-.lens-intro.resting { background: #fff; border-color: color-mix(in srgb, var(--accent) 45%, #fff); }
-.lens-intro.resting .lens-intro-head { color: #3a4166; font-weight: 600; }
+@media (min-width: 861px) { .lens-intro { display: none !important; } }
 .intro-list { display: none; list-style: none; margin: 6px 0 0; padding: 0; gap: 6px; }
 .intro-list li { font-size: 12.5px; line-height: 1.45; padding-left: 10px; border-left: 3px solid var(--dept); }
 .intro-list b { display: block; font-size: 11.5px; }
@@ -172,8 +171,13 @@ p { margin: 0; }
 .kind-row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: start; }
 .kind-name { font-size: 11.5px; color: var(--muted); padding-top: 3px; line-height: 1.3; }
 #dim { position: absolute; inset: 0; z-index: 1; background: rgba(28, 31, 42, 0.72); opacity: 0; pointer-events: none; transition: opacity 220ms ease-out; }
-body.lens-on #dim { opacity: 1; }
-body.lens-on .block-label, body.lens-on .entry-label, body.lens-on .group-label { z-index: 0 !important; }
+body.lens-on #dim, body.welcome-on #dim { opacity: 1; }
+body.lens-on .block-label, body.lens-on .entry-label, body.lens-on .group-label,
+body.welcome-on .block-label, body.welcome-on .entry-label, body.welcome-on .group-label { z-index: 0 !important; }
+.welcome { position: absolute; z-index: 31; transform: translateY(-50%); width: 236px; display: grid; gap: 6px; padding: 12px 40px 13px 14px; background: #fff; border: 1.5px solid var(--accent); border-radius: 14px; box-shadow: var(--shadow); font-size: 13px; line-height: 1.5; color: #3a4166; }
+.welcome[hidden] { display: none; }
+.welcome-title { font-size: 14px; font-weight: 650; color: var(--text); }
+.welcome-close { position: absolute; top: 8px; right: 8px; }
 body.lens-on .say { z-index: 5; }
 .tool { font-size: 11px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: #3a4166; }
 .lenses { display: grid; gap: 10px; }
@@ -223,6 +227,7 @@ body.lens-on .say { z-index: 5; }
 .problem-list, .flow-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .problem { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 7px; }
 .problem[data-dim="true"] { opacity: 0.38; }
+.problem-top b { font-weight: 650; }
 .problem-top { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; font-size: 13px; line-height: 1.45; }
 .problem-tags { display: flex; gap: 4px; flex-wrap: wrap; }
 .tag { font-size: 10.5px; color: var(--muted); border: 1px solid var(--line); background: #fff; border-radius: 5px; padding: 0 6px; }
@@ -241,7 +246,7 @@ body.lens-on .say { z-index: 5; }
 
 @media (max-width: 860px) {
   .ov-backdrop { padding: 10px; }
-  .overview { grid-template-columns: 1fr; grid-template-areas: "head" "lens" "chain" "sys" "foot"; }
+  .overview { grid-template-columns: 1fr; grid-template-areas: "head" "chain" "lens" "sys" "foot"; }
   .overview > * { padding-left: 20px; padding-right: 20px; }
   .ov-sys { border-left: 0; border-top: 1px solid var(--line); }
   .ov-lens .lenses { grid-template-columns: 1fr; }
@@ -252,6 +257,7 @@ body.lens-on .say { z-index: 5; }
   .say { display: none !important; }
   .top-card { left: 12px; right: 12px; transform: none; width: auto; max-width: none; }
   .lens-intro { max-height: 46dvh; overflow-y: auto; }
+  .welcome { left: 12px !important; right: 12px; top: auto !important; bottom: 12px; width: auto; transform: none; }
   .intro-list { display: grid !important; }
   .lens-intro .intro-hint { display: block; }
   .dept-panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 64dvh; }
@@ -289,6 +295,12 @@ html.embedded .topbar h1 { display: none; }
       <div class="lens-intro" id="lensIntro" hidden></div>
     </div>
 
+    <div class="welcome" id="welcome" role="dialog" aria-labelledby="welcomeTitle" hidden>
+      <button type="button" class="icon-btn welcome-close" id="welcomeClose" aria-label="Close">×</button>
+      <p class="welcome-title" id="welcomeTitle">Pick a problem above to see where it shows up</p>
+      <p>Each team gets a speech bubble explaining how that problem affects its work. Click any team block for its full detail.</p>
+    </div>
+
     <div class="edge-card" id="edgeCard" hidden></div>
     <aside class="dept-panel" id="deptPanel" hidden></aside>
   </main>
@@ -301,7 +313,7 @@ html.embedded .topbar h1 { display: none; }
       <div class="overview-head">
         <div>
           <div class="kicker">Overall problem</div>
-          <h2 id="ovTitle">Every order crosses nine teams, and no single system carries it from start to finish</h2>
+          <h2 id="ovTitle">Every order crosses eight teams, and no single system carries it from start to finish</h2>
         </div>
       </div>
       <ul class="ov-points">
@@ -315,17 +327,17 @@ html.embedded .topbar h1 { display: none; }
       <div class="sec-title">Systems an order passes through <span class="muted" id="toolCount"></span></div>
       <div class="kind-list" id="toolCloud"></div>
     </div>
-    <div class="ov-lens">
-      <div class="sec-title">Four problems shared across teams</div>
-      <div class="lenses" id="lenses"></div>
-      <p class="hint">Pick one to see on the map which teams and hand-offs it affects.</p>
-    </div>
     <div class="ov-chain">
       <div class="chain-head">
         <div class="sec-title" id="journeyTitle" style="margin:0"></div>
       </div>
       <div class="chain-end" id="journeyEnd" style="margin: 0 0 16px"></div>
       <div id="journeyBody"></div>
+    </div>
+    <div class="ov-lens">
+      <div class="sec-title">Four problems shared across teams</div>
+      <div class="lenses" id="lenses"></div>
+      <p class="hint">Pick one to see on the map which teams and hand-offs it affects.</p>
     </div>
     <footer class="ov-foot">
       <p class="hint" style="margin:0">Headcounts are the people named in discovery sessions; TBC means the team size wasn't recorded. IT (1) supports every team with 20+ stop-gap tools.</p>
@@ -417,10 +429,11 @@ const SAYS = {
 const DEPTS = [
   { id: "sales", name: "Sales", color: "#F59E0B", cell: [-1.5, 0.5],
     blurb: "Wins rental and machinery orders and owns customer accounts.",
-    roles: [["Salesperson", 2], ["Sales support (offshore)", null]],
+    roles: [["Sales manager", 2], ["Salesperson", 8]],
     tools: ["WhatsApp", "Excel", "LincolnERP mobile"],
     problems: [
-      ["Orders are sent as free-text remarks on WhatsApp because the CRFQ form takes too long", "high", ["frag", "change"]],
+      ["When a salesperson leaves, their customer history leaves with them, so whoever takes over the account starts from scratch", "critical", ["frag"]],
+      ["The <b>CRFQ form</b> and <b>log activity form</b> take too long to fill in, so orders go out as WhatsApp text instead", "high", ["frag", "change"]],
       ["Offshore support fills in the form for sales, then goes back with questions (delivery, accessories, certs)", "moderate", ["frag"]],
       ["Account allocation and customer profiles are kept in Excel, with no record of customer interactions", "moderate", ["frag"]],
       ["No mobile view of past orders, outstanding payments or estimated commission. The UI doesn't fit an iPad", "moderate", ["frag"]],
@@ -853,6 +866,13 @@ function applyCam() {
     sayEls[d.id].style.left = (Math.max(q[0] * cam.scale + cam.tx, labRight) + 8 * k) + "px";
     sayEls[d.id].style.top = (q[1] * cam.scale + cam.ty - 14 * k) + "px";
   }
+  placeWelcome();
+}
+/* The welcome bubble takes Plant Service's speech-bubble slot, which the camera fit always leaves free. */
+function placeWelcome() {
+  if (welcome.hidden) return;
+  welcome.style.left = sayEls.plant.style.left;
+  welcome.style.top = sayEls.plant.style.top;
 }
 function liftPx(id) { const e = emphasisOf(id); return (e === "active" ? 0.42 : e === "related" ? 0.16 : 0) * cam.scale; }
 function tick() {
@@ -908,6 +928,7 @@ function edgeState(e) {
   return "idle";
 }
 function render() {
+  if (!welcome.hidden && (state.lens || state.selected || state.edge)) setWelcome(false);
   document.body.classList.toggle("lens-on", !!state.lens && !state.selected && !state.hovered && !state.edge);
   for (const d of DEPTS) {
     const em = emphasisOf(d.id);
@@ -974,29 +995,11 @@ function renderJourney() {
 renderJourney();
 
 function fillIntro(intro, L) {
-  intro.classList.toggle("resting", !L);
-  if (!L) {
-    intro.style.setProperty("--sev", "#b9c1d9");
-    intro.innerHTML = `<div class="lens-intro-head"><span>Pick a problem above to see where it shows up</span></div>
-      <p>Each team gets a speech bubble explaining how that problem affects its work. Click any team block for its full detail.</p>`;
-    return;
-  }
+  if (!L) return;
   intro.style.setProperty("--sev", SEV_COLOR[L.sev]);
   intro.innerHTML = `<div class="lens-intro-head"><span>${L.name}</span><span class="chip sev-${L.sev}">${lensDepts(L.id).size} of ${DEPTS.length} teams</span></div>
     <p>${L.intro}</p><p class="hint intro-hint">Each bubble shows how it plays out in that team. Click a team for the full detail.</p>
     <ul class="intro-list">${DEPTS.filter(d => SAYS[L.id][d.id]).map(d => `<li style="--dept:${d.color}"><b>${d.name}</b>${sayHTML(SAYS[L.id][d.id])}</li>`).join("")}</ul>`;
-}
-/* Give the intro one fixed height (the tallest of its states) so switching problems never moves the map. */
-function equalizeIntro() {
-  const intro = document.getElementById("lensIntro");
-  intro.style.minHeight = "";
-  if (innerWidth <= 860) return;
-  const wasHidden = intro.hidden; intro.hidden = false;
-  let max = 0;
-  for (const L of [null, ...LENSES]) { fillIntro(intro, L); max = Math.max(max, intro.offsetHeight); }
-  intro.style.minHeight = max + "px";
-  intro.hidden = wasHidden;
-  fillIntro(intro, state.lens ? LENS[state.lens] : null);
 }
 function renderLenses() {
   const host = document.getElementById("lenses");
@@ -1017,7 +1020,7 @@ function renderLenses() {
   bar.querySelector("#barOverview").addEventListener("click", () => setOverview(true));
   const intro = document.getElementById("lensIntro");
   fillIntro(intro, state.lens ? LENS[state.lens] : null);
-  intro.hidden = !!state.selected;
+  intro.hidden = !!state.selected || !state.lens;
   bar.querySelectorAll(".lens-pill").forEach(b => b.addEventListener("click", () => {
     const id = b.dataset.lens; state.lens = state.lens === id ? null : id; state.edge = null;
     render(); if (state.selected) renderPanel();
@@ -1099,12 +1102,22 @@ function select(id) {
   if (id) document.getElementById("deptPanel").scrollTop = 0;
 }
 function toggleEdge(id) { state.edge = state.edge === id ? null : id; render(); if (state.selected) renderPanel(); }
+const welcome = document.getElementById("welcome");
+let welcomeSeen = false;
+function setWelcome(on) {
+  welcome.hidden = !on;
+  document.body.classList.toggle("welcome-on", on);
+  if (on) placeWelcome();
+  if (on) document.getElementById("welcomeClose").focus({ preventScroll: true });
+}
 function setOverview(on) {
   if (on === state.overview) return;
   state.overview = on;
   document.getElementById("ovBackdrop").hidden = !on;
   if (on) { state.lastFocus = document.activeElement; document.getElementById("overview").scrollTop = 0; document.getElementById("overviewClose").focus({ preventScroll: true }); }
   else if (state.lastFocus && document.contains(state.lastFocus) && state.lastFocus !== document.body) state.lastFocus.focus();
+  if (on) setWelcome(false);
+  else if (!welcomeSeen) { welcomeSeen = true; if (!state.lens) setWelcome(true); }
 }
 function clearAll() {
   if (state.edge) { state.edge = null; render(); if (state.selected) renderPanel(); return; }
@@ -1113,6 +1126,7 @@ function clearAll() {
 }
 
 document.getElementById("overviewClose").addEventListener("click", () => setOverview(false));
+document.getElementById("welcomeClose").addEventListener("click", () => setWelcome(false));
 document.getElementById("exploreBtn").addEventListener("click", () => setOverview(false));
 const ovBackdrop = document.getElementById("ovBackdrop");
 ovBackdrop.addEventListener("click", e => { if (e.target === ovBackdrop) setOverview(false); });
@@ -1126,8 +1140,8 @@ const help = document.getElementById("help");
 document.getElementById("helpBtn").addEventListener("click", () => { help.hidden = false; document.getElementById("helpClose").focus(); });
 document.getElementById("helpClose").addEventListener("click", () => { help.hidden = true; });
 help.addEventListener("click", e => { if (e.target === help) help.hidden = true; });
-addEventListener("keydown", e => { if (e.key === "Escape") { if (!help.hidden) help.hidden = true; else if (state.overview) setOverview(false); else clearAll(); } });
-addEventListener("resize", () => { equalizeIntro(); refit(true); });
+addEventListener("keydown", e => { if (e.key === "Escape") { if (!help.hidden) help.hidden = true; else if (state.overview) setOverview(false); else if (!welcome.hidden) setWelcome(false); else clearAll(); } });
+addEventListener("resize", () => refit(true));
 
 /* ---------- Boot ---------- */
 const roleCount = DEPTS.reduce((s, d) => s + d.roles.length, 0);
@@ -1135,7 +1149,7 @@ const probCount = DEPTS.reduce((s, d) => s + d.problems.length, 0);
 document.getElementById("topstats").textContent = `8 departments · ${DEPTS.length} teams · ${roleCount} roles · ${probCount} problems · ${EDGES.length} broken hand-offs · ${LENSES.length} shared problems`;
 drawGrid(); drawGroup(); drawEdges(); drawEntry(); drawBlocks(); drawLabels();
 computeBounds();
-render(); equalizeIntro(); refit(true); requestAnimationFrame(tick);
+render(); refit(true); requestAnimationFrame(tick);
 document.getElementById("overviewClose").focus({ preventScroll: true });
 </script>
 </body>
