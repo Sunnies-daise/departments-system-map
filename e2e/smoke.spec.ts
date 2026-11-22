@@ -107,13 +107,9 @@ test("switching to the Problem map tab and back keeps the 3D map's selection", a
   await frame.locator("#exploreBtn").click();
   await expect(frame.locator("#lensBar")).toContainText("Fragmented data");
 
-  // Closing the overview shows the welcome bubble over a greyed-out map; its × restores the map.
-  await expect(frame.locator("#welcome")).toBeVisible();
-  await expect(frame.locator("#welcome")).toContainText("Pick a problem above");
-  await expect(frame.locator("body")).toHaveClass(/welcome-on/);
-  await frame.locator("#welcomeClose").click();
-  await expect(frame.locator("#welcome")).toBeHidden();
-  await expect(frame.locator("body")).not.toHaveClass(/welcome-on/);
+  // Closing the overview goes straight to the map: no welcome bubble, no grey-out.
+  await expect(frame.locator("#welcome")).toHaveCount(0);
+  await expect(frame.locator("body")).not.toHaveClass(/lens-on/);
   await expect(frame.locator("#lensIntro")).toBeHidden();
 
   // The 3D tab is hidden from the tab bar for now; its direct link still opens it with state intact.

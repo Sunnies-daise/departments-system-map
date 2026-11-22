@@ -171,13 +171,8 @@ p { margin: 0; }
 .kind-row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: start; }
 .kind-name { font-size: 11.5px; color: var(--muted); padding-top: 3px; line-height: 1.3; }
 #dim { position: absolute; inset: 0; z-index: 1; background: rgba(28, 31, 42, 0.72); opacity: 0; pointer-events: none; transition: opacity 220ms ease-out; }
-body.lens-on #dim, body.welcome-on #dim { opacity: 1; }
-body.lens-on .block-label, body.lens-on .entry-label, body.lens-on .group-label,
-body.welcome-on .block-label, body.welcome-on .entry-label, body.welcome-on .group-label { z-index: 0 !important; }
-.welcome { position: absolute; z-index: 31; transform: translateY(-50%); width: 236px; display: grid; gap: 6px; padding: 12px 40px 13px 14px; background: #fff; border: 1.5px solid var(--accent); border-radius: 14px; box-shadow: var(--shadow); font-size: 13px; line-height: 1.5; color: #3a4166; }
-.welcome[hidden] { display: none; }
-.welcome-title { font-size: 14px; font-weight: 650; color: var(--text); }
-.welcome-close { position: absolute; top: 8px; right: 8px; }
+body.lens-on #dim { opacity: 1; }
+body.lens-on .block-label, body.lens-on .entry-label, body.lens-on .group-label { z-index: 0 !important; }
 body.lens-on .say { z-index: 5; }
 .tool { font-size: 11px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: #3a4166; }
 .lenses { display: grid; gap: 10px; }
@@ -257,14 +252,13 @@ body.lens-on .say { z-index: 5; }
   .say { display: none !important; }
   .top-card { left: 12px; right: 12px; transform: none; width: auto; max-width: none; }
   .lens-intro { max-height: 46dvh; overflow-y: auto; }
-  .welcome { left: 12px !important; right: 12px; top: auto !important; bottom: 12px; width: auto; transform: none; }
   .intro-list { display: grid !important; }
   .lens-intro .intro-hint { display: block; }
   .dept-panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 64dvh; }
   .topbar { flex-wrap: wrap; }
 }
-/* Embedded as a tab in the Departments System Map: the host app's bar names the page, so drop the duplicate title. */
-html.embedded .topbar h1 { display: none; }
+/* Embedded as a tab in the Operation System Map: the host app's bar names the page, so hide this page's own bar. */
+html.embedded .topbar { display: none; }
 @media (prefers-reduced-motion: reduce) {
   #dim { transition: none; }
   .say.pop { animation: none; }
@@ -293,12 +287,6 @@ html.embedded .topbar h1 { display: none; }
     <div class="top-card" id="topCard">
       <div class="lens-bar" id="lensBar"></div>
       <div class="lens-intro" id="lensIntro" hidden></div>
-    </div>
-
-    <div class="welcome" id="welcome" role="dialog" aria-labelledby="welcomeTitle" hidden>
-      <button type="button" class="icon-btn welcome-close" id="welcomeClose" aria-label="Close">×</button>
-      <p class="welcome-title" id="welcomeTitle">Pick a problem above to see where it shows up</p>
-      <p>Each team gets a speech bubble explaining how that problem affects its work. Click any team block for its full detail.</p>
     </div>
 
     <div class="edge-card" id="edgeCard" hidden></div>
@@ -866,13 +854,6 @@ function applyCam() {
     sayEls[d.id].style.left = (Math.max(q[0] * cam.scale + cam.tx, labRight) + 8 * k) + "px";
     sayEls[d.id].style.top = (q[1] * cam.scale + cam.ty - 14 * k) + "px";
   }
-  placeWelcome();
-}
-/* The welcome bubble takes Plant Service's speech-bubble slot, which the camera fit always leaves free. */
-function placeWelcome() {
-  if (welcome.hidden) return;
-  welcome.style.left = sayEls.plant.style.left;
-  welcome.style.top = sayEls.plant.style.top;
 }
 function liftPx(id) { const e = emphasisOf(id); return (e === "active" ? 0.42 : e === "related" ? 0.16 : 0) * cam.scale; }
 function tick() {
@@ -928,7 +909,6 @@ function edgeState(e) {
   return "idle";
 }
 function render() {
-  if (!welcome.hidden && (state.lens || state.selected || state.edge)) setWelcome(false);
   document.body.classList.toggle("lens-on", !!state.lens && !state.selected && !state.hovered && !state.edge);
   for (const d of DEPTS) {
     const em = emphasisOf(d.id);
@@ -1102,22 +1082,12 @@ function select(id) {
   if (id) document.getElementById("deptPanel").scrollTop = 0;
 }
 function toggleEdge(id) { state.edge = state.edge === id ? null : id; render(); if (state.selected) renderPanel(); }
-const welcome = document.getElementById("welcome");
-let welcomeSeen = false;
-function setWelcome(on) {
-  welcome.hidden = !on;
-  document.body.classList.toggle("welcome-on", on);
-  if (on) placeWelcome();
-  if (on) document.getElementById("welcomeClose").focus({ preventScroll: true });
-}
 function setOverview(on) {
   if (on === state.overview) return;
   state.overview = on;
   document.getElementById("ovBackdrop").hidden = !on;
   if (on) { state.lastFocus = document.activeElement; document.getElementById("overview").scrollTop = 0; document.getElementById("overviewClose").focus({ preventScroll: true }); }
   else if (state.lastFocus && document.contains(state.lastFocus) && state.lastFocus !== document.body) state.lastFocus.focus();
-  if (on) setWelcome(false);
-  else if (!welcomeSeen) { welcomeSeen = true; if (!state.lens) setWelcome(true); }
 }
 function clearAll() {
   if (state.edge) { state.edge = null; render(); if (state.selected) renderPanel(); return; }
@@ -1126,7 +1096,6 @@ function clearAll() {
 }
 
 document.getElementById("overviewClose").addEventListener("click", () => setOverview(false));
-document.getElementById("welcomeClose").addEventListener("click", () => setWelcome(false));
 document.getElementById("exploreBtn").addEventListener("click", () => setOverview(false));
 const ovBackdrop = document.getElementById("ovBackdrop");
 ovBackdrop.addEventListener("click", e => { if (e.target === ovBackdrop) setOverview(false); });
@@ -1140,7 +1109,7 @@ const help = document.getElementById("help");
 document.getElementById("helpBtn").addEventListener("click", () => { help.hidden = false; document.getElementById("helpClose").focus(); });
 document.getElementById("helpClose").addEventListener("click", () => { help.hidden = true; });
 help.addEventListener("click", e => { if (e.target === help) help.hidden = true; });
-addEventListener("keydown", e => { if (e.key === "Escape") { if (!help.hidden) help.hidden = true; else if (state.overview) setOverview(false); else if (!welcome.hidden) setWelcome(false); else clearAll(); } });
+addEventListener("keydown", e => { if (e.key === "Escape") { if (!help.hidden) help.hidden = true; else if (state.overview) setOverview(false); else clearAll(); } });
 addEventListener("resize", () => refit(true));
 
 /* ---------- Boot ---------- */
